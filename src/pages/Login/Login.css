@@ -345,6 +345,71 @@
 }
 
 /* =========================================
+   Forgot Password – Specific Styles
+   ========================================= */
+
+/* Back link */
+.forgot-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-bottom: var(--space-md);
+  transition: color var(--transition-fast);
+}
+.forgot-back-link:hover {
+  color: var(--color-mint);
+  text-decoration: none;
+}
+
+/* Success state */
+.forgot-success {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.forgot-success__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--color-mint-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-mint);
+  margin-bottom: var(--space-sm);
+}
+.forgot-success__desc {
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+.forgot-success__desc strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+.forgot-success__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-top: var(--space-sm);
+}
+
+/* =========================================
+   Reset Password – Specific Styles
+   ========================================= */
+
+/* Invalid token – error icon variant */
+.reset-invalid__icon {
+  background-color: #FFF5F5;
+  color: var(--color-error);
+}
+
+/* =========================================
    Responsive – tablet / mobile
    ========================================= */
 @media (max-width: 900px) {
