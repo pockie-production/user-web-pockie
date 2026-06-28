@@ -1261,3 +1261,93 @@
   height: 100%;
   border-radius: 3px;
 }
+/* =========================================
+   eKYC Banner
+   ========================================= */
+.ekyc-banner {
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 8px;
+}
+
+.ekyc-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ekyc-banner-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ekyc-banner-text h4 {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ekyc-banner-text p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.ekyc-banner-btn {
+  padding: 10px 20px;
+  background-color: var(--color-mint);
+  color: var(--color-white);
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.ekyc-banner-btn:hover {
+  opacity: 0.9;
+}
+
+.ekyc-banner-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.ekyc-banner-warning .ekyc-banner-icon {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.ekyc-banner-warning .ekyc-banner-btn {
+  background-color: #d97706;
+}
+
+.ekyc-banner-pending {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.ekyc-banner-pending .ekyc-banner-icon {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.rotating {
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}

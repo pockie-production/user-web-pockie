@@ -149,33 +149,30 @@ export default function Dashboard() {
         <div className="dashboard-grid">
           {/* --- eKYC Banner --- */}
           {(kycStatus === 'NOT_STARTED' || kycStatus === 'REJECTED') && (
-            <div className="col-span-12 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+            <div className="col-span-12 ekyc-banner ekyc-banner-warning">
+              <div className="ekyc-banner-content">
+                <div className="ekyc-banner-icon">
                   <Target size={20} />
                 </div>
-                <div>
-                  <h4 className="font-semibold text-gray-800">Tài khoản chưa được xác thực (eKYC)</h4>
-                  <p className="text-sm text-gray-600">Vui lòng hoàn tất định danh để mở khóa toàn bộ tính năng và nhận thêm 500 XP.</p>
+                <div className="ekyc-banner-text">
+                  <h4>Tài khoản chưa được xác thực (eKYC)</h4>
+                  <p>Vui lòng hoàn tất định danh để mở khóa toàn bộ tính năng và nhận thêm 500 XP.</p>
                 </div>
               </div>
-              <NavLink 
-                to="/ekyc" 
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
-              >
+              <NavLink to="/ekyc" className="ekyc-banner-btn">
                 Xác thực ngay
               </NavLink>
             </div>
           )}
 
           {kycStatus === 'PENDING' && (
-            <div className="col-span-12 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3 shadow-sm">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="col-span-12 ekyc-banner ekyc-banner-pending">
+              <div className="ekyc-banner-icon rotating">
+                <RefreshCcw size={20} />
               </div>
-              <div>
-                <h4 className="font-semibold text-gray-800">Hồ sơ đang được chờ duyệt</h4>
-                <p className="text-sm text-gray-600">Chúng tôi đang xử lý thông tin eKYC của bạn. Vui lòng quay lại sau.</p>
+              <div className="ekyc-banner-text">
+                <h4>Hồ sơ đang được chờ duyệt</h4>
+                <p>Chúng tôi đang xử lý thông tin eKYC của bạn. Vui lòng quay lại sau.</p>
               </div>
             </div>
           )}
