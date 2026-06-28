@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
+import EkycFlow from './pages/Ekyc/EkycFlow';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/ekyc" element={<EkycFlow />} />
       </Routes>
     </BrowserRouter>
   );
