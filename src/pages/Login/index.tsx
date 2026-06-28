@@ -1,22 +1,59 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import pockieLogo from '../assets/logo.png';
-import logoNav from '../assets/logo_nav.png';
+import pockieLogo from '../../assets/logo.png';
+import logoNav from '../../assets/logo_nav.png';
+import { useNavigate } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { api } from '../../lib/api';
 import './Login.css';
-
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Call API here
-    console.log('Login', { email, password });
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.post('/api/v1/auth/login', { email, password });
+      const { accessToken, refreshToken } = res.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      // Redirect to dashboard or home
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      
+      const res = await api.post('/api/v1/auth/firebase/login', { idToken });
+      const { accessToken, refreshToken } = res.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      // Redirect to dashboard or home
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      setError('Đăng nhập Google thất bại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,6 +103,8 @@ export default function Login() {
             <h1 className="login-title">Chào mừng trở lại!</h1>
             <p className="login-subtitle">Đăng nhập để tiếp tục quản lý tài chính.</p>
           </div>
+
+          {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
 
           {/* Form */}
           <form onSubmit={handleLogin} className="login-form" noValidate>
@@ -124,8 +163,8 @@ export default function Login() {
             </div>
 
             {/* Submit */}
-            <button type="submit" className="btn-primary" id="login-submit-btn">
-              Đăng nhập
+            <button type="submit" className="btn-primary" id="login-submit-btn" disabled={loading}>
+              {loading ? 'Đang xử lý...' : 'Đăng nhập'}
             </button>
           </form>
 
@@ -138,6 +177,7 @@ export default function Login() {
             className="btn-google"
             id="login-google-btn"
             onClick={handleGoogleLogin}
+            disabled={loading}
           >
             <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
               <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z" />
