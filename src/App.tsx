@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
 import { api } from './lib/api';
+import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -76,6 +77,20 @@ function App() {
     }
 
     bootstrapSession();
+  }, []);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsAuthenticated(Boolean(localStorage.getItem('accessToken')));
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, syncAuthState);
+    window.addEventListener('storage', syncAuthState);
+
+    return () => {
+      window.removeEventListener(AUTH_STATE_CHANGED_EVENT, syncAuthState);
+      window.removeEventListener('storage', syncAuthState);
+    };
   }, []);
 
   if (isBootstrapping) {

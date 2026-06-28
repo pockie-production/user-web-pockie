@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { api } from '../../lib/api';
+import { emitAuthStateChanged } from '../../lib/authEvents';
 import '../Login/Login.css';
 import './Register.css';
 
@@ -32,6 +33,7 @@ export default function Register() {
       const res = await api.post('/api/v1/auth/signup', { email, password });
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
+      emitAuthStateChanged();
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
@@ -50,6 +52,7 @@ export default function Register() {
       const res = await api.post('/api/v1/auth/firebase/login', { idToken });
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
+      emitAuthStateChanged();
       navigate('/dashboard');
     } catch {
       setError('Đăng ký với Google thất bại.');

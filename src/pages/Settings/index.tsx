@@ -15,6 +15,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { emitAuthStateChanged } from '../../lib/authEvents';
 import '../Dashboard/Dashboard.css';
 import './Settings.css';
 
@@ -140,6 +141,7 @@ export default function SettingsPage() {
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      emitAuthStateChanged();
       navigate('/login', { replace: true });
     }
   };

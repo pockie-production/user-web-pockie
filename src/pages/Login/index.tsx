@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { api } from '../../lib/api';
+import { emitAuthStateChanged } from '../../lib/authEvents';
 import './Login.css';
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,6 +25,7 @@ export default function Login() {
       const { accessToken, refreshToken } = res.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      emitAuthStateChanged();
       // Redirect to dashboard or home
       navigate('/dashboard');
     } catch (err: any) {
@@ -46,6 +48,7 @@ export default function Login() {
       const { accessToken, refreshToken } = res.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      emitAuthStateChanged();
       // Redirect to dashboard or home
       navigate('/dashboard');
     } catch (err: any) {

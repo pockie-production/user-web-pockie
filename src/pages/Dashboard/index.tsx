@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import mascot from '../../assets/mascot.png';
 import logo from '../../assets/logo.png';
 import { api } from '../../lib/api';
+import { emitAuthStateChanged } from '../../lib/authEvents';
 import './Dashboard.css';
 
 type DashboardProfile = {
@@ -264,6 +265,7 @@ export default function Dashboard() {
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      emitAuthStateChanged();
       navigate('/login', { replace: true });
     }
   };
