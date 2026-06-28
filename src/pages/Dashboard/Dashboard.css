@@ -1,0 +1,925 @@
+/* =========================================
+   Dashboard Base Layout
+   ========================================= */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-cream);
+  font-family: 'ABCOracle', sans-serif;
+  color: var(--color-text-primary);
+  position: relative;
+}
+
+/* =========================================
+   Sidebar
+   ========================================= */
+.dashboard-sidebar {
+  width: 260px;
+  background-color: var(--color-white);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-xl) var(--space-lg);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-logo-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  padding: 0 var(--space-sm);
+}
+
+.sidebar-mascot {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.sidebar-brand {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-cream-dark);
+  color: var(--color-text-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-mint-light);
+  color: var(--color-mint);
+  font-weight: 700;
+}
+
+.beta-badge {
+  background-color: var(--color-mint-light);
+  color: var(--color-mint);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+/* User Profile Footer */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.user-profile:hover {
+  background-color: var(--color-cream-dark);
+}
+
+.user-avatar-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #E8E3D8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-avatar {
+  font-size: 24px;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+  color: var(--color-text-primary);
+}
+
+.user-level {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.user-xp {
+  color: var(--color-mint);
+  font-weight: 700;
+}
+
+.user-xp-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.user-xp-fill {
+  height: 100%;
+  background-color: var(--color-yellow);
+  border-radius: 2px;
+}
+
+.user-profile-chevron {
+  color: var(--color-text-muted);
+}
+
+
+/* =========================================
+   Main Content Area
+   ========================================= */
+.dashboard-main {
+  flex: 1;
+  padding: var(--space-xl) 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================
+   Header
+   ========================================= */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-xl);
+}
+
+.header-greeting h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.wave-animation {
+  /* Theme=Color, Skin Tone=Light
+     Unicode: u270c
+  */
+  /* Đoạn CSS của bạn từ Figma:
+  position: absolute;
+  left: 31.37%;
+  right: 52.94%;
+  top: 82.19%;
+  bottom: 6.85%;
+  */
+  
+  /* Mình đã tinh chỉnh lại một chút (dùng inline-block thay vì absolute) 
+     để icon không bị lệch khỏi dòng chữ khi thay đổi kích thước màn hình */
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: wave 2.5s infinite;
+}
+
+@keyframes wave {
+  0% { transform: rotate( 0.0deg) }
+  10% { transform: rotate(14.0deg) }
+  20% { transform: rotate(-8.0deg) }
+  30% { transform: rotate(14.0deg) }
+  40% { transform: rotate(-4.0deg) }
+  50% { transform: rotate(10.0deg) }
+  60% { transform: rotate( 0.0deg) }
+  100% { transform: rotate( 0.0deg) }
+}
+
+.header-greeting p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.icon-btn:hover {
+  background-color: var(--color-cream-dark);
+}
+
+.notification-dot {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-error);
+  border-radius: 50%;
+  border: 2px solid var(--color-cream);
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.date-selector:hover {
+  border-color: var(--color-mint);
+}
+
+/* =========================================
+   FAB (Floating Action Button)
+   ========================================= */
+.fab-ai-chat {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  background-color: var(--color-mint);
+  color: var(--color-white);
+  border: none;
+  border-radius: 30px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'ABCOracle', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  z-index: 100;
+}
+
+.fab-ai-chat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-mint-hover);
+}
+
+/* =========================================
+   Dashboard Grid
+   ========================================= */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+  padding-bottom: 100px;
+  /* Space for FAB */
+}
+
+.dashboard-card {
+  background-color: var(--color-white);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.col-span-5 {
+  grid-column: span 5;
+}
+
+.col-span-7 {
+  grid-column: span 7;
+}
+
+.col-span-12 {
+  grid-column: span 12;
+}
+
+.col-span-6 {
+  grid-column: span 6;
+}
+
+/* Utility colors */
+.text-mint {
+  color: var(--color-mint) !important;
+}
+
+.text-error {
+  color: var(--color-error) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.text-text-primary {
+  color: var(--color-text-primary) !important;
+}
+
+.bg-mint {
+  background-color: var(--color-mint) !important;
+}
+
+.bg-mint-light {
+  background-color: var(--color-mint-light) !important;
+}
+
+.font-normal {
+  font-weight: 400 !important;
+}
+
+.text-sm {
+  font-size: 13px !important;
+}
+
+
+/* --- Financial Mood Card --- */
+.card-mood {
+  background-color: #F0FBF6;
+  /* Mint very light */
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.mood-content {
+  flex: 1;
+  z-index: 1;
+}
+
+.mood-header {
+  margin-bottom: 12px;
+}
+
+.mood-label {
+  color: var(--color-mint);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.mood-title {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+}
+
+.mood-subtitle {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.mood-mascot {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.mood-trend-icon {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background-color: var(--color-white);
+  color: var(--color-mint);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Wallet Card --- */
+.card-wallet {
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.wallet-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.wallet-icon {
+  color: #F5B041;
+  /* Gold coin color */
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-cream);
+  border: 1px solid var(--color-border);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.wallet-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.stat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.day-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.streak-circle-active {
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-mint);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.streak-circle-inactive {
+  width: 20px;
+  height: 20px;
+  background-color: #E8E8E8;
+  border-radius: 50%;
+}
+
+.wallet-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.wallet-progress-bar {
+  flex: 1;
+  height: 10px;
+  background-color: var(--color-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.wallet-progress-fill {
+  height: 100%;
+  background-color: var(--color-mint);
+  border-radius: 5px;
+}
+
+.wallet-progress-text {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.wallet-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  border-top: 1px dashed var(--color-border);
+  padding-top: 16px;
+  margin-top: auto;
+}
+
+.wallet-update {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* --- AI Insight Card --- */
+.card-insight {
+  background-color: var(--color-mint-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 40px;
+}
+
+.insight-content {
+  max-width: 60%;
+}
+
+.insight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-mint);
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.insight-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.btn-insight-action {
+  background-color: var(--color-white);
+  color: var(--color-mint);
+  border: 1px solid var(--color-mint);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-insight-action:hover {
+  background-color: var(--color-mint);
+  color: var(--color-white);
+}
+
+.insight-illustration {
+  padding-right: 40px;
+}
+
+.insight-circle {
+  width: 130px;
+  height: 130px;
+  background-color: var(--color-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+}
+
+.burger-icon {
+  font-size: 70px;
+  filter: drop-shadow(16px 20px 20px rgba(0, 0, 0, 0.16));
+  /* CSS layout từ Figma của bạn: */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* --- Mission & Streak Card --- */
+.card-mission {
+  background-color: #FFFDF0;
+  /* Very light yellow/cream */
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+}
+
+.mission-section {
+  flex: 5;
+  padding: 24px;
+}
+
+.mission-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mission-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mission-list {
+  display: flex;
+  gap: 16px;
+}
+
+.mission-item {
+  flex: 1;
+  background-color: var(--color-white);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.mission-item-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.xp-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-mint);
+  align-self: flex-start;
+  margin-left: 28px;
+}
+
+.streak-divider {
+  width: 1px;
+  background-color: var(--color-border);
+  margin: 24px 0;
+}
+
+.streak-section {
+  flex: 4;
+  padding: 24px;
+}
+
+.streak-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.streak-flame {
+  font-size: 20px;
+}
+
+.streak-title {
+  font-weight: 700;
+  color: #FF8000;
+}
+
+.streak-count {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.streak-count strong {
+  font-size: 32px;
+  font-weight: 800;
+  color: #FF8000;
+}
+
+.streak-count-text {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.streak-calendar {
+  display: flex;
+  gap: 12px;
+}
+
+.streak-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-name {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.streak-reward {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.reward-icon-wrapper {
+  margin-bottom: 12px;
+}
+
+.reward-text {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+/* --- Shared Simple Card Header --- */
+.card-header-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-header-simple h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.link-view-all {
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link-view-all:hover {
+  text-decoration: underline;
+}
+
+/* --- Recent Transactions --- */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tx-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tx-details {
+  flex: 1;
+}
+
+.tx-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.tx-category {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tx-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-mint);
+  border-radius: 50%;
+}
+
+.tx-time {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.tx-amount {
+  font-weight: 800;
+  font-size: 16px;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* --- Spending Categories --- */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cat-name {
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-percent {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.cat-progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cat-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+}
