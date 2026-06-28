@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import pockieLogo from '../assets/logo.png';
-import logoNav from '../assets/logo_nav.png';
-import './Login.css';
+import pockieLogo from '../../assets/logo.png';
+import logoNav from '../../assets/logo_nav.png';
+import '../Login/Login.css';
 import './Register.css';
 
 export default function Register() {
