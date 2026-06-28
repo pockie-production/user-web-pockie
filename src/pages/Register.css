@@ -1,0 +1,13 @@
+/*
+  Register.css
+  Trang Register dùng lại toàn bộ layout và component của Login.css.
+  File này chỉ chứa các override nhỏ nếu cần thiết cho trang Register.
+*/
+
+/*
+  Không cần override gì thêm vì trang Register sử dụng
+  đúng cùng layout, màu sắc và components với trang Login.
+  Các class tái dụng: .login-page, .login-left, .login-right,
+  .login-form-wrapper, .input-field, .btn-primary, .btn-google,
+  .divider, .login-footer, v.v.
+*/
