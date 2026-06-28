@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Home,
@@ -18,7 +18,6 @@ import {
   RefreshCcw,
   Sparkles,
   ChevronRight as ChevronRightIcon,
-  Coffee,
   CheckCircle2,
   Circle,
   Coffee as CoffeeIcon,
