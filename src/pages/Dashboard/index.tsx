@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Home,
@@ -18,7 +17,6 @@ import {
   RefreshCcw,
   Sparkles,
   ChevronRight as ChevronRightIcon,
-  Coffee,
   Gift,
   CheckCircle2,
   Circle,
