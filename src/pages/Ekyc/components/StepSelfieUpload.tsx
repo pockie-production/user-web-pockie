@@ -39,34 +39,33 @@ export function StepSelfieUpload({ sessionId, onNext }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold mb-2">Bước 2: Chụp ảnh chân dung</h2>
-      <p className="text-sm text-gray-600 mb-4">
+    <div>
+      <h2 className="ekyc-step-title">Bước 2: Chụp ảnh chân dung</h2>
+      <p className="ekyc-step-desc">
         Hãy để khuôn mặt nằm trong khung hình và không đeo kính đen hay khẩu trang.
       </p>
 
-      {error && <div className="text-red-500 text-sm">{error}</div>}
+      {error && <div className="ekyc-error">{error}</div>}
 
-      <div className="border border-dashed border-gray-300 rounded p-4 text-center cursor-pointer hover:bg-gray-50 h-32 flex flex-col justify-center items-center">
-        <label className="cursor-pointer block w-full h-full flex flex-col items-center justify-center">
-          <span className="text-blue-600 font-medium text-lg">Mở Camera / Tải ảnh lên</span>
+      <div className="ekyc-upload-box">
+        <label className="ekyc-upload-label">
+          {selfieFile ? `Đã chọn: ${selfieFile.name}` : '+ Mở Camera / Tải ảnh lên'}
           <input 
             type="file" 
             accept="image/*" 
             capture="user"
-            className="hidden" 
             onChange={(e) => e.target.files && setSelfieFile(e.target.files[0])}
+            style={{ display: 'none' }}
           />
         </label>
-        {selfieFile && <p className="text-sm text-green-600 mt-2">Đã chọn: {selfieFile.name}</p>}
       </div>
 
       <button 
-        onClick={handleUpload} 
-        disabled={loading || !selfieFile}
-        className="mt-6 w-full py-3 bg-blue-600 text-white font-semibold rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="ekyc-btn"
+        disabled={!selfieFile || loading}
+        onClick={handleUpload}
       >
-        {loading ? 'Đang xử lý...' : 'Hoàn tất và Gửi'}
+        {loading ? 'Đang tải lên...' : 'Hoàn tất và Gửi'}
       </button>
     </div>
   );

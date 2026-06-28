@@ -3,6 +3,7 @@ import { api } from '../../lib/api';
 import { StepIdUpload } from './components/StepIdUpload';
 import { StepSelfieUpload } from './components/StepSelfieUpload';
 import { StepStatus } from './components/StepStatus';
+import './Ekyc.css';
 
 export default function EkycFlow() {
   const [step, setStep] = useState<number>(0);
@@ -34,12 +35,12 @@ export default function EkycFlow() {
 
   if (error) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl text-red-500 font-bold mb-4">Lỗi</h2>
-        <p>{error}</p>
+      <div className="ekyc-container">
+        <h2 className="ekyc-title" style={{ color: '#ef4444' }}>Lỗi</h2>
+        <p style={{ textAlign: 'center' }}>{error}</p>
         <button 
           onClick={() => { setError(null); setStep(0); setSessionId(null); }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+          className="ekyc-btn"
         >
           Thử lại
         </button>
@@ -49,23 +50,23 @@ export default function EkycFlow() {
 
   if (loading || step === 0) {
     return (
-      <div className="p-8 text-center flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <div className="ekyc-container ekyc-loading">
+        <div className="ekyc-spinner"></div>
         <p>Đang khởi tạo phiên định danh...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-4 bg-white rounded shadow">
-      <h1 className="text-2xl font-bold text-center mb-6">Xác thực tài khoản (eKYC)</h1>
+    <div className="ekyc-container">
+      <h1 className="ekyc-title">Xác thực tài khoản (eKYC)</h1>
       
       {/* ProgressBar */}
-      <div className="flex justify-between mb-8">
+      <div className="ekyc-progress-bar">
         {[1, 2, 3].map((s) => (
           <div 
             key={s} 
-            className={`flex-1 h-2 mx-1 rounded ${s <= step ? 'bg-blue-600' : 'bg-gray-200'}`}
+            className={`ekyc-progress-step ${s <= step ? 'active' : ''}`}
           />
         ))}
       </div>

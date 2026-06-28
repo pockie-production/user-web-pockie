@@ -50,63 +50,60 @@ export function StepStatus({ sessionId }: Props) {
   }, [sessionId]);
 
   return (
-    <div className="flex flex-col items-center justify-center text-center py-8">
+    <div className="ekyc-status">
       {loading ? (
         <>
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Đang xử lý hồ sơ...</h2>
-          <p className="text-sm text-gray-600">
+          <div className="ekyc-spinner" style={{ margin: '0 auto 24px' }}></div>
+          <h2 className="ekyc-step-title">Đang xử lý hồ sơ...</h2>
+          <p className="ekyc-step-desc">
             Hệ thống đang tự động nhận diện và đối chiếu khuôn mặt. Vui lòng không đóng trang này.
           </p>
         </>
       ) : status === 'APPROVED' ? (
-        <>
-          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 text-4xl">
-            ✓
-          </div>
-          <h2 className="text-xl font-bold text-green-700 mb-2">Xác thực thành công!</h2>
-          <p className="text-sm text-gray-600 mb-6">
+        <div className="ekyc-status-success">
+          <div className="ekyc-status-icon">✓</div>
+          <h2 className="ekyc-step-title" style={{ color: '#16a34a' }}>Xác thực thành công!</h2>
+          <p className="ekyc-step-desc">
             Tài khoản của bạn đã được xác minh. Bây giờ bạn có thể sử dụng tất cả các dịch vụ.
           </p>
           <button 
             onClick={() => navigate('/dashboard')}
-            className="px-6 py-2 bg-blue-600 text-white rounded font-medium"
+            className="ekyc-btn"
+            style={{ width: 'auto', padding: '12px 24px' }}
           >
             Về trang chủ
           </button>
-        </>
+        </div>
       ) : status === 'REJECTED' ? (
-        <>
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 text-4xl">
-            ✕
-          </div>
-          <h2 className="text-xl font-bold text-red-700 mb-2">Xác thực thất bại</h2>
-          <p className="text-sm text-gray-600 mb-6">
+        <div className="ekyc-status-error">
+          <div className="ekyc-status-icon">✕</div>
+          <h2 className="ekyc-step-title" style={{ color: '#dc2626' }}>Xác thực thất bại</h2>
+          <p className="ekyc-step-desc">
             Hình ảnh không khớp hoặc thông tin không rõ ràng. Vui lòng thực hiện lại từ đầu.
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded font-medium"
+            className="ekyc-btn"
+            style={{ width: 'auto', padding: '12px 24px', backgroundColor: '#dc2626' }}
           >
             Thử lại
           </button>
-        </>
+        </div>
       ) : (
-        <>
-          <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-6 text-4xl">
-            !
-          </div>
-          <h2 className="text-xl font-bold text-yellow-700 mb-2">Lỗi kết nối</h2>
-          <p className="text-sm text-gray-600 mb-6">
+        <div className="ekyc-status-error">
+          <div className="ekyc-status-icon" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>!</div>
+          <h2 className="ekyc-step-title" style={{ color: '#d97706' }}>Lỗi kết nối</h2>
+          <p className="ekyc-step-desc">
             Có lỗi xảy ra trong quá trình nộp hồ sơ. Vui lòng thử lại sau.
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded font-medium"
+            className="ekyc-btn"
+            style={{ width: 'auto', padding: '12px 24px' }}
           >
             Thử lại
           </button>
-        </>
+        </div>
       )}
     </div>
   );

@@ -51,48 +51,44 @@ export function StepIdUpload({ sessionId, onNext }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold mb-2">Bước 1: Chụp ảnh CCCD/CMND</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Vui lòng chụp rõ nét mặt trước và mặt sau của thẻ. Không để hình bị loá sáng hay mờ, mất góc.
-      </p>
+    <div>
+      <h2 className="ekyc-step-title">Bước 1: Giấy tờ tùy thân</h2>
+      <p className="ekyc-step-desc">Tải lên mặt trước và mặt sau CMND/CCCD hoặc Hộ chiếu của bạn.</p>
 
-      {error && <div className="text-red-500 text-sm">{error}</div>}
+      {error && <div className="ekyc-error">{error}</div>}
 
-      <div className="border border-dashed border-gray-300 rounded p-4 text-center cursor-pointer hover:bg-gray-50">
-        <label className="cursor-pointer block">
-          <span className="text-blue-600 font-medium">Tải lên mặt trước</span>
-          <input 
-            type="file" 
-            accept="image/*" 
-            capture="environment"
-            className="hidden" 
-            onChange={(e) => e.target.files && setFrontFile(e.target.files[0])}
-          />
-        </label>
-        {frontFile && <p className="text-sm text-green-600 mt-2">Đã chọn: {frontFile.name}</p>}
-      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="ekyc-upload-box">
+          <label className="ekyc-upload-label">
+            {frontFile ? `Đã chọn: ${frontFile.name}` : '+ Tải lên mặt trước'}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={(e) => handleFileChange(e, 'front')} 
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
 
-      <div className="border border-dashed border-gray-300 rounded p-4 text-center cursor-pointer hover:bg-gray-50">
-        <label className="cursor-pointer block">
-          <span className="text-blue-600 font-medium">Tải lên mặt sau</span>
-          <input 
-            type="file" 
-            accept="image/*" 
-            capture="environment"
-            className="hidden" 
-            onChange={(e) => e.target.files && setBackFile(e.target.files[0])}
-          />
-        </label>
-        {backFile && <p className="text-sm text-green-600 mt-2">Đã chọn: {backFile.name}</p>}
+        <div className="ekyc-upload-box">
+          <label className="ekyc-upload-label">
+            {backFile ? `Đã chọn: ${backFile.name}` : '+ Tải lên mặt sau'}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={(e) => handleFileChange(e, 'back')} 
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
       </div>
 
       <button 
-        onClick={handleUpload} 
-        disabled={loading || !frontFile || !backFile}
-        className="mt-6 w-full py-3 bg-blue-600 text-white font-semibold rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="ekyc-btn"
+        disabled={!frontFile || !backFile || loading}
+        onClick={handleUpload}
       >
-        {loading ? 'Đang xử lý...' : 'Tiếp tục'}
+        {loading ? 'Đang tải lên...' : 'Tiếp tục'}
       </button>
     </div>
   );
