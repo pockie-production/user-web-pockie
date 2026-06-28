@@ -16,11 +16,11 @@ export function StepStatus({ sessionId }: Props) {
 
     const checkStatus = async () => {
       try {
-        const res = await api.get(`/ekyc/sessions/${sessionId}/status`);
+        const res = await api.get(`/api/v1/ekyc/sessions/${sessionId}/status`);
         const currentStatus = res.data.status;
         setStatus(currentStatus);
 
-        if (currentStatus === 'APPROVED' || currentStatus === 'REJECTED') {
+        if (currentStatus === 'VERIFIED' || currentStatus === 'REJECTED' || currentStatus === 'FAILED' || currentStatus === 'RETRY_REQUIRED') {
           setLoading(false);
           clearInterval(intervalId);
         }
@@ -31,7 +31,7 @@ export function StepStatus({ sessionId }: Props) {
 
     const submitSession = async () => {
       try {
-        await api.post(`/ekyc/sessions/${sessionId}/submit`);
+        await api.post(`/api/v1/ekyc/sessions/${sessionId}/submit`);
         setStatus('PROCESSING');
         // Bắt đầu poll status sau khi submit thành công
         intervalId = setInterval(checkStatus, 3000);
@@ -59,7 +59,7 @@ export function StepStatus({ sessionId }: Props) {
             Hệ thống đang tự động nhận diện và đối chiếu khuôn mặt. Vui lòng không đóng trang này.
           </p>
         </>
-      ) : status === 'APPROVED' ? (
+      ) : status === 'VERIFIED' ? (
         <div className="ekyc-status-success">
           <div className="ekyc-status-icon">✓</div>
           <h2 className="ekyc-step-title" style={{ color: '#16a34a' }}>Xác thực thành công!</h2>
@@ -74,7 +74,7 @@ export function StepStatus({ sessionId }: Props) {
             Về trang chủ
           </button>
         </div>
-      ) : status === 'REJECTED' ? (
+      ) : status === 'REJECTED' || status === 'RETRY_REQUIRED' ? (
         <div className="ekyc-status-error">
           <div className="ekyc-status-icon">✕</div>
           <h2 className="ekyc-step-title" style={{ color: '#dc2626' }}>Xác thực thất bại</h2>

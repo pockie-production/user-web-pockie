@@ -37,21 +37,21 @@ export function StepIdUpload({ sessionId, onNext }: Props) {
       
       // Upload front
       const formDataFront = new FormData();
-      formDataFront.append('documentType', 'ID_CARD');
+      formDataFront.append('documentType', 'CCCD_CHIP');
       formDataFront.append('side', 'FRONT');
       formDataFront.append('file', frontFile);
       
-      await api.post(`/ekyc/sessions/${sessionId}/documents`, formDataFront, {
+      await api.post(`/api/v1/ekyc/sessions/${sessionId}/documents`, formDataFront, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       // Upload back
       const formDataBack = new FormData();
-      formDataBack.append('documentType', 'ID_CARD');
+      formDataBack.append('documentType', 'CCCD_CHIP');
       formDataBack.append('side', 'BACK');
       formDataBack.append('file', backFile);
       
-      await api.post(`/ekyc/sessions/${sessionId}/documents`, formDataBack, {
+      await api.post(`/api/v1/ekyc/sessions/${sessionId}/documents`, formDataBack, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

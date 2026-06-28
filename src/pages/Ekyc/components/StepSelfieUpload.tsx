@@ -22,11 +22,11 @@ export function StepSelfieUpload({ sessionId, onNext }: Props) {
       setError(null);
       
       const formData = new FormData();
-      formData.append('documentType', 'SELFIE');
-      formData.append('side', 'FRONT');
+      formData.append('documentType', 'FACE');
+      formData.append('side', 'SELFIE');
       formData.append('file', selfieFile);
       
-      await api.post(`/ekyc/sessions/${sessionId}/documents`, formData, {
+      await api.post(`/api/v1/ekyc/sessions/${sessionId}/documents`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

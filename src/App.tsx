@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { useEffect, useState, type ReactNode } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
 import { api } from './lib/api';
+import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
   if (!isAuthenticated) {
@@ -14,6 +15,22 @@ function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolea
   }
 
   return <>{children}</>;
+}
+
+function ComingSoon({ title }: { title: string }) {
+  return (
+    <div className="ekyc-container">
+      <h1 className="ekyc-title">{title}</h1>
+      <p style={{ textAlign: 'center', color: '#6b7280' }}>
+        Trang này đang được hoàn thiện. Hiện tại bạn có thể dùng dashboard và eKYC trước.
+      </p>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+        <NavLink to="/dashboard" className="ekyc-btn" style={{ width: 'auto', padding: '12px 24px' }}>
+          Quay lại dashboard
+        </NavLink>
+      </div>
+    </div>
+  );
 }
 
 function App() {
@@ -88,6 +105,71 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/insights"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Insights" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Giao dịch" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Ví của tôi" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/goals"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Mục tiêu" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mission"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Mission" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Báo cáo" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-chat"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="AI Chat" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ComingSoon title="Danh mục chi tiêu" />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -16,8 +16,8 @@ export default function EkycFlow() {
     async function initSession() {
       try {
         setLoading(true);
-        const res = await api.post('/ekyc/sessions');
-        setSessionId(res.data.id);
+        const res = await api.post('/api/v1/ekyc/sessions');
+        setSessionId(res.data.sessionId);
         setStep(1); // Chuyển sang bước upload ID
       } catch (err: any) {
         setError(err.response?.data?.message || 'Không thể khởi tạo phiên eKYC');
