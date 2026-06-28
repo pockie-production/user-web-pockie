@@ -1,0 +1,399 @@
+/* =========================================
+   Login Page – Split Layout
+   ========================================= */
+
+/* ── Page Shell ── */
+.login-page {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  min-height: 100vh;
+  background-color: var(--color-cream);
+}
+
+/* =========================================
+   LEFT PANEL – Pockie Branding
+   ========================================= */
+.login-left {
+  position: relative;
+  background-color: var(--color-mint-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-2xl);
+  overflow: hidden;
+}
+
+/* Decorative cards – stacked centered BEHIND the logo */
+.deco-card {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  /* Slightly above center to align with logo area */
+  border-radius: var(--radius-xl);
+  border: 1.5px solid rgba(92, 200, 156, 0.30);
+  background: rgba(255, 255, 255, 0.40);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.deco-card--back {
+  width: 500px;
+  height: 320px;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  opacity: 0.45;
+}
+
+.deco-card--mid {
+  width: 480px;
+  height: 300px;
+  transform: translate(-50%, -50%) rotate(-4deg);
+  opacity: 0.60;
+}
+
+.deco-card--front {
+  width: 460px;
+  height: 280px;
+  transform: translate(-50%, -50%) rotate(0deg);
+  opacity: 0.75;
+}
+
+/* Left panel content */
+.login-left__content {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Tagline */
+.login-left__tagline {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--color-mint);
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+}
+
+/* ── Pockie Logo Image ── */
+.pockie-logo-img {
+  max-width: 560px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: var(--space-xl);
+  position: relative;
+  z-index: 1;
+  /* nổi lên trên các deco-card phía sau */
+  filter: drop-shadow(0 6px 24px rgba(92, 200, 156, 0.25));
+}
+
+/* Description text */
+.login-left__desc {
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 420px;
+}
+
+
+/* =========================================
+   RIGHT PANEL – Login Form
+   ========================================= */
+.login-right {
+  background-color: var(--color-white);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* topbar | form | footer */
+  padding: 0;
+  border-left: 1px solid var(--color-border);
+  min-height: 100vh;
+}
+
+/* Logo top bar – căn giữa toàn bộ chiều rộng panel */
+.login-right__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: var(--space-md) var(--space-xl);
+}
+
+/* Form wrapper – giữ giữa theo chiều dọc */
+.login-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-lg);
+  max-width: 380px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl) var(--space-2xl);
+}
+
+/* Brand logo top of form */
+.login-brand-logo {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Headings */
+.login-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.login-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 4px 0 0;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Password input wrapper */
+.input-password-wrapper {
+  position: relative;
+}
+
+.input-field--password {
+  padding-right: 48px;
+}
+
+.input-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.input-password-toggle:hover {
+  color: var(--color-text-secondary);
+}
+
+/* Remember me + Forgot */
+.login-form__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* Toggle switch */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-white);
+  border-radius: 50%;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-checkbox:checked+.toggle-track {
+  background-color: var(--color-mint);
+}
+
+.toggle-checkbox:checked+.toggle-track .toggle-thumb {
+  transform: translateX(16px);
+}
+
+.toggle-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.forgot-link {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-mint);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.forgot-link:hover {
+  color: var(--color-mint-hover);
+  text-decoration: underline;
+}
+
+/* Google button */
+.btn-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 12px 24px;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.btn-google:hover {
+  border-color: var(--color-mint);
+  background-color: var(--color-mint-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-google:active {
+  transform: translateY(0);
+}
+
+/* Footer text */
+.login-footer {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: 0;
+}
+
+.login-footer__link {
+  font-weight: 600;
+  color: var(--color-mint);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.login-footer__link:hover {
+  color: var(--color-mint-hover);
+  text-decoration: underline;
+}
+
+/* Bottom bar */
+.login-right__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.login-right__footer-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* =========================================
+   Responsive – tablet / mobile
+   ========================================= */
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-left {
+    min-height: 260px;
+    padding: var(--space-2xl) var(--space-xl);
+  }
+
+  .login-left__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .login-left__desc {
+    font-size: var(--text-md);
+  }
+
+  .pockie-logo__star {
+    right: -6px;
+    top: -8px;
+  }
+
+  .login-right {
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .login-form-wrapper {
+    padding-block: var(--space-xl);
+  }
+
+  .deco-card {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-right {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .login-form-wrapper {
+    gap: var(--space-md);
+  }
+}
