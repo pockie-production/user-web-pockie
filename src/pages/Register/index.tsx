@@ -51,7 +51,7 @@ export default function Register() {
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
       navigate('/dashboard');
-    } catch (err) {
+    } catch {
       setError('Đăng ký với Google thất bại.');
     } finally {
       setLoading(false);

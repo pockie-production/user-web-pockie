@@ -6,6 +6,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
+import Settings from './pages/Settings';
 import { api } from './lib/api';
 import './pages/Ekyc/Ekyc.css';
 
@@ -102,6 +103,14 @@ function App() {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <EkycFlow />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Settings />
             </ProtectedRoute>
           }
         />

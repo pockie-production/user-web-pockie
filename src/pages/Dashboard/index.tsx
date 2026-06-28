@@ -23,7 +23,10 @@ import {
   Coffee as CoffeeIcon,
   ShoppingBag,
   Check,
+  LogOut,
+  Settings,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import mascot from '../../assets/mascot.png';
 import logo from '../../assets/logo.png';
 import { api } from '../../lib/api';
@@ -31,6 +34,9 @@ import './Dashboard.css';
 
 type DashboardProfile = {
   id: string;
+  email: string | null;
+  phone: string | null;
+  fullName: string | null;
   displayName: string;
   avatarUrl: string | null;
   kycStatus: 'NOT_STARTED' | 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
@@ -38,6 +44,7 @@ type DashboardProfile = {
   currentXp: number;
   nextLevelXp: number;
   xpProgressPercent: number;
+  authProvider: string;
 };
 
 type DashboardMission = {
@@ -125,6 +132,7 @@ const menuItems = [
   { name: 'Mission', icon: Flag, path: '/mission', isBeta: false },
   { name: 'Báo cáo', icon: PieChart, path: '/reports', isBeta: false },
   { name: 'AI Chat', icon: MessageSquare, path: '/ai-chat', isBeta: true },
+  { name: 'Cài đặt', icon: Settings, path: '/settings', isBeta: false },
 ];
 
 function formatCurrency(value: number, currency = 'VND') {
@@ -186,6 +194,7 @@ function buildSparklinePath(points: number[]) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -245,6 +254,20 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    try {
+      if (refreshToken) {
+        await api.post('/api/v1/auth/logout', { refreshToken });
+      }
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      navigate('/login', { replace: true });
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-layout">
@@ -277,6 +300,7 @@ export default function Dashboard() {
   const sparkline = buildSparklinePath(insight.sparkline);
   const todayLabel = formatLongDate();
   const userInitial = profile.displayName?.trim()?.charAt(0)?.toUpperCase() || 'U';
+  const displayName = profile.displayName || 'Chưa cập nhật tên';
   const weekLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const kycStatus = profile.kycStatus;
 
@@ -304,14 +328,14 @@ export default function Dashboard() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-profile">
+          <NavLink to="/settings" className="user-profile">
             <div className="user-avatar-wrapper">
               <div className="user-avatar">
                 <span>{userInitial}</span>
               </div>
             </div>
             <div className="user-info">
-              <div className="user-name">{profile.displayName}</div>
+              <div className="user-name">{displayName}</div>
               <div className="user-level">
                 Lv.{profile.level} • <span className="user-xp">{profile.currentXp.toLocaleString('vi-VN')} XP</span>
               </div>
@@ -320,7 +344,11 @@ export default function Dashboard() {
               </div>
             </div>
             <ChevronRight className="user-profile-chevron" size={16} />
-          </div>
+          </NavLink>
+          <button className="sidebar-logout-btn" type="button" onClick={() => void handleLogout()}>
+            <LogOut size={16} />
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </aside>
 
@@ -328,7 +356,7 @@ export default function Dashboard() {
         <header className="dashboard-header">
           <div className="header-greeting">
             <h1>
-              <span className="wave-animation">✌️</span> Chào {profile.displayName}!
+              <span className="wave-animation">✌️</span> Chào {displayName}!
             </h1>
             <p>Pockie luôn ở đây cùng bạn</p>
           </div>

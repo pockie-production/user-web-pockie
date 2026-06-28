@@ -102,6 +102,8 @@
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .user-profile:hover {
@@ -164,6 +166,30 @@
 
 .user-profile-chevron {
   color: var(--color-text-muted);
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-white);
+  color: var(--color-text-secondary);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'ABCOracle', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-logout-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
 }
 
 
