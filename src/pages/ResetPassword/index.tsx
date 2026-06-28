@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import pockieLogo from '../../assets/logo.png';
 import logoNav from '../../assets/logo_nav.png';
+import { api } from '../../lib/api';
 import '../Login/Login.css';
 
 export default function ResetPassword() {
@@ -13,16 +14,29 @@ export default function ResetPassword() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (newPassword !== confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp!');
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
-    // Call API here
-    console.log('Reset Password with token', token, 'new password', newPassword);
-    setSubmitted(true);
+
+    try {
+      setLoading(true);
+      await api.post('/api/v1/auth/reset-password', {
+        token,
+        newPassword,
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Không thể đặt lại mật khẩu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Left panel (shared across all auth pages) ──
@@ -130,6 +144,8 @@ export default function ResetPassword() {
                 </p>
               </div>
 
+              {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+
               <form onSubmit={handleReset} className="login-form" noValidate>
 
                 <div className="form-group">
@@ -188,8 +204,8 @@ export default function ResetPassword() {
                   </div>
                 </div>
 
-                <button type="submit" className="btn-primary" id="reset-submit-btn">
-                  Cập nhật mật khẩu
+                <button type="submit" className="btn-primary" id="reset-submit-btn" disabled={loading}>
+                  {loading ? 'Đang xử lý...' : 'Cập nhật mật khẩu'}
                 </button>
               </form>
 

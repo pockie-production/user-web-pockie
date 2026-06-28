@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import pockieLogo from '../../assets/logo.png';
 import logoNav from '../../assets/logo_nav.png';
+import { useNavigate } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { api } from '../../lib/api';
 import '../Login/Login.css';
 import './Register.css';
 
@@ -11,15 +15,47 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (password !== confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp!');
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
-    // Call API here
-    console.log('Register', { email, password });
+
+    try {
+      setLoading(true);
+      const res = await api.post('/api/v1/auth/signup', { email, password });
+      localStorage.setItem('accessToken', res.data.accessToken);
+      localStorage.setItem('refreshToken', res.data.refreshToken);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      const res = await api.post('/api/v1/auth/firebase/login', { idToken });
+      localStorage.setItem('accessToken', res.data.accessToken);
+      localStorage.setItem('refreshToken', res.data.refreshToken);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Đăng ký với Google thất bại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,6 +105,8 @@ export default function Register() {
             <h1 className="login-title">Tạo tài khoản mới</h1>
             <p className="login-subtitle">Đăng ký để bắt đầu quản lý tài chính thông minh.</p>
           </div>
+
+          {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
 
           {/* Form */}
           <form onSubmit={handleRegister} className="login-form" noValidate>
@@ -144,8 +182,8 @@ export default function Register() {
             </div>
 
             {/* Submit */}
-            <button type="submit" className="btn-primary" id="register-submit-btn">
-              Tạo tài khoản
+            <button type="submit" className="btn-primary" id="register-submit-btn" disabled={loading}>
+              {loading ? 'Đang xử lý...' : 'Tạo tài khoản'}
             </button>
           </form>
 
@@ -157,6 +195,8 @@ export default function Register() {
             type="button"
             className="btn-google"
             id="register-google-btn"
+            onClick={handleGoogleRegister}
+            disabled={loading}
           >
             <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
               <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z" />

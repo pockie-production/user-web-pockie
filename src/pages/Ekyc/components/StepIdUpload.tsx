@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { api } from '../../../lib/api';
 
 interface Props {
@@ -11,6 +11,19 @@ export function StepIdUpload({ sessionId, onNext }: Props) {
   const [backFile, setBackFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    side: 'front' | 'back',
+  ) => {
+    const file = event.target.files?.[0] || null;
+    if (side === 'front') {
+      setFrontFile(file);
+      return;
+    }
+
+    setBackFile(file);
+  };
 
   const handleUpload = async () => {
     if (!frontFile || !backFile) {

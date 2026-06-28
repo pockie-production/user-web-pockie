@@ -2,17 +2,30 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import pockieLogo from '../../assets/logo.png';
 import logoNav from '../../assets/logo_nav.png';
+import { api } from '../../lib/api';
 import '../Login/Login.css';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [resetToken, setResetToken] = useState<string | null>(null);
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Call API here
-    console.log('Forgot Password request for', email);
-    setSubmitted(true);
+    setError('');
+
+    try {
+      setLoading(true);
+      const res = await api.post('/api/v1/auth/forgot-password', { email });
+      setResetToken(res.data.resetToken || null);
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Không thể tạo link đặt lại mật khẩu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,7 +82,19 @@ export default function ForgotPassword() {
               <p className="forgot-success__desc">
                 Chúng tôi đã gửi link đặt lại mật khẩu đến<br />
                 <strong>{email}</strong>.<br /><br />
-                Vui lòng kiểm tra hộp thư đến (và thư mục spam) của bạn.
+                Đây là flow mock để test nhanh.
+                {resetToken ? (
+                  <>
+                    <br /><br />
+                    Token test:
+                    <br />
+                    <strong style={{ wordBreak: 'break-all' }}>{resetToken}</strong>
+                    <br /><br />
+                    <Link to={`/reset-password?token=${resetToken}`}>Mở màn hình reset ngay</Link>
+                  </>
+                ) : (
+                  <>Vui lòng kiểm tra hộp thư đến (và thư mục spam) của bạn.</>
+                )}
               </p>
               <Link to="/login" className="btn-primary forgot-success__btn">
                 Quay lại đăng nhập
@@ -92,6 +117,8 @@ export default function ForgotPassword() {
                 </p>
               </div>
 
+              {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+
               <form onSubmit={handleReset} className="login-form" noValidate>
                 <div className="form-group">
                   <label htmlFor="forgot-email" className="form-label">Email</label>
@@ -107,8 +134,8 @@ export default function ForgotPassword() {
                   />
                 </div>
 
-                <button type="submit" className="btn-primary" id="forgot-submit-btn">
-                  Gửi link đặt lại mật khẩu
+                <button type="submit" className="btn-primary" id="forgot-submit-btn" disabled={loading}>
+                  {loading ? 'Đang xử lý...' : 'Gửi link đặt lại mật khẩu'}
                 </button>
               </form>
 
