@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { emitAuthStateChanged } from '../../lib/authEvents';
+import { isExternalAvatarUrl } from '../../lib/profile';
 import '../Dashboard/Dashboard.css';
 import './Settings.css';
 
@@ -213,6 +214,7 @@ export default function SettingsPage() {
 
   const displayName = profile.displayName || 'Chưa cập nhật tên';
   const userInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
+  const showAvatarImage = isExternalAvatarUrl(profile.avatarUrl);
   const kyc = kycCopy[profile.kycStatus];
   const passwordAccount = profile.authProvider === 'PASSWORD';
 
@@ -237,7 +239,13 @@ export default function SettingsPage() {
         )}
 
         <section className="settings-summary">
-          <div className="settings-avatar">{userInitial}</div>
+          <div className="settings-avatar">
+            {showAvatarImage ? (
+              <img src={profile.avatarUrl ?? ''} alt={displayName} className="settings-avatar-image" />
+            ) : (
+              userInitial
+            )}
+          </div>
           <div className="settings-summary-info">
             <p className="settings-eyebrow">Tài khoản Pockie</p>
             <h1>{displayName}</h1>

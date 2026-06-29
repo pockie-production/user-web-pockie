@@ -30,7 +30,9 @@ import { useNavigate } from 'react-router-dom';
 import mascot from '../../assets/mascot.png';
 import logo from '../../assets/logo.png';
 import { api } from '../../lib/api';
+import { trackUserEvent } from '../../lib/analytics';
 import { emitAuthStateChanged } from '../../lib/authEvents';
+import { isExternalAvatarUrl } from '../../lib/profile';
 import './Dashboard.css';
 
 type DashboardProfile = {
@@ -210,6 +212,16 @@ export default function Dashboard() {
         params: { month },
       });
       setDashboard(res.data);
+      trackUserEvent({
+        eventName: 'dashboard_loaded',
+        page: '/dashboard',
+        feature: 'finance_dashboard',
+        payload: {
+          missionCount: res.data.missions.items.length,
+          categoryCount: res.data.categoryStats.items.length,
+          unreadNotifications: res.data.notifications.unreadCount,
+        },
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Không tải được dashboard.');
     } finally {
@@ -224,6 +236,16 @@ export default function Dashboard() {
   const handleMissionClick = async (mission: DashboardMission) => {
     if (mission.status === 'COMPLETED' || completingMissionId) return;
 
+    trackUserEvent({
+      eventName: 'mission_click',
+      page: '/dashboard',
+      feature: 'streak',
+      payload: {
+        missionId: mission.id,
+        requiresConfirm: mission.requiresConfirm,
+      },
+    });
+
     if (mission.requiresConfirm) {
       setPendingMission(mission);
       return;
@@ -232,6 +254,12 @@ export default function Dashboard() {
     setCompletingMissionId(mission.id);
     try {
       await api.post(`/api/v1/missions/${mission.id}/complete`);
+      trackUserEvent({
+        eventName: 'mission_completed',
+        page: '/dashboard',
+        feature: 'streak',
+        payload: { missionId: mission.id },
+      });
       await loadDashboard();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Không thể hoàn thành mission.');
@@ -246,6 +274,12 @@ export default function Dashboard() {
     setCompletingMissionId(pendingMission.id);
     try {
       await api.post(`/api/v1/missions/${pendingMission.id}/complete`);
+      trackUserEvent({
+        eventName: 'mission_completed',
+        page: '/dashboard',
+        feature: 'streak',
+        payload: { missionId: pendingMission.id, confirmed: true },
+      });
       setPendingMission(null);
       await loadDashboard();
     } catch (err: any) {
@@ -302,6 +336,7 @@ export default function Dashboard() {
   const sparkline = buildSparklinePath(insight.sparkline);
   const todayLabel = formatLongDate();
   const userInitial = profile.displayName?.trim()?.charAt(0)?.toUpperCase() || 'U';
+  const showAvatarImage = isExternalAvatarUrl(profile.avatarUrl);
   const displayName = profile.displayName || 'Chưa cập nhật tên';
   const weekLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const kycStatus = profile.kycStatus;
@@ -320,6 +355,16 @@ export default function Dashboard() {
               key={item.name}
               to={item.path}
               end={item.path === '/dashboard'}
+              onClick={() => trackUserEvent({
+                eventName: 'sidebar_navigation_click',
+                page: '/dashboard',
+                feature:
+                  item.path === '/ai-chat' ? 'chat' :
+                  item.path === '/mission' ? 'streak' :
+                  item.path === '/settings' ? 'profile' :
+                  'finance_dashboard',
+                payload: { targetPath: item.path, label: item.name },
+              })}
               className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
             >
               <item.icon className="sidebar-nav-icon" size={20} />
@@ -333,7 +378,11 @@ export default function Dashboard() {
           <NavLink to="/settings" className="user-profile">
             <div className="user-avatar-wrapper">
               <div className="user-avatar">
-                <span>{userInitial}</span>
+                {showAvatarImage ? (
+                  <img src={profile.avatarUrl ?? ''} alt={displayName} className="user-avatar-image" />
+                ) : (
+                  <span>{userInitial}</span>
+                )}
               </div>
             </div>
             <div className="user-info">
@@ -392,7 +441,16 @@ export default function Dashboard() {
                   <p>Vui lòng hoàn tất định danh để mở khóa toàn bộ tính năng và nhận thêm 500 XP.</p>
                 </div>
               </div>
-              <NavLink to="/ekyc" className="ekyc-banner-btn">
+              <NavLink
+                to="/ekyc"
+                className="ekyc-banner-btn"
+                onClick={() => trackUserEvent({
+                  eventName: 'ekyc_cta_click',
+                  page: '/dashboard',
+                  feature: 'ocr',
+                  payload: { kycStatus },
+                })}
+              >
                 Xác thực ngay
               </NavLink>
             </div>
@@ -651,6 +709,12 @@ export default function Dashboard() {
         className="fab-ai-chat"
         disabled={!featureAccess.canUseAI}
         title={featureAccess.canUseAI ? 'AI chat sắp được bật' : 'Cần hoàn tất eKYC để dùng AI'}
+        onClick={() => trackUserEvent({
+          eventName: 'fab_ai_chat_click',
+          page: '/dashboard',
+          feature: 'chat',
+          payload: { canUseAI: featureAccess.canUseAI },
+        })}
       >
         <MessageSquare size={20} />
         <span>{featureAccess.canUseAI ? 'Hỏi Pockie...' : 'Mở AI sau eKYC'}</span>

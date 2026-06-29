@@ -49,7 +49,11 @@ export default function Register() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
-      const res = await api.post('/api/v1/auth/firebase/login', { idToken });
+      const res = await api.post('/api/v1/auth/firebase/login', {
+        idToken,
+        displayName: result.user.displayName || undefined,
+        avatarUrl: result.user.photoURL || undefined,
+      });
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
       emitAuthStateChanged();
