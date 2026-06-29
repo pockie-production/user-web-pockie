@@ -92,7 +92,7 @@ function featureRows(profile: UserProfile) {
   ];
 }
 
-export default function SettingsPage() {
+export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [form, setForm] = useState({
@@ -219,18 +219,20 @@ export default function SettingsPage() {
   const passwordAccount = profile.authProvider === 'PASSWORD';
 
   return (
-    <div className="settings-page">
-      <main className="settings-shell">
-        <header className="settings-header">
-          <NavLink to="/dashboard" className="settings-back">
-            <ArrowLeft size={18} />
-            <span>Dashboard</span>
-          </NavLink>
-          <button type="button" className="settings-logout" onClick={() => void logout()}>
-            <LogOut size={18} />
-            <span>Đăng xuất</span>
-          </button>
-        </header>
+    <div className="settings-page" style={isEmbedded ? { padding: 0 } : {}}>
+      <main className="settings-shell" style={isEmbedded ? { margin: 0, maxWidth: 'none', borderRadius: 0 } : {}}>
+        {!isEmbedded && (
+          <header className="settings-header">
+            <NavLink to="/dashboard" className="settings-back">
+              <ArrowLeft size={18} />
+              <span>Dashboard</span>
+            </NavLink>
+            <button type="button" className="settings-logout" onClick={() => void logout()}>
+              <LogOut size={18} />
+              <span>Đăng xuất</span>
+            </button>
+          </header>
+        )}
 
         {(error || message) && (
           <div className={`settings-alert ${error ? 'settings-alert-error' : 'settings-alert-success'}`}>

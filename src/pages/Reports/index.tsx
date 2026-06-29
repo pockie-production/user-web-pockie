@@ -77,7 +77,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '4', title: 'GrabBike', date: '24/05/2025, 09:00', amount: '-32.000đ', type: 'expense', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Motor%20scooter/3D/motor_scooter_3d.png' }
 ];
 
-export default function Reports() {
+export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [overview, setOverview] = useState<ReportOverview>(MOCK_OVERVIEW);
   const [trends, setTrends] = useState<TrendDataPoint[]>(MOCK_TRENDS);
   const [categories, setCategories] = useState<CategoryData[]>(MOCK_CATEGORIES);
@@ -127,10 +127,7 @@ export default function Reports() {
     return { ...cat, offset };
   });
 
-  return (
-    <div className="dashboard-layout">
-      <Sidebar />
-      <main className="dashboard-main" style={{ padding: 0 }}>
+  const content = (
         <div className="reports-page">
           
           <header className="reports-header">
@@ -387,8 +384,15 @@ export default function Reports() {
           <footer className="reports-footer">
             <Lock size={14} /> Dữ liệu được mã hóa và bảo mật tuyệt đối bởi Pockie
           </footer>
-
         </div>
+  );
+
+  if (isEmbedded) return content;
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      <main className="dashboard-main" style={{ padding: 0 }}>
+        {content}
       </main>
     </div>
   );

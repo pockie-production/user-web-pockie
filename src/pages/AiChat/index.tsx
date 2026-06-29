@@ -4,6 +4,10 @@ import { ArrowLeft, Send, Plus, Sparkles, TrendingUp, Target, PiggyBank } from '
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
 import { api } from '../../lib/api';
+import Wallet from '../Wallet';
+import Goals from '../Goals';
+import Reports from '../Reports';
+import Settings from '../Settings';
 import './AiChat.css';
 
 interface Message {
@@ -85,6 +89,7 @@ export default function AiChat() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [workspaceType, setWorkspaceType] = useState<'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report'>('none');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -129,13 +134,31 @@ export default function AiChat() {
 
     setTimeout(async () => {
       let content = 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI...';
-      try {
-        const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
-        content = res.data.reply;
-      } catch (err) {
-        // Fallback mock logic if API not ready
-        content = getMockResponse(text.trim());
+      let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report' = 'mock-report';
+
+      const lowerInput = text.trim().toLowerCase();
+      if (lowerInput.includes('ví') || lowerInput.includes('tài sản')) {
+        detectedWorkspace = 'wallet';
+        content = 'Tôi đã mở Ví của bạn. Bạn có thể xem chi tiết dòng tiền và số dư của các ví hiện tại ở màn hình bên cạnh nhé!';
+      } else if (lowerInput.includes('mục tiêu') || lowerInput.includes('tiết kiệm') || lowerInput.includes('kế hoạch')) {
+        detectedWorkspace = 'goals';
+        content = 'Đây là các mục tiêu tài chính và tiến độ hiện tại của bạn. Bạn đang làm rất tốt, tiếp tục phát huy nhé! 🎯';
+      } else if (lowerInput.includes('báo cáo') || lowerInput.includes('phân tích') || lowerInput.includes('chi tiêu')) {
+        detectedWorkspace = 'reports';
+        content = 'Tôi đã mở Báo cáo chi tiêu tháng này cho bạn. Bạn có thể thấy danh mục nào đang chiếm tỷ trọng lớn nhất để điều chỉnh cho phù hợp. 📊';
+      } else if (lowerInput.includes('cài đặt') || lowerInput.includes('tài khoản')) {
+        detectedWorkspace = 'settings';
+        content = 'Đây là trang Cài đặt. Bạn có thể thay đổi thông tin cá nhân hoặc mật khẩu tại đây. ⚙️';
+      } else {
+        try {
+          const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
+          content = res.data.reply;
+        } catch (err) {
+          content = getMockResponse(text.trim());
+        }
       }
+
+      setWorkspaceType(detectedWorkspace);
       
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -173,12 +196,7 @@ export default function AiChat() {
 
   return (
     <div className={`chat-layout ${!isEmpty ? 'split-view' : ''}`}>
-      {/* Workspace Panel (Bên trái) */}
-      <div className="agent-workspace-panel">
-        {!isEmpty && reportData && <MockReportView data={reportData} />}
-      </div>
-
-      {/* Chat Panel (Bên phải) */}
+      {/* Chat Panel (Bên trái) */}
       <div className="agent-chat-panel">
         <header className="chat-header">
           <button className="chat-back-btn" onClick={() => navigate('/dashboard')}>
@@ -290,6 +308,17 @@ export default function AiChat() {
         </div>
         <p className="chat-disclaimer">Pockie AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng.</p>
       </div>
+      </div>
+
+      {/* Workspace Panel (Bên phải) */}
+      <div className="agent-workspace-panel">
+        <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>
+          {!isEmpty && workspaceType === 'mock-report' && reportData && <MockReportView data={reportData} />}
+          {!isEmpty && workspaceType === 'wallet' && <Wallet isEmbedded={true} />}
+          {!isEmpty && workspaceType === 'goals' && <Goals isEmbedded={true} />}
+          {!isEmpty && workspaceType === 'reports' && <Reports isEmbedded={true} />}
+          {!isEmpty && workspaceType === 'settings' && <Settings isEmbedded={true} />}
+        </div>
       </div>
     </div>
   );

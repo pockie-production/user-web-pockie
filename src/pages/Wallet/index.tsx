@@ -64,7 +64,7 @@ const MOCK_ACCOUNTS: WalletAccount[] = [
   { id: 'w4', type: 'cash', name: 'Tiền mặt', balance: '1.500.000đ', accountNumber: 'Ví tiền mặt', isPrimary: false }
 ];
 
-export default function Wallet() {
+export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [showBalance, setShowBalance] = useState(true);
   const [timeFilter, setTimeFilter] = useState('3T');
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
@@ -137,12 +137,8 @@ export default function Wallet() {
     }
   };
 
-  return (
-    <div className="dashboard-layout">
-      <Sidebar />
-
-      {/* NỘI DUNG CHÍNH (VÍ CỦA TÔI) */}
-      <main className="dashboard-main" style={{ padding: 0 }}>
+  const content = (
+        <main className="dashboard-main" style={{ padding: 0 }}>
         <div className="wallet-page" style={{ height: '100%', overflowY: 'auto' }}>
           <header className="wallet-page-header">
             <div className="wallet-title-group">
@@ -413,6 +409,13 @@ export default function Wallet() {
           </div>
         </div>
       </main>
+  );
+
+  if (isEmbedded) return content;
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      {content}
     </div>
   );
 }

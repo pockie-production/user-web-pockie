@@ -57,7 +57,7 @@ const MOCK_REWARDS: Reward[] = [
   { id: '3', title: 'eVoucher 50K', requirementText: 'Cần 3,000 XP', iconSrc: EMOJI.gift, theme: 'yellow' }
 ];
 
-export default function Goals() {
+export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [profile, setProfile] = useState<any>(null);
   const [activeBanner, setActiveBanner] = useState(0);
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -112,9 +112,7 @@ export default function Goals() {
   const strokeDasharray = 283;
   const strokeDashoffset = strokeDasharray - (strokeDasharray * xpPercent) / 100;
 
-  return (
-    <div className="dashboard-layout">
-      <Sidebar />
+  const content = (
       <main className="goals-page">
         {/* HEADER */}
         <header className="goals-header">
@@ -287,6 +285,13 @@ export default function Goals() {
 
         </div>
       </main>
+  );
+
+  if (isEmbedded) return content;
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      {content}
     </div>
   );
 }
