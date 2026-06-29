@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
+import AiChat from './pages/AiChat';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
@@ -44,10 +45,10 @@ function RouteTracker({ isAuthenticated }: { isAuthenticated: boolean }) {
 
     const feature =
       location.pathname.startsWith('/dashboard') ? 'finance_dashboard' :
-      location.pathname.startsWith('/ekyc') ? 'ocr' :
-      location.pathname.startsWith('/ai-chat') ? 'chat' :
-      location.pathname.startsWith('/mission') ? 'streak' :
-      undefined;
+        location.pathname.startsWith('/ekyc') ? 'ocr' :
+          location.pathname.startsWith('/ai-chat') ? 'chat' :
+            location.pathname.startsWith('/mission') ? 'streak' :
+              undefined;
 
     trackUserEvent({
       eventName: 'page_view',
@@ -206,7 +207,7 @@ function App() {
           path="/ai-chat"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="AI Chat" />
+              <AiChat />
             </ProtectedRoute>
           }
         />
