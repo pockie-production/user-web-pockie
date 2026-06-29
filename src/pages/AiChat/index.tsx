@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Plus, Sparkles, TrendingUp, Target, PiggyBank } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Sparkles, TrendingUp, Target, PiggyBank, Mic, Camera, ChevronRight } from 'lucide-react';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
 import { api } from '../../lib/api';
@@ -51,7 +51,29 @@ const MockReportView = ({ data }: { data: ReportData }) => (
   <div style={{ padding: '32px 48px', height: '100%', overflowY: 'auto', background: '#fff' }}>
     <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>Phân tích chi tiêu tháng 5</h2>
     <p style={{ color: 'var(--color-text-secondary)', marginBottom: '40px' }}>Dựa trên dữ liệu giao dịch của bạn</p>
-    
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-mint-light)', padding: '20px 24px', borderRadius: '16px', marginBottom: '32px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+        <div style={{ color: 'var(--color-mint)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Sparkles size={14} /> AI Insight
+        </div>
+        <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+          Tình hình chi tiêu đang ở mức trung bình
+        </div>
+        <button style={{ background: '#fff', border: '1px solid var(--color-mint)', color: 'var(--color-mint)', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', width: 'max-content' }}>
+          Xem gợi ý <ChevronRight size={14} />
+        </button>
+      </div>
+      
+      <div style={{ background: '#fff', padding: '12px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', minWidth: '110px' }}>
+         <div style={{ color: '#FF4D4F', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: '0.5px' }}>NEUTRAL</div>
+         <svg width="80" height="30" viewBox="0 0 80 30" style={{ overflow: 'visible' }}>
+           <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="#FF4D4F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+           <circle cx="75" cy="2" r="3" fill="#FF4D4F" />
+         </svg>
+         <div style={{ fontSize: '9px', color: 'var(--color-text-muted)', marginTop: '8px' }}>xu hướng tháng này</div>
+      </div>
+    </div>
+
     <div style={{ display: 'flex', gap: '24px', marginBottom: '40px' }}>
       <div style={{ flex: 1, padding: '24px', background: 'var(--color-cream)', borderRadius: '20px' }}>
         <div style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Tổng chi</div>
@@ -164,7 +186,7 @@ export default function AiChat() {
     }
 
     setWorkspaceType(detectedWorkspace);
-    
+
     const botMsg: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
@@ -198,6 +220,52 @@ export default function AiChat() {
 
   const isEmpty = messages.length === 0;
 
+  const renderInputBar = () => (
+    <div className={`chat-input-wrapper ${isEmpty ? 'centered-input' : ''}`}>
+      {!isEmpty && (
+        <div className="chat-suggestions-row">
+          {SUGGESTED_PROMPTS.slice(0, 2).map((p, i) => (
+            <button key={i} className="chat-suggestion-chip small" onClick={() => sendMessage(p.text)}>
+              <p.icon size={13} className="chip-icon" />
+              {p.text}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="chat-input-bar">
+        <button className="chat-attach-btn" aria-label="Đính kèm">
+          <Plus size={18} />
+        </button>
+        <textarea
+          ref={textareaRef}
+          className="chat-input"
+          placeholder="Hỏi Pockie..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          rows={1}
+        />
+        <div className="chat-input-actions">
+          <button className="chat-action-btn" aria-label="Giọng nói">
+            <Mic size={18} />
+          </button>
+          <button className="chat-action-btn" aria-label="Quét hóa đơn">
+            <Camera size={18} />
+          </button>
+          <button
+            className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim()}
+            aria-label="Gửi"
+          >
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+      <p className="chat-disclaimer">Pockie AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng.</p>
+    </div>
+  );
+
   return (
     <div className={`chat-layout ${!isEmpty ? 'split-view' : ''}`}>
       {/* Chat Panel (Bên trái) */}
@@ -220,98 +288,63 @@ export default function AiChat() {
         </header>
 
         <main className="chat-messages-area">
-        {isEmpty ? (
-          <div className="chat-welcome">
-            <div className="chat-welcome-glow" />
+          {isEmpty ? (
+            <div className="chat-welcome">
+              <div className="chat-welcome-glow" />
 
-            {/* Dùng PockieSprite thay cho thẻ img */}
-            <PockieSprite size={90} className="chat-welcome-sprite" />
+              <PockieSprite size={120} variant="shy" className="chat-welcome-sprite" />
 
-            <p className="chat-welcome-subtitle">Trợ lý tài chính thông minh</p>
-            <h1 className="chat-welcome-title">Xin chào! Tôi có thể<br />giúp gì cho bạn?</h1>
-            <div className="chat-suggestions">
-              {SUGGESTED_PROMPTS.map((p, i) => (
-                <button
-                  key={i}
-                  className="chat-suggestion-chip"
-                  onClick={() => sendMessage(p.text)}
-                >
-                  <p.icon size={16} className="chip-icon" />
-                  {p.text}
-                </button>
-              ))}
+              <h1 className="chat-welcome-title">Xin chào! Tôi có thể<br />giúp gì cho bạn?</h1>
+              
+              {renderInputBar()}
+              <div className="chat-suggestions">
+                {SUGGESTED_PROMPTS.map((p, i) => (
+                  <button
+                    key={i}
+                    className="chat-suggestion-chip"
+                    onClick={() => sendMessage(p.text)}
+                  >
+                    <p.icon size={16} className="chip-icon" />
+                    {p.text}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="chat-messages-list">
-            {messages.map(msg => (
-              <div key={msg.id} className={`chat-message-row ${msg.role}`}>
-                {msg.role === 'assistant' && (
+          ) : (
+            <div className="chat-messages-list">
+              {messages.map(msg => (
+                <div key={msg.id} className={`chat-message-row ${msg.role}`}>
+                  {msg.role === 'assistant' && (
+                    <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
+                  )}
+                  <div className={`chat-bubble ${msg.role}`}>
+                    <div
+                      className="chat-bubble-text"
+                      dangerouslySetInnerHTML={{
+                        __html: msg.content
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\n/g, '<br/>'),
+                      }}
+                    />
+                    <span className="chat-bubble-time">
+                      {msg.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {isTyping && (
+                <div className="chat-message-row assistant">
                   <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
-                )}
-                <div className={`chat-bubble ${msg.role}`}>
-                  <div
-                    className="chat-bubble-text"
-                    dangerouslySetInnerHTML={{
-                      __html: msg.content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\n/g, '<br/>'),
-                    }}
-                  />
-                  <span className="chat-bubble-time">
-                    {msg.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="chat-bubble assistant chat-typing">
+                    <span /><span /><span />
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="chat-message-row assistant">
-                <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
-                <div className="chat-bubble assistant chat-typing">
-                  <span /><span /><span />
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </main>
-
-      <div className="chat-input-wrapper">
-        {!isEmpty && (
-          <div className="chat-suggestions-row">
-            {SUGGESTED_PROMPTS.slice(0, 2).map((p, i) => (
-              <button key={i} className="chat-suggestion-chip small" onClick={() => sendMessage(p.text)}>
-                <p.icon size={13} className="chip-icon" />
-                {p.text}
-              </button>
-            ))}
-          </div>
-        )}
-        <div className="chat-input-bar">
-          <button className="chat-attach-btn" aria-label="Đính kèm">
-            <Plus size={18} />
-          </button>
-          <textarea
-            ref={textareaRef}
-            className="chat-input"
-            placeholder="Hỏi Pockie về tài chính của bạn..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={1}
-          />
-          <button
-            className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim()}
-            aria-label="Gửi"
-          >
-            <Send size={16} />
-          </button>
-        </div>
-        <p className="chat-disclaimer">Pockie AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng.</p>
-      </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </main>
+        {!isEmpty && renderInputBar()}
       </div>
 
       {/* Workspace Panel (Bên phải) */}

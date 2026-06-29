@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '../../components/Sidebar';
 import { api } from '../../lib/api';
-import { Bell } from 'lucide-react';
+import { 
+  Bell,
+  X
+} from 'lucide-react';
 import './Goals.css';
 
 import banner1 from '../../assets/banner_1.png';
@@ -63,6 +66,7 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
   const [missions, setMissions] = useState<Mission[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [userStats, setUserStats] = useState({ streak: 0, missionsCompleted: 0 });
+  const [isMissionsModalOpen, setIsMissionsModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -244,7 +248,7 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
                   <h4>Hoàn thành nhiệm vụ để nhận XP</h4>
                   <p>Tích XP để lên level và nhận nhiều phần thưởng hơn!</p>
                 </div>
-                <button className="banner-btn">
+                <button className="banner-btn" onClick={() => setIsMissionsModalOpen(true)}>
                   Xem tất cả nhiệm vụ &rarr;
                 </button>
               </div>
@@ -284,6 +288,41 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
           </div>
 
         </div>
+      
+      {/* All Missions Modal */}
+      {isMissionsModalOpen && (
+        <div className="goals-modal-overlay" onClick={() => setIsMissionsModalOpen(false)}>
+          <div className="goals-modal" onClick={e => e.stopPropagation()}>
+            <button className="goals-modal-close" onClick={() => setIsMissionsModalOpen(false)}>
+              <X size={24} />
+            </button>
+            <h2 className="goals-modal-title">Tất cả nhiệm vụ</h2>
+            <div className="goals-modal-content">
+              {missions.map(mission => (
+                <div key={mission.id} className={`mission-card ${mission.theme}`} style={{ width: '100%' }}>
+                  <div className="m-card-header">
+                    <div className="m-card-icon"><img src={mission.iconSrc} alt="Icon" style={{ width: 28, height: 28 }} /></div>
+                    <div className="m-card-title">
+                      <h3>{mission.title}</h3>
+                      <p>{mission.description}</p>
+                    </div>
+                  </div>
+                  <div className="m-card-progress-text">
+                    {mission.current.toLocaleString()} / {mission.target.toLocaleString()}{mission.unit}
+                  </div>
+                  <div className="m-card-progress-bar">
+                    <div className="m-card-progress-fill" style={{ width: `${Math.min((mission.current / mission.target) * 100, 100)}%` }}></div>
+                  </div>
+                  <div className="m-card-footer">
+                    <div className="m-card-reward"><img src={EMOJI.star} alt="XP" style={{ width: 16, height: 16, display: 'inline', verticalAlign: 'text-bottom' }} /> +{mission.rewardXp} XP</div>
+                    <button className="m-card-btn">Bắt đầu</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       </main>
   );
 

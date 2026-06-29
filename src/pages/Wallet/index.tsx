@@ -10,6 +10,7 @@ import {
   Star,
 } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
+import { AddTransactionModal, SmartScanModal, AddWalletModal } from './WalletModals';
 import './Wallet.css';
 
 
@@ -74,6 +75,11 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
   const [allocations, setAllocations] = useState<AllocationData[]>([]);
   const [summary, setSummary] = useState<WalletSummary | null>(null);
   const [accounts, setAccounts] = useState<WalletAccount[]>([]);
+
+  // Modal states
+  const [isAddTxOpen, setIsAddTxOpen] = useState(false);
+  const [isSmartScanOpen, setIsSmartScanOpen] = useState(false);
+  const [isAddWalletOpen, setIsAddWalletOpen] = useState(false);
 
   React.useEffect(() => {
     async function fetchWalletData() {
@@ -149,13 +155,13 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
               <p>Quản lý tài sản và theo dõi dòng tiền của bạn</p>
             </div>
             <div className="wallet-actions">
-              <button className="wallet-action-btn btn-add-tx">
+              <button className="wallet-action-btn btn-add-tx" onClick={() => setIsAddTxOpen(true)}>
                 <Plus size={16} /> Thêm giao dịch
               </button>
-              <button className="wallet-action-btn btn-scan">
+              <button className="wallet-action-btn btn-scan" onClick={() => setIsSmartScanOpen(true)}>
                 <ScanLine size={16} /> Smart Scan
               </button>
-              <button className="wallet-action-btn btn-add-wallet">
+              <button className="wallet-action-btn btn-add-wallet" onClick={() => setIsAddWalletOpen(true)}>
                 <Plus size={16} /> Thêm ví
               </button>
             </div>
@@ -416,6 +422,9 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
     <div className="dashboard-layout">
       <Sidebar />
       {content}
+      <AddTransactionModal isOpen={isAddTxOpen} onClose={() => setIsAddTxOpen(false)} />
+      <SmartScanModal isOpen={isSmartScanOpen} onClose={() => setIsSmartScanOpen(false)} />
+      <AddWalletModal isOpen={isAddWalletOpen} onClose={() => setIsAddWalletOpen(false)} />
     </div>
   );
 }

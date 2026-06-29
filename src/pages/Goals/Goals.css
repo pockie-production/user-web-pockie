@@ -347,8 +347,23 @@
 .mission-card.blue .m-card-btn { color: #3B82F6; }
 
 .m-card-btn:hover {
-  background: currentColor;
-  color: white !important;
+  font-weight: 700;
+}
+
+.mission-card.mint .m-card-btn:hover {
+  background: #10B981;
+  border-color: #10B981;
+  color: #022c22 !important;
+}
+.mission-card.yellow .m-card-btn:hover {
+  background: #F59E0B;
+  border-color: #F59E0B;
+  color: #451a03 !important;
+}
+.mission-card.blue .m-card-btn:hover {
+  background: #3B82F6;
+  border-color: #3B82F6;
+  color: #1e3a8a !important;
 }
 
 .mission-banner {
@@ -465,4 +480,76 @@
 
 .carousel-img.active {
   opacity: 1;
+}
+
+/* --- Goals Modals --- */
+.goals-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.goals-modal {
+  background: var(--color-white);
+  border-radius: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.goals-modal-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.goals-modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+.goals-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 24px;
+  font-family: var(--font-heading);
+}
+
+.goals-modal-content {
+  overflow-y: auto;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Custom scrollbar for modal content */
+.goals-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.goals-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.goals-modal-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
 }
