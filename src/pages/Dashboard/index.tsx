@@ -1,15 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  Home,
-  Lightbulb,
-  CreditCard,
-  Wallet,
   Target,
-  Flag,
-  PieChart,
-  MessageSquare,
-  ChevronRight,
   Bell,
   Calendar,
   TrendingUp,
@@ -23,17 +15,13 @@ import {
   Coffee as CoffeeIcon,
   ShoppingBag,
   Check,
-  LogOut,
-  Settings,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import mascot from '../../assets/mascot.png';
 import logo from '../../assets/logo.png';
 import { api } from '../../lib/api';
 import { trackUserEvent } from '../../lib/analytics';
-import { PockieSprite } from '../../components/PockieSprite';
-import { emitAuthStateChanged } from '../../lib/authEvents';
-import { isExternalAvatarUrl } from '../../lib/profile';
+import { Sidebar } from '../../components/Sidebar';
 import './Dashboard.css';
 
 type DashboardProfile = {
@@ -127,14 +115,6 @@ type DashboardResponse = {
   };
 };
 
-const menuItems = [
-  { name: 'Trang chủ', icon: Home, path: '/dashboard', isBeta: false },
-  { name: 'Ví của tôi', icon: Wallet, path: '/wallet', isBeta: false },
-  { name: 'Mục tiêu', icon: Target, path: '/goals', isBeta: false },
-  { name: 'Báo cáo', icon: PieChart, path: '/reports', isBeta: false },
-  { name: 'AI Chat', icon: MessageSquare, path: '/ai-chat', isBeta: true },
-  { name: 'Cài đặt', icon: Settings, path: '/settings', isBeta: false },
-];
 
 function formatCurrency(value: number, currency = 'VND') {
   return new Intl.NumberFormat('vi-VN', {
@@ -201,111 +181,6 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [pendingMission, setPendingMission] = useState<DashboardMission | null>(null);
   const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
-
-  // --- Drag Logic cho FAB AI ---
-  const [fabPos, setFabPos] = useState({ x: window.innerWidth - 188, y: window.innerHeight - 188 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
-  const dragStartClient = useRef({ x: 0, y: 0 });
-  const dragStartPos = useRef({ x: 0, y: 0 });
-  const hasMoved = useRef(false);
-
-  useEffect(() => {
-    // Khởi tạo vị trí FAB (góc dưới phải)
-    setFabPos({ x: window.innerWidth - 188, y: window.innerHeight - 188 });
-
-    const handleResize = () => {
-      setFabPos(prev => {
-        let newX = prev.x;
-        let newY = prev.y;
-        if (newX > window.innerWidth - 188) newX = window.innerWidth - 188;
-        if (newY > window.innerHeight - 188) newY = window.innerHeight - 188;
-        return { x: newX, y: newY };
-      });
-    };
-    window.addEventListener('resize', handleResize);
-
-    // Bubble timer: show every 15 seconds (stays for 3s, then hides)
-    const bubbleInterval = setInterval(() => {
-      setShowBubble(true);
-      setTimeout(() => setShowBubble(false), 3000);
-    }, 15000);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearInterval(bubbleInterval);
-    };
-  }, []);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    hasMoved.current = false;
-    dragStartClient.current = { x: e.clientX, y: e.clientY };
-    dragStartPos.current = { x: e.clientX - fabPos.x, y: e.clientY - fabPos.y };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-
-    const moveX = Math.abs(e.clientX - dragStartClient.current.x);
-    const moveY = Math.abs(e.clientY - dragStartClient.current.y);
-    if (moveX > 3 || moveY > 3) {
-      hasMoved.current = true;
-    }
-
-    if (hasMoved.current) {
-      let newX = e.clientX - dragStartPos.current.x;
-      let newY = e.clientY - dragStartPos.current.y;
-
-      const fabSize = 168;
-      const sidebarWidth = 260; // Chiều rộng sidebar
-
-      if (newX < sidebarWidth + 20) newX = sidebarWidth + 20; // Thêm 20px margin cho an toàn
-      if (newX > window.innerWidth - fabSize - 20) newX = window.innerWidth - fabSize - 20;
-      if (newY < 20) newY = 20;
-      if (newY > window.innerHeight - fabSize - 20) newY = window.innerHeight - fabSize - 20;
-
-      setFabPos({ x: newX, y: newY });
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    setIsDragging(false);
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-
-    // Snap to edge if moved
-    if (hasMoved.current) {
-      setFabPos(prev => {
-        const fabSize = 168;
-        const sidebarWidth = 260;
-        const minX = sidebarWidth + 20;
-        const maxX = window.innerWidth - fabSize - 20;
-
-        const distToLeft = Math.abs(prev.x - minX);
-        const distToRight = Math.abs(prev.x - maxX);
-
-        return {
-          ...prev,
-          x: distToLeft < distToRight ? minX : maxX
-        };
-      });
-    }
-  };
-
-  const handleFabClick = () => {
-    if (!hasMoved.current) {
-      trackUserEvent({
-        eventName: 'fab_ai_chat_click',
-        page: '/dashboard',
-        feature: 'chat',
-        payload: { canUseAI: featureAccess.canUseAI },
-      });
-      navigate('/ai-chat');
-    }
-  };
-  // -----------------------------
 
   const loadDashboard = async () => {
     try {
@@ -392,20 +267,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    try {
-      if (refreshToken) {
-        await api.post('/api/v1/auth/logout', { refreshToken });
-      }
-    } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      emitAuthStateChanged();
-      navigate('/login', { replace: true });
-    }
-  };
 
   if (loading) {
     return (
@@ -438,74 +299,15 @@ export default function Dashboard() {
         'progress-danger';
   const sparkline = buildSparklinePath(insight.sparkline);
   const todayLabel = formatLongDate();
-  const userInitial = profile.displayName?.trim()?.charAt(0)?.toUpperCase() || 'U';
-  const showAvatarImage = isExternalAvatarUrl(profile.avatarUrl);
   const displayName = profile.displayName || 'Chưa cập nhật tên';
   const weekLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const kycStatus = profile.kycStatus;
 
   return (
     <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-logo-container">
-          <img src={mascot} alt="Pockie" className="sidebar-mascot" />
-          <span className="sidebar-brand">Pockie</span>
-        </div>
+      <Sidebar />
 
-        <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              end={item.path === '/dashboard'}
-              onClick={() => trackUserEvent({
-                eventName: 'sidebar_navigation_click',
-                page: '/dashboard',
-                feature:
-                  item.path === '/ai-chat' ? 'chat' :
-                    item.path === '/mission' ? 'streak' :
-                      item.path === '/settings' ? 'profile' :
-                        'finance_dashboard',
-                payload: { targetPath: item.path, label: item.name },
-              })}
-              className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
-            >
-              <item.icon className="sidebar-nav-icon" size={20} />
-              <span className="sidebar-nav-text">{item.name}</span>
-              {item.isBeta && <span className="beta-badge">BETA</span>}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <NavLink to="/settings" className="user-profile">
-            <div className="user-avatar-wrapper">
-              <div className="user-avatar">
-                {showAvatarImage ? (
-                  <img src={profile.avatarUrl ?? ''} alt={displayName} className="user-avatar-image" />
-                ) : (
-                  <span>{userInitial}</span>
-                )}
-              </div>
-            </div>
-            <div className="user-info">
-              <div className="user-name">{displayName}</div>
-              <div className="user-level">
-                Lv.{profile.level} • <span className="user-xp">{profile.currentXp.toLocaleString('vi-VN')} XP</span>
-              </div>
-              <div className="user-xp-bar">
-                <div className="user-xp-fill" style={{ width: `${profile.xpProgressPercent}%` }}></div>
-              </div>
-            </div>
-            <ChevronRight className="user-profile-chevron" size={16} />
-          </NavLink>
-          <button className="sidebar-logout-btn" type="button" onClick={() => void handleLogout()}>
-            <LogOut size={16} />
-            <span>Đăng xuất</span>
-          </button>
-        </div>
-      </aside>
-
+      {/* NỘI DUNG CHÍNH */}
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-greeting">
@@ -666,7 +468,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="dashboard-card card-wallet col-span-7">
+          <div 
+            className="dashboard-card card-wallet col-span-7" 
+            onClick={() => navigate('/wallet')} 
+            style={{ cursor: 'pointer' }}
+          >
             <div className="wallet-header">
               <div className="wallet-title">
                 <Coins size={20} className="wallet-icon" />
@@ -807,24 +613,6 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
-      <button
-        className={`fab-ai-chat ${isDragging ? 'dragging' : ''}`}
-        title="Chat với Pockie AI"
-        onClick={handleFabClick}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        style={{ left: fabPos.x, top: fabPos.y }}
-      >
-        <div className={`fab-bubble ${showBubble && !isDragging ? 'visible' : ''}`}>
-          Hỏi Pockie !
-        </div>
-        <div className="fab-sprite-container">
-          <PockieSprite size={168} />
-        </div>
-      </button>
 
       {pendingMission && (
         <div className="mission-overlay" onClick={() => setPendingMission(null)}>

@@ -8,9 +8,11 @@ import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
 import AiChat from './pages/AiChat';
+import Wallet from './pages/Wallet';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
+import { GlobalPockie } from './components/GlobalPockie';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -175,7 +177,7 @@ function App() {
           path="/wallet"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Ví của tôi" />
+              <Wallet />
             </ProtectedRoute>
           }
         />
@@ -221,6 +223,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       </Routes>
+      {isAuthenticated && <GlobalPockie />}
     </BrowserRouter>
   );
 }
