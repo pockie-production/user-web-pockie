@@ -9,6 +9,7 @@ import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
 import AiChat from './pages/AiChat';
 import Wallet from './pages/Wallet';
+import Goals from './pages/Goals';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
@@ -185,7 +186,7 @@ function App() {
           path="/goals"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Mục tiêu" />
+              <Goals />
             </ProtectedRoute>
           }
         />
