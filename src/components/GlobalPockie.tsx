@@ -15,9 +15,18 @@ export function GlobalPockie() {
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasMoved = useRef(false);
 
+  // Auto-move refs
+  const [hasBeenDragged, setHasBeenDragged] = useState(false);
+  const posRef = useRef({ x: window.innerWidth - 188, y: window.innerHeight - 188 });
+  const velRef = useRef({ vx: -0.4, vy: -0.4 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     // Khởi tạo vị trí FAB (góc dưới phải)
-    setFabPos({ x: window.innerWidth - 188, y: window.innerHeight - 188 });
+    const initX = window.innerWidth - 188;
+    const initY = window.innerHeight - 188;
+    setFabPos({ x: initX, y: initY });
+    posRef.current = { x: initX, y: initY };
 
     const handleResize = () => {
       setFabPos(prev => {
@@ -42,12 +51,62 @@ export function GlobalPockie() {
     };
   }, []);
 
+  // Loop auto-move
+  useEffect(() => {
+    if (hasBeenDragged || isDragging) return;
+
+    let rAF = 0;
+    const loop = () => {
+      const fabSize = 168;
+      const sidebarWidth = window.innerWidth > 768 ? 260 : 0;
+      const minX = sidebarWidth + 20;
+      const maxX = window.innerWidth - fabSize - 20;
+      const minY = 20;
+      const maxY = window.innerHeight - fabSize - 20;
+
+      let { x, y } = posRef.current;
+      let { vx, vy } = velRef.current;
+
+      x += vx;
+      y += vy;
+
+      if (x <= minX) { x = minX; vx *= -1; }
+      else if (x >= maxX) { x = maxX; vx *= -1; }
+
+      if (y <= minY) { y = minY; vy *= -1; }
+      else if (y >= maxY) { y = maxY; vy *= -1; }
+
+      posRef.current = { x, y };
+      velRef.current = { vx, vy };
+
+      if (buttonRef.current) {
+        buttonRef.current.style.left = `${x}px`;
+        buttonRef.current.style.top = `${y}px`;
+      }
+
+      rAF = requestAnimationFrame(loop);
+    };
+
+    rAF = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rAF);
+  }, [hasBeenDragged, isDragging]);
+
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
+
+    if (!hasBeenDragged) {
+      setHasBeenDragged(true);
+      setFabPos({ x: posRef.current.x, y: posRef.current.y });
+    }
+
     setIsDragging(true);
     hasMoved.current = false;
     dragStartClient.current = { x: e.clientX, y: e.clientY };
-    dragStartPos.current = { x: e.clientX - fabPos.x, y: e.clientY - fabPos.y };
+    
+    const currentX = hasBeenDragged ? fabPos.x : posRef.current.x;
+    const currentY = hasBeenDragged ? fabPos.y : posRef.current.y;
+    dragStartPos.current = { x: e.clientX - currentX, y: e.clientY - currentY };
+    
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
@@ -80,23 +139,22 @@ export function GlobalPockie() {
     setIsDragging(false);
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
 
-    // Snap to edge if moved
-    if (hasMoved.current) {
-      setFabPos(prev => {
-        const fabSize = 168;
-        const sidebarWidth = window.innerWidth > 768 ? 260 : 0;
-        const minX = sidebarWidth + 20;
-        const maxX = window.innerWidth - fabSize - 20;
+    // Snap to edge when dropped, regardless of hasMoved if it's the first time, or if moved
+    setFabPos(prev => {
+      const fabSize = 168;
+      const sidebarWidth = window.innerWidth > 768 ? 260 : 0;
+      const minX = sidebarWidth + 20;
+      const maxX = window.innerWidth - fabSize - 20;
 
-        const distToLeft = Math.abs(prev.x - minX);
-        const distToRight = Math.abs(prev.x - maxX);
+      // Always calculate closest edge
+      const distToLeft = Math.abs(prev.x - minX);
+      const distToRight = Math.abs(prev.x - maxX);
 
-        return {
-          ...prev,
-          x: distToLeft < distToRight ? minX : maxX
-        };
-      });
-    }
+      return {
+        ...prev,
+        x: distToLeft < distToRight ? minX : maxX
+      };
+    });
   };
 
   const handleFabClick = () => {
@@ -118,7 +176,8 @@ export function GlobalPockie() {
 
   return (
     <button
-      className={`fab-ai-chat ${isDragging ? 'dragging' : ''}`}
+      ref={buttonRef}
+      className={`fab-ai-chat ${isDragging ? 'dragging' : ''} ${!hasBeenDragged ? 'auto-moving' : ''}`}
       title="Chat với Pockie AI"
       onClick={handleFabClick}
       onPointerDown={handlePointerDown}
@@ -126,8 +185,8 @@ export function GlobalPockie() {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       style={{ 
-        left: fabPos.x, 
-        top: fabPos.y,
+        left: hasBeenDragged || isDragging ? fabPos.x : posRef.current.x, 
+        top: hasBeenDragged || isDragging ? fabPos.y : posRef.current.y,
         position: 'fixed',
         zIndex: 9999
       }}

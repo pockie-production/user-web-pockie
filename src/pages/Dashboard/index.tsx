@@ -146,36 +146,35 @@ function formatTransactionTime(date: string) {
 }
 
 function buildSparklinePath(points: number[]) {
-  if (!points.length) {
+  if (!points || points.length === 0) return { line: '', endY: 0 };
+  if (points.length === 1) {
     return {
-      line: '0,58 20,50 40,45 60,36 80,28 100,16 120,6',
-      area: 'M0,58 L20,50 L40,45 L60,36 L80,28 L100,16 L120,6 L120,70 L0,70 Z',
-      endY: 6,
+      line: '5,25 20,18 35,22 55,10 75,2',
+      endY: 2,
     };
   }
 
   const min = Math.min(...points);
   const max = Math.max(...points);
   const range = max - min || 1;
-  const step = points.length > 1 ? 120 / (points.length - 1) : 120;
+  const step = points.length > 1 ? 70 / (points.length - 1) : 70;
   const coords = points.map((point, index) => {
-    const x = Math.round(index * step);
-    const y = Math.round(58 - ((point - min) / range) * 52);
+    const x = Math.round(5 + index * step);
+    const y = Math.round(25 - ((point - min) / range) * 23);
     return { x, y };
   });
 
   const line = coords.map((point) => `${point.x},${point.y}`).join(' ');
-  const area = `M${coords.map((point) => `${point.x},${point.y}`).join(' L')} L120,70 L0,70 Z`;
 
   return {
     line,
-    area,
-    endY: coords[coords.length - 1]?.y ?? 6,
+    endY: coords[coords.length - 1]?.y ?? 2,
   };
 }
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [showNotifications, setShowNotifications] = useState(false);
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -317,10 +316,24 @@ export default function Dashboard() {
             <p>Pockie luôn ở đây cùng bạn</p>
           </div>
           <div className="header-actions">
-            <button className="icon-btn" aria-label="Notifications" title={`${notifications.unreadCount} thông báo chưa đọc`}>
-              <Bell size={24} />
-              {notifications.unreadCount > 0 && <span className="notification-dot"></span>}
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button className="icon-btn" aria-label="Notifications" onClick={() => setShowNotifications(!showNotifications)}>
+                <Bell size={24} />
+                {notifications.unreadCount > 0 && <span className="notification-dot"></span>}
+              </button>
+              {showNotifications && (
+                <div className="notifications-popup">
+                  <div className="notif-item">
+                    <div className="notif-icon">🎁</div>
+                    <div className="notif-content">
+                      <h4>Ưu đãi mới</h4>
+                      <p>Vietcombank đang có ưu đãi 15% cho khách hàng mở thẻ đầu tiên</p>
+                      <span className="notif-time">Vừa xong</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="date-selector">
               <Calendar size={18} />
               <span>{todayLabel}</span>
@@ -532,34 +545,22 @@ export default function Dashboard() {
                 <span className="insight-sparkline-label">{insight.mood}</span>
                 <svg
                   className="insight-sparkline"
-                  viewBox="0 0 120 70"
+                  viewBox="0 0 80 30"
                   xmlns="http://www.w3.org/2000/svg"
                   aria-hidden="true"
                 >
-                  <defs>
-                    <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
-                    </linearGradient>
-                    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#f97316" />
-                      <stop offset="100%" stopColor="#ef4444" />
-                    </linearGradient>
-                  </defs>
-                  <path d={sparkline.area} fill="url(#sparkGrad)" />
                   <polyline
                     points={sparkline.line}
                     fill="none"
-                    stroke="url(#lineGrad)"
-                    strokeWidth="3"
+                    stroke="#FF4D4F"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="spark-line"
                   />
-                  <circle cx="120" cy={sparkline.endY} r="5" fill="#ef4444" className="spark-dot" />
-                  <circle cx="120" cy={sparkline.endY} r="9" fill="#ef444430" className="spark-dot-ring" />
+                  <circle cx="75" cy={sparkline.endY} r="3" fill="#FF4D4F" className="spark-dot" />
                 </svg>
-                <span className="insight-sparkline-caption">xu hướng tháng này</span>
+                <div className="insight-sparkline-text">xu hướng tháng này</div>
               </div>
             </div>
           </div>
