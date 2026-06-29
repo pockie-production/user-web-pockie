@@ -132,43 +132,47 @@ export default function AiChat() {
     setInput('');
     setIsTyping(true);
 
-    setTimeout(async () => {
-      let content = 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI...';
-      let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report' = 'mock-report';
+    // Simulate network latency for UX
+    await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
 
-      const lowerInput = text.trim().toLowerCase();
-      if (lowerInput.includes('ví') || lowerInput.includes('tài sản')) {
-        detectedWorkspace = 'wallet';
-        content = 'Tôi đã mở Ví của bạn. Bạn có thể xem chi tiết dòng tiền và số dư của các ví hiện tại ở màn hình bên cạnh nhé!';
-      } else if (lowerInput.includes('mục tiêu') || lowerInput.includes('tiết kiệm') || lowerInput.includes('kế hoạch')) {
-        detectedWorkspace = 'goals';
-        content = 'Đây là các mục tiêu tài chính và tiến độ hiện tại của bạn. Bạn đang làm rất tốt, tiếp tục phát huy nhé! 🎯';
-      } else if (lowerInput.includes('báo cáo') || lowerInput.includes('phân tích') || lowerInput.includes('chi tiêu')) {
-        detectedWorkspace = 'reports';
-        content = 'Tôi đã mở Báo cáo chi tiêu tháng này cho bạn. Bạn có thể thấy danh mục nào đang chiếm tỷ trọng lớn nhất để điều chỉnh cho phù hợp. 📊';
-      } else if (lowerInput.includes('cài đặt') || lowerInput.includes('tài khoản')) {
-        detectedWorkspace = 'settings';
-        content = 'Đây là trang Cài đặt. Bạn có thể thay đổi thông tin cá nhân hoặc mật khẩu tại đây. ⚙️';
-      } else {
-        try {
-          const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
-          content = res.data.reply;
-        } catch (err) {
-          content = getMockResponse(text.trim());
-        }
+    let content = 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI...';
+    let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report' = 'mock-report';
+
+    // TODO: The keyword detection logic is currently hardcoded on the frontend.
+    // This logic should eventually be moved to the AI Backend, where the AI can understand
+    // natural language intents and return a structured response (e.g., { workspace: 'wallet', reply: '...' }).
+    const lowerInput = text.trim().toLowerCase();
+    if (lowerInput.includes('ví') || lowerInput.includes('tài sản')) {
+      detectedWorkspace = 'wallet';
+      content = 'Tôi đã mở Ví của bạn. Bạn có thể xem chi tiết dòng tiền và số dư của các ví hiện tại ở màn hình bên cạnh nhé!';
+    } else if (lowerInput.includes('mục tiêu') || lowerInput.includes('tiết kiệm') || lowerInput.includes('kế hoạch')) {
+      detectedWorkspace = 'goals';
+      content = 'Đây là các mục tiêu tài chính và tiến độ hiện tại của bạn. Bạn đang làm rất tốt, tiếp tục phát huy nhé! 🎯';
+    } else if (lowerInput.includes('báo cáo') || lowerInput.includes('phân tích') || lowerInput.includes('chi tiêu')) {
+      detectedWorkspace = 'reports';
+      content = 'Tôi đã mở Báo cáo chi tiêu tháng này cho bạn. Bạn có thể thấy danh mục nào đang chiếm tỷ trọng lớn nhất để điều chỉnh cho phù hợp. 📊';
+    } else if (lowerInput.includes('cài đặt') || lowerInput.includes('tài khoản')) {
+      detectedWorkspace = 'settings';
+      content = 'Đây là trang Cài đặt. Bạn có thể thay đổi thông tin cá nhân hoặc mật khẩu tại đây. ⚙️';
+    } else {
+      try {
+        const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
+        content = res.data.reply;
+      } catch (err) {
+        content = getMockResponse(text.trim());
       }
+    }
 
-      setWorkspaceType(detectedWorkspace);
-      
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 1200 + Math.random() * 800);
+    setWorkspaceType(detectedWorkspace);
+    
+    const botMsg: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, botMsg]);
+    setIsTyping(false);
   };
 
   const getMockResponse = (input: string): string => {
