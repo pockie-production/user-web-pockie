@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../../lib/api';
 import { useNavigate } from 'react-router-dom';
+import { trackUserEvent } from '../../../lib/analytics';
 
 interface Props {
   sessionId: string;
@@ -20,6 +21,13 @@ export function StepStatus({ sessionId }: Props) {
         const currentStatus = res.data.status;
         setStatus(currentStatus);
 
+        trackUserEvent({
+          eventName: 'ekyc_status_polled',
+          page: '/ekyc',
+          feature: 'ocr',
+          payload: { sessionId, status: currentStatus },
+        });
+
         if (currentStatus === 'VERIFIED' || currentStatus === 'REJECTED' || currentStatus === 'FAILED' || currentStatus === 'RETRY_REQUIRED') {
           setLoading(false);
           clearInterval(intervalId);
@@ -33,6 +41,12 @@ export function StepStatus({ sessionId }: Props) {
       try {
         await api.post(`/api/v1/ekyc/sessions/${sessionId}/submit`);
         setStatus('PROCESSING');
+        trackUserEvent({
+          eventName: 'ekyc_submitted',
+          page: '/ekyc',
+          feature: 'ocr',
+          payload: { sessionId },
+        });
         // Bắt đầu poll status sau khi submit thành công
         intervalId = setInterval(checkStatus, 3000);
       } catch (err) {

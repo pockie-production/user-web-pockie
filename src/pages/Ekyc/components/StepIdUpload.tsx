@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
 import { api } from '../../../lib/api';
+import { trackUserEvent } from '../../../lib/analytics';
 
 interface Props {
   sessionId: string;
@@ -53,6 +54,13 @@ export function StepIdUpload({ sessionId, onNext }: Props) {
       
       await api.post(`/api/v1/ekyc/sessions/${sessionId}/documents`, formDataBack, {
         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      trackUserEvent({
+        eventName: 'ekyc_documents_uploaded',
+        page: '/ekyc',
+        feature: 'ocr',
+        payload: { sessionId },
       });
 
       onNext();

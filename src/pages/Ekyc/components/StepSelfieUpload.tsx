@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../../../lib/api';
+import { trackUserEvent } from '../../../lib/analytics';
 
 interface Props {
   sessionId: string;
@@ -28,6 +29,13 @@ export function StepSelfieUpload({ sessionId, onNext }: Props) {
       
       await api.post(`/api/v1/ekyc/sessions/${sessionId}/documents`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      trackUserEvent({
+        eventName: 'ekyc_selfie_uploaded',
+        page: '/ekyc',
+        feature: 'ocr',
+        payload: { sessionId },
       });
 
       onNext();

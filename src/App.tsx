@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState, type ReactNode } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -9,6 +9,7 @@ import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
+import { trackUserEvent } from './lib/analytics';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -33,6 +34,29 @@ function ComingSoon({ title }: { title: string }) {
       </div>
     </div>
   );
+}
+
+function RouteTracker({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const feature =
+      location.pathname.startsWith('/dashboard') ? 'finance_dashboard' :
+      location.pathname.startsWith('/ekyc') ? 'ocr' :
+      location.pathname.startsWith('/ai-chat') ? 'chat' :
+      location.pathname.startsWith('/mission') ? 'streak' :
+      undefined;
+
+    trackUserEvent({
+      eventName: 'page_view',
+      page: location.pathname,
+      feature,
+    });
+  }, [isAuthenticated, location.pathname]);
+
+  return null;
 }
 
 function App() {
@@ -99,6 +123,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <RouteTracker isAuthenticated={isAuthenticated} />
       <Routes>
         <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />

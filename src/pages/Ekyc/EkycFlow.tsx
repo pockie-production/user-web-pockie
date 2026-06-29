@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { trackUserEvent } from '../../lib/analytics';
 import { StepIdUpload } from './components/StepIdUpload';
 import { StepSelfieUpload } from './components/StepSelfieUpload';
 import { StepStatus } from './components/StepStatus';
@@ -18,6 +19,12 @@ export default function EkycFlow() {
         setLoading(true);
         const res = await api.post('/api/v1/ekyc/sessions');
         setSessionId(res.data.sessionId);
+        trackUserEvent({
+          eventName: 'ekyc_session_created',
+          page: '/ekyc',
+          feature: 'ocr',
+          payload: { sessionId: res.data.sessionId },
+        });
         setStep(1); // Chuyển sang bước upload ID
       } catch (err: any) {
         setError(err.response?.data?.message || 'Không thể khởi tạo phiên eKYC');
@@ -32,6 +39,17 @@ export default function EkycFlow() {
   }, [step, sessionId, error]);
 
   const nextStep = () => setStep((s) => s + 1);
+
+  useEffect(() => {
+    if (!sessionId || step === 0) return;
+
+    trackUserEvent({
+      eventName: 'ekyc_step_view',
+      page: '/ekyc',
+      feature: 'ocr',
+      payload: { sessionId, step },
+    });
+  }, [sessionId, step]);
 
   if (error) {
     return (
