@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  Home,
-  Lightbulb,
-  CreditCard,
-  Wallet,
   Target,
-  Flag,
-  PieChart,
-  MessageSquare,
-  ChevronRight,
   Bell,
   Calendar,
   TrendingUp,
@@ -23,16 +15,13 @@ import {
   Coffee as CoffeeIcon,
   ShoppingBag,
   Check,
-  LogOut,
-  Settings,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import mascot from '../../assets/mascot.png';
 import logo from '../../assets/logo.png';
 import { api } from '../../lib/api';
 import { trackUserEvent } from '../../lib/analytics';
-import { emitAuthStateChanged } from '../../lib/authEvents';
-import { isExternalAvatarUrl } from '../../lib/profile';
+import { Sidebar } from '../../components/Sidebar';
 import './Dashboard.css';
 
 type DashboardProfile = {
@@ -126,17 +115,6 @@ type DashboardResponse = {
   };
 };
 
-const menuItems = [
-  { name: 'Trang chủ', icon: Home, path: '/dashboard', isBeta: false },
-  { name: 'Insights', icon: Lightbulb, path: '/insights', isBeta: false },
-  { name: 'Giao dịch', icon: CreditCard, path: '/transactions', isBeta: false },
-  { name: 'Ví của tôi', icon: Wallet, path: '/wallet', isBeta: false },
-  { name: 'Mục tiêu', icon: Target, path: '/goals', isBeta: false },
-  { name: 'Mission', icon: Flag, path: '/mission', isBeta: false },
-  { name: 'Báo cáo', icon: PieChart, path: '/reports', isBeta: false },
-  { name: 'AI Chat', icon: MessageSquare, path: '/ai-chat', isBeta: true },
-  { name: 'Cài đặt', icon: Settings, path: '/settings', isBeta: false },
-];
 
 function formatCurrency(value: number, currency = 'VND') {
   return new Intl.NumberFormat('vi-VN', {
@@ -289,20 +267,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    try {
-      if (refreshToken) {
-        await api.post('/api/v1/auth/logout', { refreshToken });
-      }
-    } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      emitAuthStateChanged();
-      navigate('/login', { replace: true });
-    }
-  };
 
   if (loading) {
     return (
@@ -331,78 +295,19 @@ export default function Dashboard() {
   const { profile, featureAccess, notifications, missions, streak, wallet, insight, recentTransactions, categoryStats } = dashboard;
   const progressClass =
     wallet.spentPercent <= 50 ? 'progress-safe' :
-    wallet.spentPercent <= 80 ? 'progress-warn' :
-      'progress-danger';
+      wallet.spentPercent <= 80 ? 'progress-warn' :
+        'progress-danger';
   const sparkline = buildSparklinePath(insight.sparkline);
   const todayLabel = formatLongDate();
-  const userInitial = profile.displayName?.trim()?.charAt(0)?.toUpperCase() || 'U';
-  const showAvatarImage = isExternalAvatarUrl(profile.avatarUrl);
   const displayName = profile.displayName || 'Chưa cập nhật tên';
   const weekLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const kycStatus = profile.kycStatus;
 
   return (
     <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-logo-container">
-          <img src={mascot} alt="Pockie" className="sidebar-mascot" />
-          <span className="sidebar-brand">Pockie</span>
-        </div>
+      <Sidebar />
 
-        <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              end={item.path === '/dashboard'}
-              onClick={() => trackUserEvent({
-                eventName: 'sidebar_navigation_click',
-                page: '/dashboard',
-                feature:
-                  item.path === '/ai-chat' ? 'chat' :
-                  item.path === '/mission' ? 'streak' :
-                  item.path === '/settings' ? 'profile' :
-                  'finance_dashboard',
-                payload: { targetPath: item.path, label: item.name },
-              })}
-              className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
-            >
-              <item.icon className="sidebar-nav-icon" size={20} />
-              <span className="sidebar-nav-text">{item.name}</span>
-              {item.isBeta && <span className="beta-badge">BETA</span>}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <NavLink to="/settings" className="user-profile">
-            <div className="user-avatar-wrapper">
-              <div className="user-avatar">
-                {showAvatarImage ? (
-                  <img src={profile.avatarUrl ?? ''} alt={displayName} className="user-avatar-image" />
-                ) : (
-                  <span>{userInitial}</span>
-                )}
-              </div>
-            </div>
-            <div className="user-info">
-              <div className="user-name">{displayName}</div>
-              <div className="user-level">
-                Lv.{profile.level} • <span className="user-xp">{profile.currentXp.toLocaleString('vi-VN')} XP</span>
-              </div>
-              <div className="user-xp-bar">
-                <div className="user-xp-fill" style={{ width: `${profile.xpProgressPercent}%` }}></div>
-              </div>
-            </div>
-            <ChevronRight className="user-profile-chevron" size={16} />
-          </NavLink>
-          <button className="sidebar-logout-btn" type="button" onClick={() => void handleLogout()}>
-            <LogOut size={16} />
-            <span>Đăng xuất</span>
-          </button>
-        </div>
-      </aside>
-
+      {/* NỘI DUNG CHÍNH */}
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-greeting">
@@ -563,7 +468,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="dashboard-card card-wallet col-span-7">
+          <div 
+            className="dashboard-card card-wallet col-span-7" 
+            onClick={() => navigate('/wallet')} 
+            style={{ cursor: 'pointer' }}
+          >
             <div className="wallet-header">
               <div className="wallet-title">
                 <Coins size={20} className="wallet-icon" />
@@ -704,21 +613,6 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
-      <button
-        className="fab-ai-chat"
-        disabled={!featureAccess.canUseAI}
-        title={featureAccess.canUseAI ? 'AI chat sắp được bật' : 'Cần hoàn tất eKYC để dùng AI'}
-        onClick={() => trackUserEvent({
-          eventName: 'fab_ai_chat_click',
-          page: '/dashboard',
-          feature: 'chat',
-          payload: { canUseAI: featureAccess.canUseAI },
-        })}
-      >
-        <MessageSquare size={20} />
-        <span>{featureAccess.canUseAI ? 'Hỏi Pockie...' : 'Mở AI sau eKYC'}</span>
-      </button>
 
       {pendingMission && (
         <div className="mission-overlay" onClick={() => setPendingMission(null)}>

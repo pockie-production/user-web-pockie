@@ -7,9 +7,13 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import EkycFlow from './pages/Ekyc/EkycFlow';
 import Settings from './pages/Settings';
+import AiChat from './pages/AiChat';
+import Wallet from './pages/Wallet';
+import Goals from './pages/Goals';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
+import { GlobalPockie } from './components/GlobalPockie';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -44,10 +48,10 @@ function RouteTracker({ isAuthenticated }: { isAuthenticated: boolean }) {
 
     const feature =
       location.pathname.startsWith('/dashboard') ? 'finance_dashboard' :
-      location.pathname.startsWith('/ekyc') ? 'ocr' :
-      location.pathname.startsWith('/ai-chat') ? 'chat' :
-      location.pathname.startsWith('/mission') ? 'streak' :
-      undefined;
+        location.pathname.startsWith('/ekyc') ? 'ocr' :
+          location.pathname.startsWith('/ai-chat') ? 'chat' :
+            location.pathname.startsWith('/mission') ? 'streak' :
+              undefined;
 
     trackUserEvent({
       eventName: 'page_view',
@@ -174,7 +178,7 @@ function App() {
           path="/wallet"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Ví của tôi" />
+              <Wallet />
             </ProtectedRoute>
           }
         />
@@ -182,7 +186,7 @@ function App() {
           path="/goals"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Mục tiêu" />
+              <Goals />
             </ProtectedRoute>
           }
         />
@@ -206,7 +210,7 @@ function App() {
           path="/ai-chat"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="AI Chat" />
+              <AiChat />
             </ProtectedRoute>
           }
         />
@@ -220,6 +224,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       </Routes>
+      {isAuthenticated && <GlobalPockie />}
     </BrowserRouter>
   );
 }

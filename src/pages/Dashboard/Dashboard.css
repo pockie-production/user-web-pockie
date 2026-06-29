@@ -205,8 +205,8 @@
    ========================================= */
 .dashboard-main {
   flex: 1;
-  padding: 20px 32px;
-  max-width: 1200px;
+  padding: 32px 48px; /* Tăng nhẹ padding để nội dung thở tốt hơn khi mở rộng */
+  max-width: 1500px; /* Tăng max-width lên 1500px để giảm lề 2 bên */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -351,29 +351,67 @@
    ========================================= */
 .fab-ai-chat {
   position: fixed;
-  bottom: 40px;
-  right: 40px;
-  background-color: var(--color-mint);
-  color: var(--color-white);
+  background: transparent;
   border: none;
-  border-radius: 30px;
-  padding: 14px 24px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-family: 'ABCOracle', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-  z-index: 100;
+  justify-content: center;
+  cursor: grab;
+  z-index: 9999;
+  /* Thêm transition cho left, top để snap chậm và mượt mà hơn */
+  transition: transform 0.2s ease, left 1s ease-out, top 1s ease-out;
+  touch-action: none; /* Prevent scroll while dragging on touch */
 }
 
-.fab-ai-chat:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  background-color: var(--color-mint-hover);
+.fab-ai-chat:active,
+.fab-ai-chat.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.fab-sprite-container {
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible; /* Cho phép con ma tự do */
+  border: none;
+  box-shadow: none;
+  transition: transform 0.2s ease;
+}
+
+.fab-ai-chat:not(.dragging):hover .fab-sprite-container {
+  transform: scale(1.1);
+}
+
+.fab-bubble {
+  position: absolute;
+  top: -20px; /* Điều chỉnh lại vì container đã to lên 140px */
+  right: 0px;
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  padding: 8px 14px;
+  border-radius: 16px;
+  border-bottom-right-radius: 4px; /* Hình dáng bong bóng thoại */
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid var(--color-mint-light);
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: -1; /* Nằm dưới con ma một chút xíu để không che mất chóp đầu nếu dính */
+}
+
+.fab-bubble.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 /* =========================================
@@ -1186,7 +1224,7 @@
 }
 
 .link-view-all:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* --- Recent Transactions --- */
