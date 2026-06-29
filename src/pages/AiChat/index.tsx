@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Plus, Sparkles, TrendingUp, Target, PiggyBank } from 'lucide-react';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
+import { api } from '../../lib/api';
 import './AiChat.css';
 
 interface Message {
@@ -19,7 +20,30 @@ const SUGGESTED_PROMPTS = [
   { icon: Sparkles, text: 'Gợi ý mục tiêu tài chính cho tôi' },
 ];
 
-const MockReportView = () => (
+interface CategoryExpense {
+  name: string;
+  percent: number;
+  icon: string;
+  color: string;
+  bgIconColor: string;
+}
+
+interface ReportData {
+  totalExpense: string;
+  budget: string;
+  categories: CategoryExpense[];
+}
+
+const MOCK_REPORT: ReportData = {
+  totalExpense: '2.150.000đ',
+  budget: '3.500.000đ',
+  categories: [
+    { name: 'Ăn uống', percent: 35, icon: '🍔', color: 'var(--color-danger)', bgIconColor: '#FFE8D6' },
+    { name: 'Quần áo', percent: 25, icon: '👕', color: 'var(--color-primary)', bgIconColor: '#E0F4FF' }
+  ]
+};
+
+const MockReportView = ({ data }: { data: ReportData }) => (
   <div style={{ padding: '32px 48px', height: '100%', overflowY: 'auto', background: '#fff' }}>
     <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>Phân tích chi tiêu tháng 5</h2>
     <p style={{ color: 'var(--color-text-secondary)', marginBottom: '40px' }}>Dựa trên dữ liệu giao dịch của bạn</p>
@@ -27,41 +51,30 @@ const MockReportView = () => (
     <div style={{ display: 'flex', gap: '24px', marginBottom: '40px' }}>
       <div style={{ flex: 1, padding: '24px', background: 'var(--color-cream)', borderRadius: '20px' }}>
         <div style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Tổng chi</div>
-        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--color-danger)' }}>2.150.000đ</div>
+        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--color-danger)' }}>{data.totalExpense}</div>
       </div>
       <div style={{ flex: 1, padding: '24px', background: 'var(--color-cream)', borderRadius: '20px' }}>
         <div style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Ngân sách</div>
-        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>3.500.000đ</div>
+        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{data.budget}</div>
       </div>
     </div>
 
     <h3 style={{ fontSize: '20px', marginBottom: '24px', fontFamily: 'var(--font-heading)' }}>Danh mục chi nhiều nhất</h3>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#FFE8D6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>🍔</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontWeight: 600, fontSize: '16px' }}>Ăn uống</span>
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>35%</span>
-          </div>
-          <div style={{ height: '10px', background: 'var(--color-border)', borderRadius: '5px', overflow: 'hidden' }}>
-            <div style={{ width: '35%', height: '100%', background: 'var(--color-danger)' }} />
-          </div>
-        </div>
-      </div>
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#E0F4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>👕</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontWeight: 600, fontSize: '16px' }}>Quần áo</span>
-            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>25%</span>
-          </div>
-          <div style={{ height: '10px', background: 'var(--color-border)', borderRadius: '5px', overflow: 'hidden' }}>
-            <div style={{ width: '25%', height: '100%', background: 'var(--color-primary)' }} />
+      {data.categories.map((cat, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: cat.bgIconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>{cat.icon}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontWeight: 600, fontSize: '16px' }}>{cat.name}</span>
+              <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{cat.percent}%</span>
+            </div>
+            <div style={{ height: '10px', background: 'var(--color-border)', borderRadius: '5px', overflow: 'hidden' }}>
+              <div style={{ width: `${cat.percent}%`, height: '100%', background: cat.color }} />
+            </div>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   </div>
 );
@@ -71,8 +84,21 @@ export default function AiChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    async function loadReport() {
+      try {
+        const res = await api.get('/api/v1/ai/report-view');
+        setReportData(res.data);
+      } catch (err) {
+        setReportData(MOCK_REPORT);
+      }
+    }
+    loadReport();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -101,11 +127,20 @@ export default function AiChat() {
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      let content = 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI...';
+      try {
+        const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
+        content = res.data.reply;
+      } catch (err) {
+        // Fallback mock logic if API not ready
+        content = getMockResponse(text.trim());
+      }
+      
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: getMockResponse(text.trim()),
+        content,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botMsg]);
@@ -140,7 +175,7 @@ export default function AiChat() {
     <div className={`chat-layout ${!isEmpty ? 'split-view' : ''}`}>
       {/* Workspace Panel (Bên trái) */}
       <div className="agent-workspace-panel">
-        {!isEmpty && <MockReportView />}
+        {!isEmpty && reportData && <MockReportView data={reportData} />}
       </div>
 
       {/* Chat Panel (Bên phải) */}
