@@ -1,0 +1,859 @@
+@media (max-width: 900px) {
+  body.mobile-web-mode {
+    background: var(--color-cream);
+    overflow-x: hidden;
+  }
+
+  body.mobile-web-mode #root {
+    min-height: 100vh;
+  }
+
+  body.mobile-web-mode .dashboard-sidebar {
+    display: none !important;
+  }
+
+  body.mobile-web-mode .dashboard-layout {
+    display: block;
+    min-height: 100vh;
+    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+
+  body.mobile-web-mode .dashboard-main,
+  body.mobile-web-mode .settings-page,
+  body.mobile-web-mode .reports-page,
+  body.mobile-web-mode .goals-page,
+  body.mobile-web-mode .wallet-page {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  body.mobile-web-mode .dashboard-main {
+    padding: 18px 16px 0 !important;
+    overflow-x: hidden;
+  }
+
+  body.mobile-web-mode .dashboard-header,
+  body.mobile-web-mode .wallet-page-header,
+  body.mobile-web-mode .goals-header,
+  body.mobile-web-mode .reports-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  body.mobile-web-mode .header-greeting h1,
+  body.mobile-web-mode .wallet-title-group h1,
+  body.mobile-web-mode .goals-header-left h1,
+  body.mobile-web-mode .reports-title h1 {
+    font-size: 26px;
+    line-height: 1.08;
+    letter-spacing: 0;
+    margin-bottom: 6px;
+  }
+
+  body.mobile-web-mode .header-greeting p,
+  body.mobile-web-mode .wallet-title-group p,
+  body.mobile-web-mode .goals-header-left p,
+  body.mobile-web-mode .reports-title p {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  body.mobile-web-mode .header-actions,
+  body.mobile-web-mode .wallet-actions,
+  body.mobile-web-mode .goals-header-right,
+  body.mobile-web-mode .reports-actions {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  body.mobile-web-mode .date-selector {
+    min-width: 0;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 16px;
+  }
+
+  body.mobile-web-mode .dashboard-grid,
+  body.mobile-web-mode .metrics-grid,
+  body.mobile-web-mode .goals-content,
+  body.mobile-web-mode .missions-grid,
+  body.mobile-web-mode .rewards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.mobile-web-mode [class*='col-span-'] {
+    grid-column: auto !important;
+  }
+
+  body.mobile-web-mode .dashboard-card,
+  body.mobile-web-mode .metric-card,
+  body.mobile-web-mode .progress-card,
+  body.mobile-web-mode .mission-card,
+  body.mobile-web-mode .reward-card,
+  body.mobile-web-mode .settings-shell,
+  body.mobile-web-mode .chat-input-bar,
+  body.mobile-web-mode .agent-workspace-panel {
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .dashboard-card,
+  body.mobile-web-mode .wallet-summary-card,
+  body.mobile-web-mode .wallet-allocation-card,
+  body.mobile-web-mode .report-card,
+  body.mobile-web-mode .settings-panel,
+  body.mobile-web-mode .settings-summary,
+  body.mobile-web-mode .progress-card,
+  body.mobile-web-mode .mission-card,
+  body.mobile-web-mode .reward-card {
+    box-shadow: 0 8px 22px rgba(42, 42, 42, 0.045);
+  }
+
+  body.mobile-web-mode .icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+  }
+
+  body.mobile-web-mode .notifications-popup {
+    left: 0;
+    right: auto;
+    width: min(320px, calc(100vw - 32px));
+  }
+
+  body.mobile-web-mode .ekyc-banner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .ekyc-banner-content {
+    align-items: flex-start;
+  }
+
+  body.mobile-web-mode .ekyc-banner-btn {
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+    border-radius: 14px;
+  }
+
+  body.mobile-web-mode .mission-section,
+  body.mobile-web-mode .streak-section,
+  body.mobile-web-mode .streak-reward {
+    width: 100%;
+  }
+
+  body.mobile-web-mode .card-mission {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body.mobile-web-mode .mission-section,
+  body.mobile-web-mode .streak-section,
+  body.mobile-web-mode .streak-reward,
+  body.mobile-web-mode .progress-info-flex {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.mobile-web-mode .mission-section,
+  body.mobile-web-mode .streak-section,
+  body.mobile-web-mode .streak-reward {
+    padding: 18px;
+  }
+
+  body.mobile-web-mode .mission-list {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  body.mobile-web-mode .mission-item {
+    width: 100%;
+    min-height: 54px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 14px;
+  }
+
+  body.mobile-web-mode .mission-item-content {
+    align-items: center;
+  }
+
+  body.mobile-web-mode .xp-badge {
+    margin-left: 0;
+    white-space: nowrap;
+  }
+
+  body.mobile-web-mode .streak-divider,
+  body.mobile-web-mode .streak-reward-divider {
+    width: auto;
+    height: 1px;
+    margin: 0 18px;
+  }
+
+  body.mobile-web-mode .streak-section {
+    align-items: stretch;
+    text-align: left;
+  }
+
+  body.mobile-web-mode .streak-header,
+  body.mobile-web-mode .streak-count {
+    justify-content: flex-start;
+  }
+
+  body.mobile-web-mode .streak-calendar {
+    justify-content: space-between;
+  }
+
+  body.mobile-web-mode .streak-reward {
+    align-items: flex-start;
+  }
+
+  body.mobile-web-mode .reward-gift-3d {
+    display: none;
+  }
+
+  body.mobile-web-mode .reward-xp-badge {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+  }
+
+  body.mobile-web-mode .card-mood {
+    min-height: 210px;
+    padding: 22px;
+    overflow: hidden;
+  }
+
+  body.mobile-web-mode .mood-title {
+    font-size: 25px;
+    max-width: 72%;
+  }
+
+  body.mobile-web-mode .mood-subtitle {
+    max-width: 70%;
+  }
+
+  body.mobile-web-mode .mood-mascot {
+    width: 138px;
+    right: -18px;
+    bottom: -18px;
+  }
+
+  body.mobile-web-mode .card-wallet {
+    padding: 20px;
+  }
+
+  body.mobile-web-mode .wallet-header,
+  body.mobile-web-mode .wallet-stats,
+  body.mobile-web-mode .wallet-footer,
+  body.mobile-web-mode .card-header-simple {
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .wallet-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.mobile-web-mode .stat-value {
+    font-size: 22px;
+  }
+
+  body.mobile-web-mode .card-insight {
+    align-items: stretch;
+    padding: 18px;
+  }
+
+  body.mobile-web-mode .insight-content {
+    width: 100%;
+  }
+
+  body.mobile-web-mode .insight-illustration {
+    align-self: stretch;
+  }
+
+  body.mobile-web-mode .transaction-item {
+    display: grid;
+    grid-template-columns: 42px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 0;
+  }
+
+  body.mobile-web-mode .tx-time {
+    grid-column: 2 / 3;
+    font-size: 11px;
+  }
+
+  body.mobile-web-mode .tx-amount {
+    grid-column: 3 / 4;
+    grid-row: 1 / 3;
+    white-space: nowrap;
+  }
+
+  body.mobile-web-mode .wallet-page,
+  body.mobile-web-mode .goals-page,
+  body.mobile-web-mode .reports-page {
+    padding: 18px 16px 0;
+  }
+
+  body.mobile-web-mode .wallet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.mobile-web-mode .wallet-action-btn {
+    min-width: 0 !important;
+    min-height: 46px;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  body.mobile-web-mode .btn-add-wallet {
+    grid-column: 1 / -1;
+  }
+
+  body.mobile-web-mode .wallet-main-cards,
+  body.mobile-web-mode .reports-main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  body.mobile-web-mode .wallet-summary-card,
+  body.mobile-web-mode .wallet-allocation-card {
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  body.mobile-web-mode .wallet-summary-content {
+    gap: 14px;
+  }
+
+  body.mobile-web-mode .wallet-summary-top {
+    padding-top: 0;
+  }
+
+  body.mobile-web-mode .wallet-summary-content,
+  body.mobile-web-mode .wallet-assets-breakdown,
+  body.mobile-web-mode .progress-info-flex,
+  body.mobile-web-mode .progress-stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  body.mobile-web-mode .wallet-summary-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 14px;
+  }
+
+  body.mobile-web-mode .wallet-summary-bottom .stat-item {
+    padding: 10px 8px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.62);
+  }
+
+  body.mobile-web-mode .wallet-summary-bottom .stat-item .value {
+    font-size: 15px;
+  }
+
+  body.mobile-web-mode .wallet-balance {
+    font-size: 32px;
+  }
+
+  body.mobile-web-mode .wallet-diff {
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+
+  body.mobile-web-mode .wallet-time-filters {
+    width: 100%;
+    overflow-x: visible;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  body.mobile-web-mode .time-filter-btn {
+    flex: 1;
+    min-height: 38px;
+    padding: 6px 0;
+  }
+
+  body.mobile-web-mode .wallet-sparkline {
+    height: 82px;
+  }
+
+  body.mobile-web-mode .allocation-content {
+    gap: 18px;
+  }
+
+  body.mobile-web-mode .wallet-allocation-card h3,
+  body.mobile-web-mode .my-wallets-section h3 {
+    margin-bottom: 16px;
+  }
+
+  body.mobile-web-mode .donut-chart-container {
+    width: 132px;
+    height: 132px;
+  }
+
+  body.mobile-web-mode .legend-item {
+    min-height: 46px;
+  }
+
+  body.mobile-web-mode .accounts-carousel-track {
+    padding-bottom: 8px;
+  }
+
+  body.mobile-web-mode .carousel-nav-btn {
+    display: none;
+  }
+
+  body.mobile-web-mode .wallets-track {
+    gap: 12px;
+    padding-bottom: 16px;
+    scroll-snap-type: x mandatory;
+  }
+
+  body.mobile-web-mode .wallet-card {
+    width: min(82vw, 300px);
+    height: 156px;
+    border-radius: 18px;
+    scroll-snap-align: start;
+  }
+
+  body.mobile-web-mode .goals-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.mobile-web-mode .goals-main-col {
+    gap: 22px;
+  }
+
+  body.mobile-web-mode .goals-header-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    align-items: center;
+  }
+
+  body.mobile-web-mode .stat-pill {
+    justify-content: center;
+    min-height: 42px;
+    border-radius: 14px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  body.mobile-web-mode .progress-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 20px;
+    align-items: center;
+    gap: 18px;
+  }
+
+  body.mobile-web-mode .level-circle-container {
+    width: 104px;
+    height: 104px;
+  }
+
+  body.mobile-web-mode .progress-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  body.mobile-web-mode .p-stat-item {
+    padding: 10px 6px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  body.mobile-web-mode .missions-grid,
+  body.mobile-web-mode .rewards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .mission-card,
+  body.mobile-web-mode .reward-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .m-card-header {
+    margin-bottom: 14px;
+  }
+
+  body.mobile-web-mode .mission-banner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .banner-btn {
+    grid-column: 1 / -1;
+    min-height: 44px;
+  }
+
+  body.mobile-web-mode .promo-horizontal-banner {
+    height: auto;
+    min-height: 132px;
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .reports-actions .date-picker-btn,
+  body.mobile-web-mode .reports-actions .export-btn,
+  body.mobile-web-mode .wallet-actions .wallet-action-btn {
+    min-width: max-content;
+  }
+
+  body.mobile-web-mode .reports-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  body.mobile-web-mode .reports-actions .date-picker-btn,
+  body.mobile-web-mode .reports-actions .export-btn {
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 12px;
+  }
+
+  body.mobile-web-mode .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .metric-card {
+    min-height: 128px;
+    padding: 14px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .metric-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  body.mobile-web-mode .metric-value {
+    font-size: 20px;
+  }
+
+  body.mobile-web-mode .metric-diff {
+    line-height: 1.35;
+  }
+
+  body.mobile-web-mode .report-card {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  body.mobile-web-mode .report-card-header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  body.mobile-web-mode .line-chart-area {
+    min-height: 210px;
+  }
+
+  body.mobile-web-mode .chart-y-axis,
+  body.mobile-web-mode .chart-x-axis {
+    font-size: 10px;
+  }
+
+  body.mobile-web-mode .donut-chart-wrapper,
+  body.mobile-web-mode .insight-content,
+  body.mobile-web-mode .insight-list {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.mobile-web-mode .progress-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  body.mobile-web-mode .progress-name,
+  body.mobile-web-mode .progress-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  body.mobile-web-mode .insight-mascot {
+    display: none;
+  }
+
+  body.mobile-web-mode .chat-layout {
+    min-height: 100vh;
+    height: auto;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+    flex-direction: column;
+  }
+
+  body.mobile-web-mode .agent-chat-panel,
+  body.mobile-web-mode .chat-layout.split-view .agent-chat-panel {
+    width: 100%;
+    min-height: 64vh;
+    height: auto;
+    box-shadow: none;
+    border-right: none;
+    background: transparent;
+  }
+
+  body.mobile-web-mode .agent-workspace-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  body.mobile-web-mode .chat-header {
+    padding: calc(16px + env(safe-area-inset-top)) 16px 14px;
+    border-bottom: 0;
+    background: rgba(253, 249, 238, 0.96);
+  }
+
+  body.mobile-web-mode .chat-back-btn {
+    display: none;
+  }
+
+  body.mobile-web-mode .chat-welcome {
+    min-height: calc(100vh - 150px);
+    padding: 28px 16px 24px;
+    justify-content: flex-start;
+  }
+
+  body.mobile-web-mode .chat-welcome-glow {
+    display: none;
+  }
+
+  body.mobile-web-mode .chat-welcome-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  body.mobile-web-mode .chat-suggestions {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  body.mobile-web-mode .chat-suggestion-chip {
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  body.mobile-web-mode .chat-messages-list {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .chat-bubble {
+    max-width: 84%;
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .chat-input-wrapper {
+    padding: 0 14px 10px;
+  }
+
+  body.mobile-web-mode .chat-input-bar {
+    gap: 10px;
+    border-radius: 22px;
+    padding: 8px 10px;
+  }
+
+  body.mobile-web-mode .chat-action-btn {
+    display: none;
+  }
+
+  body.mobile-web-mode .agent-workspace-panel .wallet-page,
+  body.mobile-web-mode .agent-workspace-panel .goals-page,
+  body.mobile-web-mode .agent-workspace-panel .reports-page,
+  body.mobile-web-mode .agent-workspace-panel .settings-page {
+    min-height: auto;
+    padding-bottom: 24px;
+  }
+
+  body.mobile-web-mode .settings-page {
+    padding: 18px 16px calc(128px + env(safe-area-inset-bottom));
+  }
+
+  body.mobile-web-mode .settings-shell {
+    width: 100%;
+    padding: 0;
+  }
+
+  body.mobile-web-mode .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.mobile-web-mode .settings-hero,
+  body.mobile-web-mode .settings-grid,
+  body.mobile-web-mode .settings-sections {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.mobile-web-mode .settings-summary,
+  body.mobile-web-mode .settings-panel {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  body.mobile-web-mode .settings-summary {
+    grid-template-columns: auto 1fr;
+  }
+
+  body.mobile-web-mode .settings-kyc-pill {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  body.mobile-web-mode .settings-grid {
+    gap: 14px;
+  }
+
+  body.mobile-web-mode .settings-feature-item {
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  body.mobile-web-mode .mission-popup,
+  body.mobile-web-mode .goals-modal {
+    width: calc(100vw - 28px);
+    border-radius: 22px;
+    padding: 24px 20px;
+  }
+
+  body.mobile-web-mode .login-page {
+    display: block;
+    min-height: 100vh;
+  }
+
+  body.mobile-web-mode .login-left {
+    min-height: 210px;
+    padding: 28px 20px;
+  }
+
+  body.mobile-web-mode .login-left__content {
+    max-width: 100%;
+  }
+
+  body.mobile-web-mode .login-left__desc {
+    max-width: 100%;
+  }
+
+  body.mobile-web-mode .login-right {
+    min-height: auto;
+    padding: 24px 18px 36px;
+  }
+
+  body.mobile-web-mode .login-form-wrapper {
+    width: 100%;
+    max-width: 430px;
+    padding: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  body.mobile-web-mode .dashboard-main,
+  body.mobile-web-mode .wallet-page,
+  body.mobile-web-mode .goals-page,
+  body.mobile-web-mode .reports-page,
+  body.mobile-web-mode .settings-page {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  body.mobile-web-mode .header-greeting h1,
+  body.mobile-web-mode .wallet-title-group h1,
+  body.mobile-web-mode .goals-header-left h1,
+  body.mobile-web-mode .reports-title h1 {
+    font-size: 25px;
+  }
+
+  body.mobile-web-mode .mood-title,
+  body.mobile-web-mode .metric-value,
+  body.mobile-web-mode .wallet-balance {
+    font-size: 24px;
+  }
+
+  body.mobile-web-mode .chat-layout.split-view .agent-chat-panel {
+    min-height: 58vh;
+  }
+
+  body.mobile-web-mode .wallet-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.mobile-web-mode .wallet-summary-bottom,
+  body.mobile-web-mode .progress-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  body.mobile-web-mode .metrics-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body.mobile-web-mode .card-mood {
+    min-height: 230px;
+  }
+
+  body.mobile-web-mode .mood-title,
+  body.mobile-web-mode .mood-subtitle {
+    max-width: 88%;
+  }
+
+  body.mobile-web-mode .mood-mascot {
+    opacity: 0.48;
+  }
+
+  body.mobile-web-mode .goals-header-right {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.mobile-web-mode .header-icon-btn,
+  body.mobile-web-mode .header-avatar {
+    display: none;
+  }
+
+  body.mobile-web-mode .reports-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .mobile-ai-shortcut.is-active {
+    display: none;
+  }
+}

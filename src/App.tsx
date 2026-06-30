@@ -15,6 +15,8 @@ import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
 import { GlobalPockie } from './components/GlobalPockie';
+import { MobileBottomNav } from './components/MobileBottomNav';
+import { useIsMobileWeb } from './hooks/useIsMobileWeb';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -64,9 +66,31 @@ function RouteTracker({ isAuthenticated }: { isAuthenticated: boolean }) {
   return null;
 }
 
+function MobileChrome({ isAuthenticated, isMobile }: { isAuthenticated: boolean; isMobile: boolean }) {
+  const location = useLocation();
+
+  useEffect(() => {
+    document.body.classList.toggle('mobile-web-mode', isMobile);
+
+    return () => {
+      document.body.classList.remove('mobile-web-mode');
+    };
+  }, [isMobile]);
+
+  if (!isAuthenticated || !isMobile) return null;
+
+  const hiddenRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/ekyc'];
+  if (hiddenRoutes.some((path) => location.pathname.startsWith(path))) {
+    return null;
+  }
+
+  return <MobileBottomNav />;
+}
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const isMobile = useIsMobileWeb();
 
   useEffect(() => {
     async function bootstrapSession() {
@@ -129,6 +153,7 @@ function App() {
   return (
     <BrowserRouter>
       <RouteTracker isAuthenticated={isAuthenticated} />
+      <MobileChrome isAuthenticated={isAuthenticated} isMobile={isMobile} />
       <Routes>
         <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
@@ -225,7 +250,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       </Routes>
-      {isAuthenticated && <GlobalPockie />}
+      {isAuthenticated && !isMobile && <GlobalPockie />}
     </BrowserRouter>
   );
 }
