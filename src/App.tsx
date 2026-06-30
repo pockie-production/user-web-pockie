@@ -11,10 +11,13 @@ import AiChat from './pages/AiChat';
 import Wallet from './pages/Wallet';
 import Goals from './pages/Goals';
 import Reports from './pages/Reports';
+import Vouchers from './pages/Vouchers';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
 import { GlobalPockie } from './components/GlobalPockie';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import GlobalLoading from './components/GlobalLoading';
 import './pages/Ekyc/Ekyc.css';
 
 function ProtectedRoute({ isAuthenticated, children }: { isAuthenticated: boolean; children: ReactNode }) {
@@ -123,14 +126,15 @@ function App() {
   }, []);
 
   if (isBootstrapping) {
-    return null;
+    return <GlobalLoading />;
   }
 
   return (
-    <BrowserRouter>
-      <RouteTracker isAuthenticated={isAuthenticated} />
-      <Routes>
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <RouteTracker isAuthenticated={isAuthenticated} />
+        <Routes>
+          <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
         <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
         <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
@@ -223,10 +227,19 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/vouchers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Vouchers />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       </Routes>
       {isAuthenticated && <GlobalPockie />}
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

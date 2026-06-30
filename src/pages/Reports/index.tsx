@@ -93,10 +93,18 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
           api.get('/api/v1/transactions/categories').catch(() => ({ data: MOCK_CATEGORIES })),
           api.get('/api/v1/transactions/recent').catch(() => ({ data: MOCK_TRANSACTIONS }))
         ]);
-        setOverview(ovRes.data || MOCK_OVERVIEW);
-        setTrends(trRes.data || MOCK_TRENDS);
-        setCategories(catRes.data || MOCK_CATEGORIES);
-        setTransactions(txnRes.data || MOCK_TRANSACTIONS);
+        // Safe fallbacks to prevent empty rendering when API returns {}
+        const rawOv = ovRes?.data?.data || ovRes?.data;
+        setOverview(rawOv && rawOv.income ? rawOv : MOCK_OVERVIEW);
+        
+        const rawTr = trRes?.data?.data || trRes?.data;
+        setTrends(Array.isArray(rawTr) && rawTr.length > 0 ? rawTr : MOCK_TRENDS);
+        
+        const rawCat = catRes?.data?.data || catRes?.data;
+        setCategories(Array.isArray(rawCat) && rawCat.length > 0 ? rawCat : MOCK_CATEGORIES);
+        
+        const rawTxn = txnRes?.data?.data || txnRes?.data;
+        setTransactions(Array.isArray(rawTxn) && rawTxn.length > 0 ? rawTxn : MOCK_TRANSACTIONS);
       } catch (err) {
         // Mocks are already initial state
       }
@@ -106,11 +114,11 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
 
   // Helper to generate line chart paths
   const generatePath = (dataKey: 'income' | 'expense') => {
-    if (!trends.length) return '';
+    if (!trends || !Array.isArray(trends) || !trends.length) return '';
     const maxVal = 25; // Y axis max value (e.g., 25M)
     const points = trends.map((pt, i) => {
       const x = (i / (trends.length - 1)) * 300; // SVG width 300
-      const y = 120 - (pt[dataKey] / maxVal) * 120; // SVG height 120
+      const y = 120 - ((pt[dataKey] || 0) / maxVal) * 120; // SVG height 120
       return `${x},${y}`;
     });
     
@@ -121,7 +129,7 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
 
   // Helper for donut chart layout
   let currentOffset = 0;
-  const categoriesWithOffset = categories.map(cat => {
+  const categoriesWithOffset = (categories || []).map(cat => {
     const offset = currentOffset;
     currentOffset -= cat.percent;
     return { ...cat, offset };
@@ -238,7 +246,7 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                     </svg>
 
                     <div style={{ position: 'absolute', left: '40px', top: 0, width: 'calc(100% - 40px)', height: '100%', pointerEvents: 'none' }}>
-                      {trends.map((pt, i) => {
+                      {(trends || []).map((pt, i) => {
                         const maxVal = 25;
                         const x = (i / (trends.length - 1)) * 100;
                         const yInc = 100 - (pt.income / maxVal) * 100;
@@ -359,7 +367,7 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                   <h3>Giao dịch gần đây</h3>
                 </div>
                 <div className="transaction-list">
-                  {transactions.map(txn => (
+                  {(transactions || []).map(txn => (
                     <div key={txn.id} className="transaction-item">
                       <div className="transaction-info">
                         <div className="transaction-icon">

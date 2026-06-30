@@ -3,14 +3,12 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Bot,
-  CheckCircle2,
   Gift,
   KeyRound,
   Lock,
   LogOut,
   Save,
   ScanLine,
-  ShieldCheck,
   Sparkles,
   UserRound,
 } from 'lucide-react';
@@ -39,34 +37,6 @@ type UserProfile = {
     canClaimPersonalizedVoucher: boolean;
     reason: string;
   };
-};
-
-const kycCopy: Record<UserProfile['kycStatus'], { label: string; detail: string; cta: string }> = {
-  NOT_STARTED: {
-    label: 'Chưa xác thực',
-    detail: 'Hoàn tất eKYC để mở AI chat, OCR và voucher cá nhân hóa.',
-    cta: 'Xác thực ngay',
-  },
-  PENDING: {
-    label: 'Đang chờ duyệt',
-    detail: 'Hồ sơ của bạn đang được xử lý. Pockie sẽ mở khóa tính năng sau khi duyệt xong.',
-    cta: 'Xem trạng thái',
-  },
-  VERIFIED: {
-    label: 'Đã xác thực',
-    detail: 'Tài khoản đã sẵn sàng dùng các tính năng nâng cao.',
-    cta: 'Xem eKYC',
-  },
-  REJECTED: {
-    label: 'Bị từ chối',
-    detail: 'Hồ sơ cần được gửi lại với thông tin rõ hơn.',
-    cta: 'Thử lại',
-  },
-  EXPIRED: {
-    label: 'Hết hạn',
-    detail: 'Vui lòng xác thực lại để tiếp tục dùng các tính năng nâng cao.',
-    cta: 'Xác thực lại',
-  },
 };
 
 function featureRows(profile: UserProfile) {
@@ -215,7 +185,6 @@ export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean 
   const displayName = profile.displayName || 'Chưa cập nhật tên';
   const userInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
   const showAvatarImage = isExternalAvatarUrl(profile.avatarUrl);
-  const kyc = kycCopy[profile.kycStatus];
   const passwordAccount = profile.authProvider === 'PASSWORD';
 
   return (
@@ -261,7 +230,13 @@ export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean 
             </div>
           </div>
           <div className={`settings-kyc-pill settings-kyc-${profile.kycStatus.toLowerCase()}`}>
-            {kyc.label}
+            {{
+              NOT_STARTED: 'Chưa xác thực',
+              PENDING: 'Đang chờ duyệt',
+              VERIFIED: 'Đã xác thực',
+              REJECTED: 'Bị từ chối',
+              EXPIRED: 'Hết hạn',
+            }[profile.kycStatus]}
           </div>
         </section>
 
@@ -312,23 +287,6 @@ export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean 
 
           <section className="settings-panel">
             <div className="settings-section-title">
-              <ShieldCheck size={20} />
-              <h2>Xác thực</h2>
-            </div>
-            <div className="settings-status-card">
-              <div className="settings-status-icon">
-                {profile.kycStatus === 'VERIFIED' ? <CheckCircle2 size={24} /> : <ShieldCheck size={24} />}
-              </div>
-              <h3>{kyc.label}</h3>
-              <p>{kyc.detail}</p>
-              <NavLink to="/ekyc" className="settings-secondary-btn">
-                {kyc.cta}
-              </NavLink>
-            </div>
-          </section>
-
-          <section className="settings-panel">
-            <div className="settings-section-title">
               <KeyRound size={20} />
               <h2>Bảo mật</h2>
             </div>
@@ -372,12 +330,10 @@ export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean 
                 <p>Tài khoản này đang đăng nhập bằng Google. Bạn có thể quản lý mật khẩu trong tài khoản Google.</p>
               </div>
             )}
-          </section>
 
-          <section className="settings-panel settings-panel-wide">
-            <div className="settings-section-title">
+            <div className="settings-section-title" style={{ marginTop: '32px' }}>
               <Sparkles size={20} />
-              <h2>Quyền tính năng</h2>
+              <h3 style={{ fontSize: '18px', margin: 0, fontWeight: 700 }}>Quyền tính năng</h3>
             </div>
             <div className="settings-feature-list">
               {featureRows(profile).map((feature) => {
@@ -400,6 +356,8 @@ export default function Settings({ isEmbedded = false }: { isEmbedded?: boolean 
               })}
             </div>
           </section>
+
+
         </div>
       </main>
     </div>

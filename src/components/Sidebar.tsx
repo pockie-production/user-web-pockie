@@ -1,7 +1,7 @@
 import { emitAuthStateChanged } from "../lib/authEvents";
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Wallet, Target, PieChart, MessageSquare, Settings, ChevronRight, LogOut } from 'lucide-react';
+import { Home, Wallet, Target, PieChart, MessageSquare, Settings, ChevronRight, LogOut, Gift } from 'lucide-react';
 import mascot from '../assets/mascot.png';
 import { trackUserEvent } from '../lib/analytics';
 import { api } from '../lib/api';
@@ -13,6 +13,7 @@ const menuItems = [
   { name: 'Mục tiêu', icon: Target, path: '/goals', isBeta: false },
   { name: 'Báo cáo', icon: PieChart, path: '/reports', isBeta: false },
   { name: 'AI Chat', icon: MessageSquare, path: '/ai-chat', isBeta: true },
+  { name: 'Voucher', icon: Gift, path: '/vouchers', isBeta: false },
   { name: 'Cài đặt', icon: Settings, path: '/settings', isBeta: false },
 ];
 

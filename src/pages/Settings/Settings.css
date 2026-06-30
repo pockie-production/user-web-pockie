@@ -6,9 +6,11 @@
 }
 
 .settings-shell {
-  width: min(1120px, calc(100% - 40px));
+  width: 100%;
+  max-width: 1280px;
+  padding: 32px 48px;
+  box-sizing: border-box;
   margin: 0 auto;
-  padding: 28px 0 56px;
 }
 
 .settings-header {
@@ -141,10 +143,9 @@
 
 .settings-xp {
   margin-top: 12px;
-  display: grid;
-  grid-template-columns: auto minmax(140px, 260px) auto;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 700;
@@ -152,6 +153,7 @@
 
 .settings-xp-track {
   height: 6px;
+  width: 200px;
   border-radius: 999px;
   background-color: var(--color-border);
   overflow: hidden;
@@ -159,7 +161,7 @@
 
 .settings-xp-track div {
   height: 100%;
-  background-color: var(--color-yellow);
+  background-color: #EAB308;
   border-radius: 999px;
 }
 
