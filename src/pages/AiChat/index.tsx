@@ -33,31 +33,26 @@ interface CategoryExpense {
 }
 
 interface ReportData {
+  title?: string;
+  subtitle?: string;
+  mood?: string;
+  insightTitle?: string;
   totalExpense: string;
   budget: string;
   categories: CategoryExpense[];
 }
 
-const MOCK_REPORT: ReportData = {
-  totalExpense: '2.150.000đ',
-  budget: '3.500.000đ',
-  categories: [
-    { name: 'Ăn uống', percent: 35, icon: '🍔', color: 'var(--color-danger)', bgIconColor: '#FFE8D6' },
-    { name: 'Quần áo', percent: 25, icon: '👕', color: 'var(--color-primary)', bgIconColor: '#E0F4FF' }
-  ]
-};
-
 const MockReportView = ({ data }: { data: ReportData }) => (
   <div style={{ padding: '32px 48px', height: '100%', overflowY: 'auto', background: '#fff' }}>
-    <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>Phân tích chi tiêu tháng 5</h2>
-    <p style={{ color: 'var(--color-text-secondary)', marginBottom: '40px' }}>Dựa trên dữ liệu giao dịch của bạn</p>
+    <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{data.title || 'Phan tich chi tieu'}</h2>
+    <p style={{ color: 'var(--color-text-secondary)', marginBottom: '40px' }}>{data.subtitle || 'Duoc tong hop tu du lieu giao dich cua ban'}</p>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-mint-light)', padding: '20px 24px', borderRadius: '16px', marginBottom: '32px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
         <div style={{ color: 'var(--color-mint)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <Sparkles size={14} /> AI Insight
         </div>
         <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          Tình hình chi tiêu đang ở mức trung bình
+          {data.insightTitle || 'Tinh hinh chi tieu dang o muc trung binh'}
         </div>
         <button style={{ background: '#fff', border: '1px solid var(--color-mint)', color: 'var(--color-mint)', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', width: 'max-content' }}>
           Xem gợi ý <ChevronRight size={14} />
@@ -65,7 +60,7 @@ const MockReportView = ({ data }: { data: ReportData }) => (
       </div>
       
       <div style={{ background: '#fff', padding: '12px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', minWidth: '110px' }}>
-         <div style={{ color: '#FF4D4F', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: '0.5px' }}>NEUTRAL</div>
+         <div style={{ color: '#FF4D4F', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: '0.5px' }}>{data.mood || 'NEUTRAL'}</div>
          <svg width="80" height="30" viewBox="0 0 80 30" style={{ overflow: 'visible' }}>
            <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="#FF4D4F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
            <circle cx="75" cy="2" r="3" fill="#FF4D4F" />
@@ -111,7 +106,7 @@ export default function AiChat() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [workspaceType, setWorkspaceType] = useState<'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report'>('none');
+  const [workspaceType, setWorkspaceType] = useState<'none' | 'wallet' | 'goals' | 'reports' | 'settings'>('none');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -121,7 +116,7 @@ export default function AiChat() {
         const res = await api.get('/api/v1/ai/report-view');
         setReportData(res.data);
       } catch (err) {
-        setReportData(MOCK_REPORT);
+        setReportData(null);
       }
     }
     loadReport();
@@ -154,35 +149,17 @@ export default function AiChat() {
     setInput('');
     setIsTyping(true);
 
-    // Simulate network latency for UX
     await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
 
-    let content = 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI...';
-    let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'mock-report' = 'mock-report';
+    let content = 'Toi chua phan tich duoc yeu cau nay.';
+    let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' = 'none';
 
-    // TODO: The keyword detection logic is currently hardcoded on the frontend.
-    // This logic should eventually be moved to the AI Backend, where the AI can understand
-    // natural language intents and return a structured response (e.g., { workspace: 'wallet', reply: '...' }).
-    const lowerInput = text.trim().toLowerCase();
-    if (lowerInput.includes('ví') || lowerInput.includes('tài sản')) {
-      detectedWorkspace = 'wallet';
-      content = 'Tôi đã mở Ví của bạn. Bạn có thể xem chi tiết dòng tiền và số dư của các ví hiện tại ở màn hình bên cạnh nhé!';
-    } else if (lowerInput.includes('mục tiêu') || lowerInput.includes('tiết kiệm') || lowerInput.includes('kế hoạch')) {
-      detectedWorkspace = 'goals';
-      content = 'Đây là các mục tiêu tài chính và tiến độ hiện tại của bạn. Bạn đang làm rất tốt, tiếp tục phát huy nhé! 🎯';
-    } else if (lowerInput.includes('báo cáo') || lowerInput.includes('phân tích') || lowerInput.includes('chi tiêu')) {
-      detectedWorkspace = 'reports';
-      content = 'Tôi đã mở Báo cáo chi tiêu tháng này cho bạn. Bạn có thể thấy danh mục nào đang chiếm tỷ trọng lớn nhất để điều chỉnh cho phù hợp. 📊';
-    } else if (lowerInput.includes('cài đặt') || lowerInput.includes('tài khoản')) {
-      detectedWorkspace = 'settings';
-      content = 'Đây là trang Cài đặt. Bạn có thể thay đổi thông tin cá nhân hoặc mật khẩu tại đây. ⚙️';
-    } else {
-      try {
-        const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
-        content = res.data.reply;
-      } catch (err) {
-        content = getMockResponse(text.trim());
-      }
+    try {
+      const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
+      content = res.data.reply;
+      detectedWorkspace = res.data.workspace || 'none';
+    } catch (err) {
+      content = 'Pockie AI tam thoi chua phan hoi duoc. Vui long thu lai sau.';
     }
 
     setWorkspaceType(detectedWorkspace);
@@ -195,20 +172,6 @@ export default function AiChat() {
     };
     setMessages(prev => [...prev, botMsg]);
     setIsTyping(false);
-  };
-
-  const getMockResponse = (input: string): string => {
-    const lower = input.toLowerCase();
-    if (lower.includes('chi tiêu') || lower.includes('phân tích')) {
-      return 'Dựa trên dữ liệu tháng 5, bạn đã chi **2.150.000đ** / 3.500.000đ ngân sách (61%). Danh mục chi nhiều nhất là **Ăn uống (35%)** và **Quần áo (25%)**. Bạn đang chi cho đồ ăn nhiều hơn tháng trước 32% — nên cân nhắc giảm xuống nhé! 🍎';
-    }
-    if (lower.includes('tiết kiệm') || lower.includes('kế hoạch')) {
-      return 'Để tiết kiệm 5 triệu trong 3 tháng, mỗi tháng bạn cần dành ra khoảng **1.667.000đ**. Với ngân sách hiện tại, bạn có thể:\n\n• Giảm ăn ngoài 2 lần/tuần → tiết kiệm ~400k\n• Bỏ trà sữa → tiết kiệm ~200k\n• Giảm mua sắm online → tiết kiệm ~500k\n\nBạn muốn tôi tạo mục tiêu tiết kiệm này không? 🎯';
-    }
-    if (lower.includes('cắt giảm')) {
-      return 'Theo phân tích chi tiêu của bạn, đây là 3 gợi ý cắt giảm hiệu quả nhất:\n\n1. **Đồ ăn bên ngoài** — Bạn đang chi 35% ngân sách, cao hơn mức lý tưởng 25%\n2. **Mua sắm quần áo** — 25% là khá nhiều, cân nhắc giảm xuống 15%\n3. **Đồ uống (trà sữa, cà phê)** — Nhỏ nhưng tích lũy lớn theo thời gian 😊';
-    }
-    return 'Cảm ơn bạn đã hỏi! Tôi là Pockie AI, trợ lý tài chính cá nhân của bạn. Tôi có thể giúp bạn phân tích chi tiêu, lên kế hoạch tiết kiệm, và đặt mục tiêu tài chính. Bạn muốn bắt đầu từ đâu? ✨';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -350,10 +313,10 @@ export default function AiChat() {
       {/* Workspace Panel (Bên phải) */}
       <div className="agent-workspace-panel">
         <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>
-          {!isEmpty && workspaceType === 'mock-report' && reportData && <MockReportView data={reportData} />}
+          {!isEmpty && workspaceType === 'reports' && reportData && <MockReportView data={reportData} />}
           {!isEmpty && workspaceType === 'wallet' && <Wallet isEmbedded={true} />}
           {!isEmpty && workspaceType === 'goals' && <Goals isEmbedded={true} />}
-          {!isEmpty && workspaceType === 'reports' && <Reports isEmbedded={true} />}
+          {!isEmpty && workspaceType === 'reports' && !reportData && <Reports isEmbedded={true} />}
           {!isEmpty && workspaceType === 'settings' && <Settings isEmbedded={true} />}
         </div>
       </div>
