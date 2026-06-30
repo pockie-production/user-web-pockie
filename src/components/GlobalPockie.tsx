@@ -223,7 +223,7 @@ export function GlobalPockie() {
     const currentY = hasBeenDragged ? fabPos.y : posRef.current.y;
     dragStartPos.current = { x: e.clientX - currentX, y: e.clientY - currentY };
     
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -253,7 +253,7 @@ export function GlobalPockie() {
 
   const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false);
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
 
     // Snap to edge when dropped, regardless of hasMoved if it's the first time, or if moved
     setFabPos(prev => {

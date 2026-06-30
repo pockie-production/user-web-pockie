@@ -65,32 +65,60 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
   const [activeBanner, setActiveBanner] = useState(0);
   const [missions, setMissions] = useState<Mission[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
-  const [userStats, setUserStats] = useState({ streak: 0, missionsCompleted: 0 });
+  const [userStats, setUserStats] = useState({ level: 1, currentXp: 0, totalXp: 0, nextLevelXpRequired: 100, streak: 0 });
   const [isMissionsModalOpen, setIsMissionsModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await api.get('/api/v1/users/me');
-        setProfile(res.data);
+        const [profileRes, statsRes] = await Promise.all([
+          api.get('/api/v1/users/me'),
+          api.get('/api/v1/gamification/profile').catch(() => ({ data: {} })),
+        ]);
+        setProfile(profileRes.data);
+        const p = statsRes.data;
         setUserStats({
-          streak: res.data.streak || 7,
-          missionsCompleted: res.data.missionsCompleted || 18
+          level: p.level || 1,
+          currentXp: p.currentXp || 0,
+          totalXp: p.totalXp || 0,
+          nextLevelXpRequired: p.nextLevelXpRequired || 100,
+          streak: p.currentStreakDays || 0,
         });
       } catch (err) {
         console.error(err);
-        // Fallback stats
-        setUserStats({ streak: 7, missionsCompleted: 18 });
       }
 
       try {
-        // Call backend API if ready, fallback to mock if 404
-        const [missionsRes, rewardsRes] = await Promise.all([
-          api.get('/api/v1/missions').catch(() => ({ data: MOCK_MISSIONS })),
-          api.get('/api/v1/rewards').catch(() => ({ data: MOCK_REWARDS }))
+        const [missionsRes, rewardsRes, activeCampaignsRes] = await Promise.all([
+          api.get('/api/v1/missions/daily').catch(() => ({ data: { items: MOCK_MISSIONS } })),
+          api.get('/api/v1/vouchers/available').catch(() => ({ data: MOCK_REWARDS })),
+          api.get('/api/v1/campaigns/active').catch(() => ({ data: { items: [] } })),
         ]);
-        setMissions(missionsRes.data || MOCK_MISSIONS);
-        setRewards(rewardsRes.data || MOCK_REWARDS);
+        
+        // Map backend missions format to frontend
+        const dailyMissions = (missionsRes.data.items || []).map((m: any) => ({
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          current: m.progress || 0,
+          target: m.targetValue || 1,
+          unit: '',
+          rewardXp: m.xpReward || 0,
+          iconSrc: EMOJI.target,
+          theme: 'mint',
+          status: m.status
+        }));
+        setMissions(dailyMissions.length > 0 ? dailyMissions : MOCK_MISSIONS);
+
+        // Map backend vouchers format
+        const availableVouchers = (rewardsRes.data || []).map((v: any) => ({
+          id: v.id,
+          title: v.name || v.title,
+          requirementText: `Còn ${v.remainingQuantity || 0} lượt`,
+          iconSrc: EMOJI.gift,
+          theme: 'yellow',
+        }));
+        setRewards(availableVouchers.length > 0 ? availableVouchers : MOCK_REWARDS);
       } catch (err) {
         setMissions(MOCK_MISSIONS);
         setRewards(MOCK_REWARDS);

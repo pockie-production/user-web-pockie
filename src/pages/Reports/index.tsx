@@ -88,10 +88,10 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
     async function fetchReportData() {
       try {
         const [ovRes, trRes, catRes, txnRes] = await Promise.all([
-          api.get('/api/v1/reports/overview').catch(() => ({ data: MOCK_OVERVIEW })),
+          api.get('/api/v1/wallets/overview').catch(() => ({ data: MOCK_OVERVIEW })),
           api.get('/api/v1/reports/trends').catch(() => ({ data: MOCK_TRENDS })),
-          api.get('/api/v1/reports/categories').catch(() => ({ data: MOCK_CATEGORIES })),
-          api.get('/api/v1/reports/transactions').catch(() => ({ data: MOCK_TRANSACTIONS }))
+          api.get('/api/v1/transactions/categories').catch(() => ({ data: MOCK_CATEGORIES })),
+          api.get('/api/v1/transactions/recent').catch(() => ({ data: MOCK_TRANSACTIONS }))
         ]);
         setOverview(ovRes.data || MOCK_OVERVIEW);
         setTrends(trRes.data || MOCK_TRENDS);

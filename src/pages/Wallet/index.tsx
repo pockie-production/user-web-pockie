@@ -84,14 +84,15 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
   React.useEffect(() => {
     async function fetchWalletData() {
       try {
-        const [allocRes, summaryRes, accountsRes] = await Promise.all([
-          api.get('/api/v1/wallet/allocations').catch(() => ({ data: MOCK_ALLOCATIONS })),
-          api.get('/api/v1/wallet/summary').catch(() => ({ data: MOCK_SUMMARY })),
-          api.get('/api/v1/wallet/accounts').catch(() => ({ data: MOCK_ACCOUNTS }))
+        // Map to backend Finance endpoints
+        const [allocationsRes, summaryRes, accountsRes] = await Promise.all([
+          api.get('/api/v1/wallets/overview').catch(() => ({ data: { allocations: MOCK_ALLOCATIONS } })),
+          api.get('/api/v1/wallets/overview').catch(() => ({ data: { summary: MOCK_SUMMARY } })),
+          api.get('/api/v1/wallets/accounts').catch(() => ({ data: { accounts: MOCK_ACCOUNTS } }))
         ]);
-        setAllocations(allocRes.data || MOCK_ALLOCATIONS);
-        setSummary(summaryRes.data || MOCK_SUMMARY);
-        setAccounts(accountsRes.data || MOCK_ACCOUNTS);
+        setAllocations(allocationsRes.data.allocations || MOCK_ALLOCATIONS);
+        setSummary(summaryRes.data.summary || MOCK_SUMMARY);
+        setAccounts(accountsRes.data.accounts || MOCK_ACCOUNTS);
       } catch (e) {
         setAllocations(MOCK_ALLOCATIONS);
         setSummary(MOCK_SUMMARY);
