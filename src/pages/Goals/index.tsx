@@ -89,7 +89,7 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
       }
 
       try {
-        const [missionsRes, rewardsRes, activeCampaignsRes] = await Promise.all([
+        const [missionsRes, rewardsRes] = await Promise.all([
           api.get('/api/v1/missions/daily').catch(() => ({ data: { items: MOCK_MISSIONS } })),
           api.get('/api/v1/vouchers/available').catch(() => ({ data: MOCK_REWARDS })),
           api.get('/api/v1/campaigns/active').catch(() => ({ data: { items: [] } })),
@@ -138,7 +138,8 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
   const xp = profile?.currentXp || 2450;
   const level = profile?.level || 12;
   const nextLevelXp = profile?.nextLevelXp || 3000;
-  const { streak, missionsCompleted } = userStats;
+  const { streak } = userStats;
+  const missionsCompleted = missions.filter((m: any) => m.status === 'COMPLETED').length;
 
   const xpPercent = Math.min((xp / nextLevelXp) * 100, 100);
   const strokeDasharray = 283;
