@@ -125,9 +125,9 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
   }, []);
 
   // Dynamic data for UI
-  const xp = profile?.currentXp || 2450;
-  const level = profile?.level || 12;
-  const nextLevelXp = profile?.nextLevelXp || 3000;
+  const xp = userStats.currentXp || 0;
+  const level = userStats.level || 1;
+  const nextLevelXp = userStats.nextLevelXpRequired || 100;
   const { streak } = userStats;
   const missionsCompleted = missions.filter((m: any) => m.status === 'COMPLETED').length;
 

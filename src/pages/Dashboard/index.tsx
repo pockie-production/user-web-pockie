@@ -442,14 +442,24 @@ export default function Dashboard() {
               </button>
               {showNotifications && (
                 <div className="notifications-popup">
-                  <div className="notif-item">
-                    <div className="notif-icon">🎁</div>
-                    <div className="notif-content">
-                      <h4>Ưu đãi mới</h4>
-                      <p>Vietcombank đang có ưu đãi 15% cho khách hàng mở thẻ đầu tiên</p>
-                      <span className="notif-time">Vừa xong</span>
+                  {notifications.items.length === 0 && (
+                    <div className="notif-item">
+                      <div className="notif-content">
+                        <h4>Chua co thong bao</h4>
+                        <p>Pockie se hien thong bao moi tai day khi co cap nhat.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {notifications.items.map((item) => (
+                    <div className="notif-item" key={item.id}>
+                      <div className="notif-icon">{item.type === 'MISSION_COMPLETED' ? '🎯' : '🔔'}</div>
+                      <div className="notif-content">
+                        <h4>{item.title}</h4>
+                        <p>{item.body}</p>
+                        <span className="notif-time">{formatTransactionTime(item.createdAt)}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

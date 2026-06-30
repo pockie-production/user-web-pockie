@@ -30,7 +30,7 @@ interface CategoryData {
   percent: number;
   amount: string;
   color: string;
-  iconUrl: string;
+  iconUrl: string | null;
 }
 
 interface Transaction {
@@ -42,6 +42,71 @@ interface Transaction {
   iconUrl: string;
 }
 
+type CategoryApiItem = {
+  categoryId: string;
+  categoryName: string;
+  icon: string | null;
+  amount: number;
+  percent: number;
+};
+
+type TransactionApiItem = {
+  id: string;
+  title: string;
+  category?: string;
+  amount?: number;
+  currency?: string;
+  transactionDate?: string;
+  date?: string;
+  type?: 'income' | 'expense';
+  icon?: string | null;
+};
+
+function formatCurrency(value: number, currency = 'VND') {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function normalizeCategories(items: CategoryApiItem[] | { items?: CategoryApiItem[] } | null | undefined) {
+  const rawItems = Array.isArray(items) ? items : items?.items || [];
+
+  return rawItems.map((item, index) => ({
+    id: item.categoryId,
+    name: item.categoryName,
+    percent: item.percent,
+    amount: formatCurrency(item.amount),
+    color: ['#A7F3D0', '#BAE6FD', '#FED7AA', '#C7D2FE', '#FEF08A', '#E5E7EB'][index % 6],
+    iconUrl: item.icon,
+  }));
+}
+
+function normalizeTransactions(items: TransactionApiItem[] | null | undefined) {
+  return (items || []).map((item) => ({
+    id: item.id,
+    title: item.title,
+    date:
+      item.date ||
+      (item.transactionDate
+        ? new Intl.DateTimeFormat('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(item.transactionDate))
+        : ''),
+    amount:
+      typeof item.amount === 'number'
+        ? `${item.type === 'income' ? '+' : '-'}${formatCurrency(item.amount, item.currency || 'VND')}`
+        : '0đ',
+    type: item.type || 'expense',
+    iconUrl: item.icon || '💸',
+  }));
+}
+
 
 export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [overview, setOverview] = useState<ReportOverview | null>(null);
@@ -49,10 +114,12 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchReportData() {
       try {
+        setError('');
         const [ovRes, trRes, catRes, txnRes] = await Promise.all([
           api.get('/api/v1/wallets/overview'),
           api.get('/api/v1/reports/trends'),
@@ -61,16 +128,16 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
         ]);
         setOverview(ovRes.data || null);
         setTrends(trRes.data || []);
-        setCategories(catRes.data || []);
-        setTransactions(txnRes.data || []);
-      } catch (err) {
-        // Mocks are already initial state
+        setCategories(normalizeCategories(catRes.data));
+        setTransactions(normalizeTransactions(txnRes.data));
+      } catch (err: any) {
+        setError(err?.response?.data?.message || 'Không tải được báo cáo.');
       }
     }
     fetchReportData();
   }, []);
 
-  if (!overview) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải báo cáo...</div>;
+  if (!overview) return <div style={{ padding: 24, textAlign: 'center' }}>{error || 'Đang tải báo cáo...'}</div>;
 
   // Helper to generate line chart paths
   const generatePath = (dataKey: 'income' | 'expense') => {
@@ -240,7 +307,11 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                     <div key={cat.id} className="progress-row">
                       <div className="progress-name">
                         <div className="icon">
-                          <img src={cat.iconUrl} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          {cat.iconUrl ? (
+                            <img src={cat.iconUrl} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          ) : (
+                            <span style={{ fontSize: 20 }}>💸</span>
+                          )}
                         </div>
                         {cat.name}
                       </div>
@@ -307,7 +378,11 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                            style={{ opacity: hoveredSlice && hoveredSlice !== cat.id ? 0.4 : 1, transition: 'opacity 0.2s' }}>
                         <div className="donut-legend-name">
                           <div className="icon">
-                            <img src={cat.iconUrl} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            {cat.iconUrl ? (
+                              <img src={cat.iconUrl} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            ) : (
+                              <span style={{ fontSize: 20 }}>💸</span>
+                            )}
                           </div>
                           {cat.name}
                         </div>
@@ -331,7 +406,11 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                     <div key={txn.id} className="transaction-item">
                       <div className="transaction-info">
                         <div className="transaction-icon">
-                          <img src={txn.iconUrl} alt={txn.title} />
+                          {txn.iconUrl.startsWith('http') ? (
+                            <img src={txn.iconUrl} alt={txn.title} />
+                          ) : (
+                            <span style={{ fontSize: 24 }}>{txn.iconUrl}</span>
+                          )}
                         </div>
                         <div className="transaction-details">
                           <h4>{txn.title}</h4>
