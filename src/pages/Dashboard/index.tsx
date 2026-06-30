@@ -681,13 +681,13 @@ export default function Dashboard() {
                   <polyline
                     points={sparkline.line}
                     fill="none"
-                    stroke="#FF4D4F"
+                    stroke="var(--app-danger)"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="spark-line"
                   />
-                  <circle cx="75" cy={sparkline.endY} r="3" fill="#FF4D4F" className="spark-dot" />
+                  <circle cx="75" cy={sparkline.endY} r="3" fill="var(--app-danger)" className="spark-dot" />
                 </svg>
                 <div className="insight-sparkline-text">xu hướng tháng này</div>
               </div>

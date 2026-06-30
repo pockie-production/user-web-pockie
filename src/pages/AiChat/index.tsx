@@ -43,40 +43,40 @@ interface ReportData {
 }
 
 const MockReportView = ({ data }: { data: ReportData }) => (
-  <div style={{ padding: '32px 48px', height: '100%', overflowY: 'auto', background: '#fff' }}>
-    <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{data.title || 'Phan tich chi tieu'}</h2>
-    <p style={{ color: 'var(--color-text-secondary)', marginBottom: '40px' }}>{data.subtitle || 'Duoc tong hop tu du lieu giao dich cua ban'}</p>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-mint-light)', padding: '20px 24px', borderRadius: '16px', marginBottom: '32px' }}>
+  <div style={{ padding: '32px 48px', height: '100%', overflowY: 'auto', background: 'var(--app-surface)' }}>
+    <h2 style={{ fontSize: '28px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{data.title || 'Phân tích chi tiêu'}</h2>
+    <p style={{ color: 'var(--app-muted)', marginBottom: '40px' }}>{data.subtitle || 'Được tổng hợp từ dữ liệu giao dịch của bạn'}</p>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--app-primary-soft)', padding: '20px 24px', borderRadius: '16px', marginBottom: '32px', border: '1px solid var(--app-line)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-        <div style={{ color: 'var(--color-mint)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ color: 'var(--app-primary-dark)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <Sparkles size={14} /> AI Insight
         </div>
-        <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          {data.insightTitle || 'Tinh hinh chi tieu dang o muc trung binh'}
+        <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--app-ink)' }}>
+          {data.insightTitle || 'Tình hình chi tiêu đang ở mức trung bình'}
         </div>
-        <button style={{ background: '#fff', border: '1px solid var(--color-mint)', color: 'var(--color-mint)', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', width: 'max-content' }}>
+        <button style={{ background: 'var(--app-surface)', border: '1px solid var(--app-primary)', color: 'var(--app-primary-dark)', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', width: 'max-content' }}>
           Xem gợi ý <ChevronRight size={14} />
         </button>
       </div>
       
-      <div style={{ background: '#fff', padding: '12px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', minWidth: '110px' }}>
-         <div style={{ color: '#FF4D4F', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: '0.5px' }}>{data.mood || 'NEUTRAL'}</div>
+      <div style={{ background: 'var(--app-surface)', padding: '12px', borderRadius: '12px', boxShadow: 'var(--app-shadow)', border: '1px solid var(--app-line)', textAlign: 'center', minWidth: '110px' }}>
+         <div style={{ color: 'var(--app-danger)', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: 0 }}>{data.mood || 'NEUTRAL'}</div>
          <svg width="80" height="30" viewBox="0 0 80 30" style={{ overflow: 'visible' }}>
-           <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="#FF4D4F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-           <circle cx="75" cy="2" r="3" fill="#FF4D4F" />
+           <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="var(--app-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+           <circle cx="75" cy="2" r="3" fill="var(--app-danger)" />
          </svg>
-         <div style={{ fontSize: '9px', color: 'var(--color-text-muted)', marginTop: '8px' }}>xu hướng tháng này</div>
+         <div style={{ fontSize: '9px', color: 'var(--app-muted)', marginTop: '8px' }}>xu hướng tháng này</div>
       </div>
     </div>
 
     <div style={{ display: 'flex', gap: '24px', marginBottom: '40px' }}>
-      <div style={{ flex: 1, padding: '24px', background: 'var(--color-cream)', borderRadius: '20px' }}>
-        <div style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Tổng chi</div>
-        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--color-danger)' }}>{data.totalExpense}</div>
+      <div style={{ flex: 1, padding: '24px', background: 'var(--app-surface-soft)', borderRadius: '20px', border: '1px solid var(--app-line)' }}>
+        <div style={{ fontSize: '15px', color: 'var(--app-muted)', marginBottom: '8px' }}>Tổng chi</div>
+        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--app-danger)' }}>{data.totalExpense}</div>
       </div>
-      <div style={{ flex: 1, padding: '24px', background: 'var(--color-cream)', borderRadius: '20px' }}>
-        <div style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Ngân sách</div>
-        <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{data.budget}</div>
+      <div style={{ flex: 1, padding: '24px', background: 'var(--app-surface-soft)', borderRadius: '20px', border: '1px solid var(--app-line)' }}>
+        <div style={{ fontSize: '15px', color: 'var(--app-muted)', marginBottom: '8px' }}>Ngân sách</div>
+        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--app-primary-dark)' }}>{data.budget}</div>
       </div>
     </div>
 
@@ -90,7 +90,7 @@ const MockReportView = ({ data }: { data: ReportData }) => (
               <span style={{ fontWeight: 600, fontSize: '16px' }}>{cat.name}</span>
               <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{cat.percent}%</span>
             </div>
-            <div style={{ height: '10px', background: 'var(--color-border)', borderRadius: '5px', overflow: 'hidden' }}>
+            <div style={{ height: '10px', background: 'var(--app-line)', borderRadius: '5px', overflow: 'hidden' }}>
               <div style={{ width: `${cat.percent}%`, height: '100%', background: cat.color }} />
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function AiChat() {
 
     await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
 
-    let content = 'Toi chua phan tich duoc yeu cau nay.';
+    let content = 'Tôi chưa phân tích được yêu cầu này.';
     let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' = 'none';
 
     try {
@@ -159,7 +159,7 @@ export default function AiChat() {
       content = res.data.reply;
       detectedWorkspace = res.data.workspace || 'none';
     } catch (err) {
-      content = 'Pockie AI tam thoi chua phan hoi duoc. Vui long thu lai sau.';
+      content = 'Pockie AI tạm thời chưa phản hồi được. Vui lòng thử lại sau.';
     }
 
     setWorkspaceType(detectedWorkspace);
@@ -182,6 +182,7 @@ export default function AiChat() {
   };
 
   const isEmpty = messages.length === 0;
+  const hasWorkspace = !isEmpty && workspaceType !== 'none';
 
   const renderInputBar = () => (
     <div className={`chat-input-wrapper ${isEmpty ? 'centered-input' : ''}`}>
@@ -230,7 +231,7 @@ export default function AiChat() {
   );
 
   return (
-    <div className={`chat-layout ${!isEmpty ? 'split-view' : ''}`}>
+    <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''}`}>
       {/* Chat Panel (Bên trái) */}
       <div className="agent-chat-panel">
         <header className="chat-header">
@@ -311,15 +312,17 @@ export default function AiChat() {
       </div>
 
       {/* Workspace Panel (Bên phải) */}
-      <div className="agent-workspace-panel">
-        <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>
-          {!isEmpty && workspaceType === 'reports' && reportData && <MockReportView data={reportData} />}
-          {!isEmpty && workspaceType === 'wallet' && <Wallet isEmbedded={true} />}
-          {!isEmpty && workspaceType === 'goals' && <Goals isEmbedded={true} />}
-          {!isEmpty && workspaceType === 'reports' && !reportData && <Reports isEmbedded={true} />}
-          {!isEmpty && workspaceType === 'settings' && <Settings isEmbedded={true} />}
+      {hasWorkspace && (
+        <div className="agent-workspace-panel">
+          <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>
+            {workspaceType === 'reports' && reportData && <MockReportView data={reportData} />}
+            {workspaceType === 'wallet' && <Wallet isEmbedded={true} />}
+            {workspaceType === 'goals' && <Goals isEmbedded={true} />}
+            {workspaceType === 'reports' && !reportData && <Reports isEmbedded={true} />}
+            {workspaceType === 'settings' && <Settings isEmbedded={true} />}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

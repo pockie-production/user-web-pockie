@@ -62,6 +62,15 @@ type TransactionApiItem = {
   icon?: string | null;
 };
 
+const CATEGORY_COLORS = [
+  'var(--app-primary)',
+  'var(--app-accent)',
+  'var(--app-primary-dark)',
+  'var(--app-muted)',
+  'var(--app-danger)',
+  'var(--app-line)',
+];
+
 function formatCurrency(value: number, currency = 'VND') {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -78,7 +87,7 @@ function normalizeCategories(items: CategoryApiItem[] | { items?: CategoryApiIte
     name: item.categoryName,
     percent: item.percent,
     amount: formatCurrency(item.amount),
-    color: ['#A7F3D0', '#BAE6FD', '#FED7AA', '#C7D2FE', '#FEF08A', '#E5E7EB'][index % 6],
+    color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
     iconUrl: item.icon,
   }));
 }
@@ -170,8 +179,8 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
               <h1>
                 Báo cáo
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 20V10M12 20V4M6 20V14" stroke="var(--color-mint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M4 14L8 10L12 14L20 6" stroke="var(--color-yellow)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 20V10M12 20V4M6 20V14" stroke="var(--app-primary-dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 14L8 10L12 14L20 6" stroke="var(--app-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </h1>
               <p>Tổng quan tài chính của bạn</p>
@@ -241,8 +250,8 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                 </div>
                 <div className="line-chart-area">
                   <div className="line-chart-legend">
-                    <div className="legend-item"><div className="legend-dot" style={{background: 'var(--color-mint)'}}></div> Thu nhập</div>
-                    <div className="legend-item"><div className="legend-dot" style={{background: 'var(--color-error)'}}></div> Chi tiêu</div>
+                    <div className="legend-item"><div className="legend-dot" style={{background: 'var(--app-primary)'}}></div> Thu nhập</div>
+                    <div className="legend-item"><div className="legend-dot" style={{background: 'var(--app-danger)'}}></div> Chi tiêu</div>
                   </div>
                   
                   <div className="chart-svg-container">
@@ -263,12 +272,12 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                       <path d="M0,120 L300,120" stroke="var(--color-border)" strokeWidth="1" opacity="0.5"/>
 
                       {/* Expense Area & Line */}
-                      <path d={`${generatePath('expense')} L 300,120 L 0,120 Z`} fill="rgba(224, 85, 85, 0.1)" />
-                      <path d={generatePath('expense')} fill="none" stroke="var(--color-error)" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
+                      <path d={`${generatePath('expense')} L 300,120 L 0,120 Z`} fill="color-mix(in srgb, var(--app-danger) 12%, transparent)" />
+                      <path d={generatePath('expense')} fill="none" stroke="var(--app-danger)" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
                       
                       {/* Income Area & Line */}
-                      <path d={`${generatePath('income')} L 300,120 L 0,120 Z`} fill="rgba(92, 200, 156, 0.1)" />
-                      <path d={generatePath('income')} fill="none" stroke="var(--color-mint)" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
+                      <path d={`${generatePath('income')} L 300,120 L 0,120 Z`} fill="color-mix(in srgb, var(--app-primary) 12%, transparent)" />
+                      <path d={generatePath('income')} fill="none" stroke="var(--app-primary)" strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
                       
                     </svg>
 
@@ -280,7 +289,7 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
                         const yExp = 100 - (pt.expense / maxVal) * 100;
                         return (
                           <div key={i}>
-                            <div style={{ position: 'absolute', left: `${x}%`, top: `${yInc}%`, width: 8, height: 8, borderRadius: '50%', background: 'white', border: '2px solid var(--color-mint)', transform: 'translate(-50%, -50%)', boxSizing: 'border-box' }} />
+                            <div style={{ position: 'absolute', left: `${x}%`, top: `${yInc}%`, width: 8, height: 8, borderRadius: '50%', background: 'white', border: '2px solid var(--app-primary)', transform: 'translate(-50%, -50%)', boxSizing: 'border-box' }} />
                             <div style={{ position: 'absolute', left: `${x}%`, top: `${yExp}%`, width: 8, height: 8, borderRadius: '50%', background: 'white', border: '2px solid var(--color-error)', transform: 'translate(-50%, -50%)', boxSizing: 'border-box' }} />
                           </div>
                         );

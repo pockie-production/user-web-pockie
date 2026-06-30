@@ -857,3 +857,353 @@
     display: none;
   }
 }
+
+@media (max-width: 900px) {
+  body.mobile-web-mode {
+    background: var(--app-bg);
+    color: var(--app-ink);
+  }
+
+  body.mobile-web-mode .dashboard-layout,
+  body.mobile-web-mode .dashboard-main,
+  body.mobile-web-mode .wallet-page,
+  body.mobile-web-mode .goals-page,
+  body.mobile-web-mode .reports-page,
+  body.mobile-web-mode .settings-page,
+  body.mobile-web-mode .chat-layout {
+    background: var(--app-bg);
+    color: var(--app-ink);
+  }
+
+  body.mobile-web-mode .header-greeting h1,
+  body.mobile-web-mode .wallet-title-group h1,
+  body.mobile-web-mode .goals-header-left h1,
+  body.mobile-web-mode .reports-title h1,
+  body.mobile-web-mode .settings-header h1,
+  body.mobile-web-mode .section-header h2,
+  body.mobile-web-mode .report-card-header h3,
+  body.mobile-web-mode .card-header-simple h4,
+  body.mobile-web-mode .settings-section-title h2 {
+    color: var(--app-ink);
+  }
+
+  body.mobile-web-mode .header-greeting p,
+  body.mobile-web-mode .wallet-title-group p,
+  body.mobile-web-mode .goals-header-left p,
+  body.mobile-web-mode .reports-title p,
+  body.mobile-web-mode .settings-header p,
+  body.mobile-web-mode .metric-title,
+  body.mobile-web-mode .p-stat-label,
+  body.mobile-web-mode .m-card-title p,
+  body.mobile-web-mode .banner-text p,
+  body.mobile-web-mode .settings-feature-item p,
+  body.mobile-web-mode .settings-status-card p,
+  body.mobile-web-mode .tx-time,
+  body.mobile-web-mode .tx-category {
+    color: var(--app-muted);
+  }
+
+  body.mobile-web-mode .dashboard-card,
+  body.mobile-web-mode .wallet-summary-card,
+  body.mobile-web-mode .wallet-allocation-card,
+  body.mobile-web-mode .report-card,
+  body.mobile-web-mode .metric-card,
+  body.mobile-web-mode .progress-card,
+  body.mobile-web-mode .mission-card,
+  body.mobile-web-mode .reward-card,
+  body.mobile-web-mode .settings-shell,
+  body.mobile-web-mode .settings-panel,
+  body.mobile-web-mode .settings-summary,
+  body.mobile-web-mode .settings-feature-item,
+  body.mobile-web-mode .notifications-popup {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+    box-shadow: var(--app-shadow);
+  }
+
+  body.mobile-web-mode .date-selector,
+  body.mobile-web-mode .icon-btn,
+  body.mobile-web-mode .header-icon-btn,
+  body.mobile-web-mode .stat-pill,
+  body.mobile-web-mode .date-picker-btn,
+  body.mobile-web-mode .export-btn,
+  body.mobile-web-mode .wallet-action-btn,
+  body.mobile-web-mode .report-filter-select,
+  body.mobile-web-mode .btn-outline,
+  body.mobile-web-mode .settings-back,
+  body.mobile-web-mode .settings-secondary-btn {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+    color: var(--app-ink);
+    box-shadow: none;
+  }
+
+  body.mobile-web-mode .text-mint,
+  body.mobile-web-mode .link-view-all,
+  body.mobile-web-mode .wallet-icon,
+  body.mobile-web-mode .mood-label,
+  body.mobile-web-mode .insight-badge,
+  body.mobile-web-mode .metric-diff.up,
+  body.mobile-web-mode .section-action,
+  body.mobile-web-mode .settings-eyebrow,
+  body.mobile-web-mode .settings-feature-icon,
+  body.mobile-web-mode .settings-status-icon {
+    color: var(--app-primary-dark) !important;
+  }
+
+  body.mobile-web-mode .bg-mint,
+  body.mobile-web-mode .wallet-progress-fill,
+  body.mobile-web-mode .cat-progress-fill,
+  body.mobile-web-mode .settings-xp-fill,
+  body.mobile-web-mode .level-circle-progress {
+    background: var(--app-primary) !important;
+    stroke: var(--app-primary) !important;
+  }
+
+  body.mobile-web-mode .bg-mint-light,
+  body.mobile-web-mode .p-stat-item,
+  body.mobile-web-mode .wallet-summary-bottom .stat-item,
+  body.mobile-web-mode .mission-item,
+  body.mobile-web-mode .settings-status-card,
+  body.mobile-web-mode .settings-feature-badge.is-enabled {
+    background: var(--app-primary-soft) !important;
+    border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-line)) !important;
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .btn-add-wallet,
+  body.mobile-web-mode .settings-primary-btn,
+  body.mobile-web-mode .ekyc-banner-btn,
+  body.mobile-web-mode .banner-btn,
+  body.mobile-web-mode .btn-popup-confirm {
+    background: var(--app-primary-dark);
+    border-color: var(--app-primary-dark);
+    color: var(--app-surface);
+  }
+
+  body.mobile-web-mode .wallet-action-btn:hover,
+  body.mobile-web-mode .date-picker-btn:hover,
+  body.mobile-web-mode .export-btn:hover,
+  body.mobile-web-mode .btn-outline:hover,
+  body.mobile-web-mode .settings-secondary-btn:hover {
+    background: var(--app-primary-soft);
+    border-color: color-mix(in srgb, var(--app-primary) 42%, var(--app-line));
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .ekyc-banner-warning,
+  body.mobile-web-mode .mission-banner,
+  body.mobile-web-mode .reward-xp-badge,
+  body.mobile-web-mode .xp-badge,
+  body.mobile-web-mode .stat-pill.streak,
+  body.mobile-web-mode .stat-pill.gems {
+    background: var(--app-accent-soft);
+    border-color: color-mix(in srgb, var(--app-accent) 26%, var(--app-line));
+    color: var(--app-accent);
+  }
+
+  body.mobile-web-mode .ekyc-banner-pending,
+  body.mobile-web-mode .stat-pill.xp,
+  body.mobile-web-mode .settings-kyc-verified {
+    background: var(--app-primary-soft);
+    border-color: color-mix(in srgb, var(--app-primary) 26%, var(--app-line));
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .ekyc-banner-icon,
+  body.mobile-web-mode .banner-icon,
+  body.mobile-web-mode .mood-trend-icon,
+  body.mobile-web-mode .reward-icon-wrapper {
+    background: var(--app-accent-soft);
+    color: var(--app-accent);
+  }
+
+  body.mobile-web-mode .card-mood {
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--app-primary-soft) 82%, white) 0%, var(--app-surface) 52%),
+      var(--app-surface);
+    border: 1px solid var(--app-line);
+  }
+
+  body.mobile-web-mode .card-insight {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
+  }
+
+  body.mobile-web-mode .insight-sparkline-label,
+  body.mobile-web-mode .metric-diff.down,
+  body.mobile-web-mode .transaction-amount.expense {
+    color: var(--app-danger) !important;
+  }
+
+  body.mobile-web-mode .spark-line {
+    stroke: var(--app-danger) !important;
+  }
+
+  body.mobile-web-mode .spark-dot {
+    fill: var(--app-danger) !important;
+  }
+
+  body.mobile-web-mode .wallet-summary-card {
+    background:
+      linear-gradient(135deg, var(--app-primary-soft) 0%, var(--app-surface) 72%),
+      var(--app-surface);
+  }
+
+  body.mobile-web-mode .wallet-allocation-card,
+  body.mobile-web-mode .my-wallets-section,
+  body.mobile-web-mode .accounts-carousel {
+    background: transparent;
+  }
+
+  body.mobile-web-mode .wallet-card.mb-bank,
+  body.mobile-web-mode .wallet-card.zalopay {
+    background: linear-gradient(135deg, var(--app-primary-dark) 0%, var(--app-primary) 100%);
+  }
+
+  body.mobile-web-mode .wallet-card.momo {
+    background: linear-gradient(135deg, var(--app-ink) 0%, var(--app-primary-dark) 100%);
+  }
+
+  body.mobile-web-mode .wallet-card.cash {
+    background: linear-gradient(135deg, var(--app-accent) 0%, #b86f20 100%);
+  }
+
+  body.mobile-web-mode .time-filter-btn.active,
+  body.mobile-web-mode .wallet-card-chip,
+  body.mobile-web-mode .wallet-card-badge {
+    background: var(--app-surface);
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .metric-card.mint,
+  body.mobile-web-mode .metric-card.blue,
+  body.mobile-web-mode .metric-card.yellow {
+    border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-line));
+  }
+
+  body.mobile-web-mode .metric-card.danger {
+    border-color: color-mix(in srgb, var(--app-danger) 24%, var(--app-line));
+  }
+
+  body.mobile-web-mode .metric-card.mint::before,
+  body.mobile-web-mode .metric-card.blue::before,
+  body.mobile-web-mode .metric-card.yellow::before {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--app-primary-soft) 76%, transparent) 0%, transparent 100%);
+  }
+
+  body.mobile-web-mode .metric-card.danger::before {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--app-danger-soft) 76%, transparent) 0%, transparent 100%);
+  }
+
+  body.mobile-web-mode .metric-card.mint .metric-icon-wrap,
+  body.mobile-web-mode .metric-card.blue .metric-icon-wrap {
+    background: var(--app-primary-soft);
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .metric-card.yellow .metric-icon-wrap {
+    background: var(--app-accent-soft);
+    color: var(--app-accent);
+  }
+
+  body.mobile-web-mode .metric-card.danger .metric-icon-wrap {
+    background: var(--app-danger-soft);
+    color: var(--app-danger);
+  }
+
+  body.mobile-web-mode .mission-card.mint,
+  body.mobile-web-mode .mission-card.blue {
+    background: var(--app-primary-soft);
+    border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-line));
+  }
+
+  body.mobile-web-mode .mission-card.yellow,
+  body.mobile-web-mode .reward-card.yellow,
+  body.mobile-web-mode .reward-card.mint {
+    background: var(--app-accent-soft);
+    border-color: color-mix(in srgb, var(--app-accent) 22%, var(--app-line));
+  }
+
+  body.mobile-web-mode .mission-card.mint .m-card-icon,
+  body.mobile-web-mode .mission-card.blue .m-card-icon,
+  body.mobile-web-mode .p-stat-icon.mint {
+    background: var(--app-surface);
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .mission-card.yellow .m-card-icon,
+  body.mobile-web-mode .p-stat-icon.yellow {
+    background: var(--app-surface);
+    color: var(--app-accent);
+  }
+
+  body.mobile-web-mode .mission-card.mint .m-card-progress-fill,
+  body.mobile-web-mode .mission-card.blue .m-card-progress-fill {
+    background: var(--app-primary);
+  }
+
+  body.mobile-web-mode .mission-card.yellow .m-card-progress-fill {
+    background: var(--app-accent);
+  }
+
+  body.mobile-web-mode .mission-card.mint .m-card-reward,
+  body.mobile-web-mode .mission-card.blue .m-card-reward,
+  body.mobile-web-mode .mission-card.mint .m-card-btn,
+  body.mobile-web-mode .mission-card.blue .m-card-btn {
+    color: var(--app-primary-dark);
+  }
+
+  body.mobile-web-mode .mission-card.yellow .m-card-reward,
+  body.mobile-web-mode .mission-card.yellow .m-card-btn,
+  body.mobile-web-mode .banner-text h4 {
+    color: var(--app-accent);
+  }
+
+  body.mobile-web-mode .m-card-progress-bar,
+  body.mobile-web-mode .wallet-progress-bar,
+  body.mobile-web-mode .cat-progress-bar,
+  body.mobile-web-mode .settings-xp-track,
+  body.mobile-web-mode .level-circle-bg {
+    background: var(--app-line);
+    stroke: var(--app-line);
+  }
+
+  body.mobile-web-mode .transaction-item,
+  body.mobile-web-mode .category-item,
+  body.mobile-web-mode .legend-item,
+  body.mobile-web-mode .donut-legend-row,
+  body.mobile-web-mode .progress-row {
+    border-color: var(--app-line);
+  }
+
+  body.mobile-web-mode .chat-layout {
+    height: 100dvh;
+    min-height: 100dvh;
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+
+  body.mobile-web-mode .agent-chat-panel,
+  body.mobile-web-mode .chat-layout.split-view .agent-chat-panel {
+    height: 100%;
+    min-height: 0;
+    background: var(--app-bg);
+  }
+
+  body.mobile-web-mode .chat-messages-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  body.mobile-web-mode .chat-header {
+    background: color-mix(in srgb, var(--app-bg) 92%, white);
+    border-bottom: 1px solid var(--app-line);
+  }
+
+  body.mobile-web-mode .chat-input-wrapper:not(.centered-input) {
+    padding: 10px 14px 12px;
+    background: linear-gradient(180deg, rgba(250, 246, 236, 0) 0%, var(--app-bg) 36%);
+  }
+}
