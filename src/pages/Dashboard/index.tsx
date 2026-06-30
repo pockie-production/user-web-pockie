@@ -131,7 +131,8 @@ function formatLongDate() {
   return `${weekday}, ${date}`;
 }
 
-function formatMonthLabel(month: string) {
+function formatMonthLabel(month?: string) {
+  if (!month) return 'Tháng này';
   const [, monthNumber] = month.split('-');
   return `Tháng ${Number(monthNumber)}`;
 }
