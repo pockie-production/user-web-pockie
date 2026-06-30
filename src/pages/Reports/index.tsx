@@ -78,31 +78,33 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }) {
-  const [overview, setOverview] = useState<ReportOverview>(MOCK_OVERVIEW);
-  const [trends, setTrends] = useState<TrendDataPoint[]>(MOCK_TRENDS);
-  const [categories, setCategories] = useState<CategoryData[]>(MOCK_CATEGORIES);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+  const [overview, setOverview] = useState<ReportOverview | null>(null);
+  const [trends, setTrends] = useState<TrendDataPoint[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchReportData() {
       try {
         const [ovRes, trRes, catRes, txnRes] = await Promise.all([
-          api.get('/api/v1/wallets/overview').catch(() => ({ data: MOCK_OVERVIEW })),
-          api.get('/api/v1/reports/trends').catch(() => ({ data: MOCK_TRENDS })),
-          api.get('/api/v1/transactions/categories').catch(() => ({ data: MOCK_CATEGORIES })),
-          api.get('/api/v1/transactions/recent').catch(() => ({ data: MOCK_TRANSACTIONS }))
+          api.get('/api/v1/wallets/overview'),
+          api.get('/api/v1/reports/trends'),
+          api.get('/api/v1/transactions/categories'),
+          api.get('/api/v1/transactions/recent')
         ]);
-        setOverview(ovRes.data || MOCK_OVERVIEW);
-        setTrends(trRes.data || MOCK_TRENDS);
-        setCategories(catRes.data || MOCK_CATEGORIES);
-        setTransactions(txnRes.data || MOCK_TRANSACTIONS);
+        setOverview(ovRes.data || null);
+        setTrends(trRes.data || []);
+        setCategories(catRes.data || []);
+        setTransactions(txnRes.data || []);
       } catch (err) {
         // Mocks are already initial state
       }
     }
     fetchReportData();
   }, []);
+
+  if (!overview) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải báo cáo...</div>;
 
   // Helper to generate line chart paths
   const generatePath = (dataKey: 'income' | 'expense') => {

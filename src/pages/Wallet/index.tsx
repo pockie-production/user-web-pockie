@@ -86,17 +86,17 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
       try {
         // Map to backend Finance endpoints
         const [allocationsRes, summaryRes, accountsRes] = await Promise.all([
-          api.get('/api/v1/wallets/overview').catch(() => ({ data: { allocations: MOCK_ALLOCATIONS } })),
-          api.get('/api/v1/wallets/overview').catch(() => ({ data: { summary: MOCK_SUMMARY } })),
-          api.get('/api/v1/wallets/accounts').catch(() => ({ data: { accounts: MOCK_ACCOUNTS } }))
+          api.get('/api/v1/wallets/overview'),
+          api.get('/api/v1/wallets/overview'),
+          api.get('/api/v1/wallets/accounts')
         ]);
-        setAllocations(allocationsRes.data.allocations || MOCK_ALLOCATIONS);
-        setSummary(summaryRes.data.summary || MOCK_SUMMARY);
-        setAccounts(accountsRes.data.accounts || MOCK_ACCOUNTS);
+        setAllocations(allocationsRes.data.allocations || []);
+        setSummary(summaryRes.data.summary || null);
+        setAccounts(accountsRes.data.accounts || []);
       } catch (e) {
-        setAllocations(MOCK_ALLOCATIONS);
-        setSummary(MOCK_SUMMARY);
-        setAccounts(MOCK_ACCOUNTS);
+        setAllocations([]);
+        setSummary(null);
+        setAccounts([]);
       }
     }
     fetchWalletData();

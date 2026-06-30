@@ -90,8 +90,8 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
 
       try {
         const [missionsRes, rewardsRes] = await Promise.all([
-          api.get('/api/v1/missions/daily').catch(() => ({ data: { items: MOCK_MISSIONS } })),
-          api.get('/api/v1/vouchers/available').catch(() => ({ data: MOCK_REWARDS })),
+          api.get('/api/v1/missions/daily'),
+          api.get('/api/v1/vouchers/available'),
           api.get('/api/v1/campaigns/active').catch(() => ({ data: { items: [] } })),
         ]);
         
@@ -108,7 +108,7 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
           theme: 'mint',
           status: m.status
         }));
-        setMissions(dailyMissions.length > 0 ? dailyMissions : MOCK_MISSIONS);
+        setMissions(dailyMissions || []);
 
         // Map backend vouchers format
         const availableVouchers = (rewardsRes.data || []).map((v: any) => ({
@@ -118,10 +118,10 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
           iconSrc: EMOJI.gift,
           theme: 'yellow',
         }));
-        setRewards(availableVouchers.length > 0 ? availableVouchers : MOCK_REWARDS);
+        setRewards(availableVouchers || []);
       } catch (err) {
-        setMissions(MOCK_MISSIONS);
-        setRewards(MOCK_REWARDS);
+        setMissions([]);
+        setRewards([]);
       }
     }
     loadData();
