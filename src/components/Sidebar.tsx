@@ -1,3 +1,4 @@
+import { emitAuthStateChanged } from "../lib/authEvents";
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Wallet, Target, PieChart, MessageSquare, Settings, ChevronRight, LogOut } from 'lucide-react';
@@ -95,7 +96,7 @@ export function Sidebar() {
           } finally {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            window.dispatchEvent(new Event('authStateChanged'));
+            emitAuthStateChanged();
           }
         }}>
           <LogOut size={16} />
