@@ -359,8 +359,10 @@
   justify-content: center;
   cursor: grab;
   z-index: 9999;
-  /* Thêm transition cho left, top để snap chậm và mượt mà hơn */
-  transition: transform 0.2s ease, left 1s ease-out, top 1s ease-out;
+  /* Dùng transform để di chuyển không gây giật lag (hardware accelerated) */
+  left: 0;
+  top: 0;
+  transition: transform 1s ease-out;
   touch-action: none; /* Prevent scroll while dragging on touch */
 }
 
@@ -1503,3 +1505,4 @@
   margin-top: 6px;
   display: block;
 }
+
