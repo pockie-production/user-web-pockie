@@ -43,27 +43,8 @@ interface WalletAccount {
   isPrimary: boolean;
 }
 
-const MOCK_ALLOCATIONS: AllocationData[] = [
-  { id: 'bank', title: 'Ngân hàng', percent: 60, amount: '3.912.000đ', color: 'var(--color-yellow)', offset: -25 },
-  { id: 'cash', title: 'Tiền mặt', percent: 25, amount: '1.630.000đ', color: 'var(--color-mint)', offset: 0 },
-  { id: 'ewallet', title: 'Ví điện tử', percent: 15, amount: '978.000đ', color: 'var(--color-text-muted)', offset: -85 }
-];
 
-const MOCK_SUMMARY: WalletSummary = {
-  balance: '6.520.000đ',
-  diffAmount: '+850.000đ',
-  diffType: 'up',
-  income: '4.500.000đ',
-  expense: '3.650.000đ',
-  savingsPercent: 19
-};
 
-const MOCK_ACCOUNTS: WalletAccount[] = [
-  { id: 'w1', type: 'mb', name: 'MB Bank', balance: '3.200.000đ', accountNumber: '•••• 0897', isPrimary: true },
-  { id: 'w2', type: 'momo', name: 'Ví MoMo', balance: '520.000đ', accountNumber: '•••• 1234', isPrimary: false },
-  { id: 'w3', type: 'zalopay', name: 'ZaloPay', balance: '340.000đ', accountNumber: '•••• 4321', isPrimary: false },
-  { id: 'w4', type: 'cash', name: 'Tiền mặt', balance: '1.500.000đ', accountNumber: 'Ví tiền mặt', isPrimary: false }
-];
 
 export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [showBalance, setShowBalance] = useState(true);
