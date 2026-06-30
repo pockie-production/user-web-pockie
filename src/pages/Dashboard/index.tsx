@@ -115,6 +115,28 @@ type DashboardResponse = {
   };
 };
 
+type LegacyTransaction = {
+  id: string;
+  title: string;
+  date?: string;
+  amount?: number | string;
+  type?: 'expense' | 'income';
+  category?: string;
+  currency?: string;
+  transactionDate?: string;
+};
+
+type LegacyCategoryStat = {
+  id?: string;
+  categoryId?: string;
+  name?: string;
+  categoryName?: string;
+  iconUrl?: string | null;
+  icon?: string | null;
+  amount: number | string;
+  percent: number;
+};
+
 
 function formatCurrency(value: number, currency = 'VND') {
   return new Intl.NumberFormat('vi-VN', {
@@ -131,18 +153,111 @@ function formatLongDate() {
   return `${weekday}, ${date}`;
 }
 
-function formatMonthLabel(month: string) {
+function formatMonthLabel(month?: string) {
+  if (!month) return 'Tháng này';
   const [, monthNumber] = month.split('-');
   return `Tháng ${Number(monthNumber)}`;
 }
 
 function formatTransactionTime(date: string) {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) {
+    return 'Khong ro thoi gian';
+  }
+
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(date));
+  }).format(parsed);
+}
+
+function parseLegacyAmount(value: number | string | undefined) {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.abs(value);
+  if (typeof value !== 'string') return 0;
+
+  const digits = value.replace(/[^\d-]/g, '');
+  const parsed = Number(digits);
+  return Number.isFinite(parsed) ? Math.abs(parsed) : 0;
+}
+
+function parseLegacyTransactionDate(value?: string) {
+  if (!value) return new Date().toISOString();
+
+  const normalized = value.trim();
+  if (!normalized) return new Date().toISOString();
+
+  const todayMatch = normalized.match(/^H[oô]m nay,\s*(\d{1,2}):(\d{2})$/i);
+  if (todayMatch) {
+    const result = new Date();
+    result.setHours(Number(todayMatch[1]), Number(todayMatch[2]), 0, 0);
+    return result.toISOString();
+  }
+
+  const yesterdayMatch = normalized.match(/^H[oô]m qua,\s*(\d{1,2}):(\d{2})$/i);
+  if (yesterdayMatch) {
+    const result = new Date();
+    result.setDate(result.getDate() - 1);
+    result.setHours(Number(yesterdayMatch[1]), Number(yesterdayMatch[2]), 0, 0);
+    return result.toISOString();
+  }
+
+  const fullDateMatch = normalized.match(/^(\d{2})\/(\d{2})\/(\d{4}),\s*(\d{1,2}):(\d{2})$/);
+  if (fullDateMatch) {
+    const [, day, month, year, hour, minute] = fullDateMatch;
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      0,
+      0
+    ).toISOString();
+  }
+
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
+
+function normalizeDashboardResponse(input: Omit<DashboardResponse, 'recentTransactions' | 'categoryStats'> & {
+  recentTransactions?: LegacyTransaction[];
+  categoryStats?: { items?: LegacyCategoryStat[] } | LegacyCategoryStat[];
+}) {
+  const recentTransactions = Array.isArray(input.recentTransactions)
+    ? input.recentTransactions.map((transaction) => ({
+      id: transaction.id,
+      title: transaction.title,
+      category:
+        transaction.category ||
+        (transaction.type === 'income' ? 'Thu nhap' : 'Chi tieu'),
+      icon: null,
+      amount: parseLegacyAmount(transaction.amount),
+      currency: transaction.currency || 'VND',
+      transactionDate: transaction.transactionDate || parseLegacyTransactionDate(transaction.date),
+    }))
+    : [];
+
+  const rawCategoryStats = Array.isArray(input.categoryStats)
+    ? input.categoryStats
+    : input.categoryStats?.items || [];
+
+  const categoryStats = {
+    items: rawCategoryStats.map((category) => ({
+      categoryId: category.categoryId || category.id || crypto.randomUUID(),
+      categoryName: category.categoryName || category.name || 'Khac',
+      icon: category.icon || null,
+      amount: typeof category.amount === 'number' ? category.amount : parseLegacyAmount(category.amount),
+      percent: category.percent,
+    })),
+  };
+
+  return {
+    ...input,
+    recentTransactions,
+    categoryStats,
+  } satisfies DashboardResponse;
 }
 
 function buildSparklinePath(points: number[]) {
@@ -188,15 +303,19 @@ export default function Dashboard() {
       const res = await api.get<DashboardResponse>('/api/v1/dashboard/home', {
         params: { month },
       });
-      setDashboard(res.data);
+      const normalized = normalizeDashboardResponse(res.data as DashboardResponse & {
+        recentTransactions?: LegacyTransaction[];
+        categoryStats?: { items?: LegacyCategoryStat[] } | LegacyCategoryStat[];
+      });
+      setDashboard(normalized);
       trackUserEvent({
         eventName: 'dashboard_loaded',
         page: '/dashboard',
         feature: 'finance_dashboard',
         payload: {
-          missionCount: res.data.missions.items.length,
-          categoryCount: res.data.categoryStats.items.length,
-          unreadNotifications: res.data.notifications.unreadCount,
+          missionCount: normalized.missions.items.length,
+          categoryCount: normalized.categoryStats.items.length,
+          unreadNotifications: normalized.notifications.unreadCount,
         },
       });
     } catch (err: any) {

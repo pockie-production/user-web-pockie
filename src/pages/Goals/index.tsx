@@ -48,17 +48,7 @@ interface Reward {
   theme: string;
 }
 
-const MOCK_MISSIONS: Mission[] = [
-  { id: '1', title: 'Quét 1 hóa đơn', description: 'Ghi nhận chi tiêu bằng Smart Scan', current: 0, target: 1, unit: '', rewardXp: 20, iconSrc: EMOJI.camera, theme: 'mint' },
-  { id: '2', title: 'Tiết kiệm 20.000đ', description: 'Chuyển tiền vào mục tiết kiệm của bạn', current: 0, target: 20000, unit: 'đ', rewardXp: 30, iconSrc: EMOJI.money, theme: 'yellow' },
-  { id: '3', title: 'Không mua trà sữa', description: 'Kiềm chế cám dỗ hôm nay nhé!', current: 0, target: 1, unit: ' ngày', rewardXp: 25, iconSrc: EMOJI.tea, theme: 'mint' }
-];
 
-const MOCK_REWARDS: Reward[] = [
-  { id: '1', title: 'eVoucher 20K', requirementText: 'Cần 2,000 XP', iconSrc: EMOJI.ticket, theme: 'yellow' },
-  { id: '2', title: '100 XP', requirementText: 'Cần 500 XP', iconSrc: EMOJI.coin, theme: 'mint' },
-  { id: '3', title: 'eVoucher 50K', requirementText: 'Cần 3,000 XP', iconSrc: EMOJI.gift, theme: 'yellow' }
-];
 
 export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [profile, setProfile] = useState<any>(null);
@@ -90,8 +80,8 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
 
       try {
         const [missionsRes, rewardsRes] = await Promise.all([
-          api.get('/api/v1/missions/daily').catch(() => ({ data: { items: MOCK_MISSIONS } })),
-          api.get('/api/v1/vouchers/available').catch(() => ({ data: MOCK_REWARDS })),
+          api.get('/api/v1/missions/daily'),
+          api.get('/api/v1/vouchers/available'),
           api.get('/api/v1/campaigns/active').catch(() => ({ data: { items: [] } })),
         ]);
         
@@ -108,7 +98,7 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
           theme: 'mint',
           status: m.status
         }));
-        setMissions(dailyMissions.length > 0 ? dailyMissions : MOCK_MISSIONS);
+        setMissions(dailyMissions || []);
 
         // Map backend vouchers format
         const availableVouchers = (rewardsRes.data || []).map((v: any) => ({
@@ -118,10 +108,10 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
           iconSrc: EMOJI.gift,
           theme: 'yellow',
         }));
-        setRewards(availableVouchers.length > 0 ? availableVouchers : MOCK_REWARDS);
+        setRewards(availableVouchers || []);
       } catch (err) {
-        setMissions(MOCK_MISSIONS);
-        setRewards(MOCK_REWARDS);
+        setMissions([]);
+        setRewards([]);
       }
     }
     loadData();

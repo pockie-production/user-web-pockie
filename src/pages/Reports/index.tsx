@@ -42,56 +42,22 @@ interface Transaction {
   iconUrl: string;
 }
 
-const MOCK_OVERVIEW: ReportOverview = {
-  income: '15.240.000đ', incomeDiff: 12,
-  expense: '9.850.000đ', expenseDiff: 8,
-  balance: '5.390.000đ', balanceDiff: 18,
-  savingsRate: 35, savingsDiff: 5
-};
-
-const MOCK_TRENDS: TrendDataPoint[] = [
-  { date: '01/05', income: 12, expense: 9 },
-  { date: '04/05', income: 14, expense: 8 },
-  { date: '08/05', income: 13, expense: 10 },
-  { date: '12/05', income: 15, expense: 7 },
-  { date: '16/05', income: 20, expense: 6 },
-  { date: '20/05', income: 14, expense: 8 },
-  { date: '24/05', income: 11, expense: 4 },
-  { date: '28/05', income: 14, expense: 7 },
-  { date: '31/05', income: 16, expense: 8 },
-];
-
-const MOCK_CATEGORIES: CategoryData[] = [
-  { id: 'food', name: 'Ăn uống', percent: 38, amount: '3.743.000đ', color: '#A7F3D0', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Hamburger/3D/hamburger_3d.png' },
-  { id: 'shopping', name: 'Mua sắm', percent: 20, amount: '1.970.000đ', color: '#BAE6FD', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20bags/3D/shopping_bags_3d.png' },
-  { id: 'transport', name: 'Đi lại', percent: 15, amount: '1.478.000đ', color: '#FED7AA', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Oncoming%20bus/3D/oncoming_bus_3d.png' },
-  { id: 'entertainment', name: 'Giải trí', percent: 10, amount: '985.000đ', color: '#C7D2FE', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Video%20game/3D/video_game_3d.png' },
-  { id: 'bills', name: 'Hóa đơn', percent: 8, amount: '788.000đ', color: '#FEF08A', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Receipt/3D/receipt_3d.png' },
-  { id: 'other', name: 'Khác', percent: 9, amount: '886.000đ', color: '#E5E7EB', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Package/3D/package_3d.png' }
-];
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: '1', title: 'Highlands Coffee', date: 'Hôm nay, 08:30', amount: '-55.000đ', type: 'expense', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Hot%20beverage/3D/hot_beverage_3d.png' },
-  { id: '2', title: 'Chuyển khoản lương', date: 'Hôm qua, 14:00', amount: '+15.240.000đ', type: 'income', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Money%20bag/3D/money_bag_3d.png' },
-  { id: '3', title: 'Shopee', date: '25/05/2025, 10:15', amount: '-450.000đ', type: 'expense', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20cart/3D/shopping_cart_3d.png' },
-  { id: '4', title: 'GrabBike', date: '24/05/2025, 09:00', amount: '-32.000đ', type: 'expense', iconUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Motor%20scooter/3D/motor_scooter_3d.png' }
-];
 
 export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }) {
-  const [overview, setOverview] = useState<ReportOverview>(MOCK_OVERVIEW);
-  const [trends, setTrends] = useState<TrendDataPoint[]>(MOCK_TRENDS);
-  const [categories, setCategories] = useState<CategoryData[]>(MOCK_CATEGORIES);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+  const [overview, setOverview] = useState<ReportOverview | null>(null);
+  const [trends, setTrends] = useState<TrendDataPoint[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [hoveredSlice, setHoveredSlice] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchReportData() {
       try {
         const [ovRes, trRes, catRes, txnRes] = await Promise.all([
-          api.get('/api/v1/wallets/overview').catch(() => ({ data: MOCK_OVERVIEW })),
-          api.get('/api/v1/reports/trends').catch(() => ({ data: MOCK_TRENDS })),
-          api.get('/api/v1/transactions/categories').catch(() => ({ data: MOCK_CATEGORIES })),
-          api.get('/api/v1/transactions/recent').catch(() => ({ data: MOCK_TRANSACTIONS }))
+          api.get('/api/v1/wallets/overview'),
+          api.get('/api/v1/reports/trends'),
+          api.get('/api/v1/transactions/categories'),
+          api.get('/api/v1/transactions/recent')
         ]);
         // Safe fallbacks to prevent empty rendering when API returns {}
         const rawOv = ovRes?.data?.data || ovRes?.data;
@@ -111,6 +77,8 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
     }
     fetchReportData();
   }, []);
+
+  if (!overview) return <div style={{ padding: 24, textAlign: 'center' }}>Đang tải báo cáo...</div>;
 
   // Helper to generate line chart paths
   const generatePath = (dataKey: 'income' | 'expense') => {
