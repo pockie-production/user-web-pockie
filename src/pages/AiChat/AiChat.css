@@ -8,7 +8,7 @@
   background: var(--app-bg);
   font-family: var(--font-sans);
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden removed to fix clipping of global widgets */
 }
 
 /* =========================================
@@ -78,9 +78,9 @@
 }
 
 .chat-session-chip.active {
-  background: var(--app-surface);
-  border-color: color-mix(in srgb, var(--app-primary) 50%, transparent);
-  box-shadow: 0 4px 12px rgba(38, 122, 92, 0.08);
+  background: var(--app-primary-soft);
+  border-color: color-mix(in srgb, var(--app-primary) 30%, transparent);
+  box-shadow: none;
 }
 
 .chat-session-chip-title {
@@ -94,12 +94,13 @@
 }
 
 .chat-session-chip-preview {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--app-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  margin-top: 2px;
 }
 
 .chat-session-empty {
@@ -294,22 +295,25 @@
 .chat-new-session-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
   gap: 8px;
-  border: 1px solid color-mix(in srgb, var(--app-primary) 20%, var(--app-line));
-  background: var(--app-surface);
-  color: var(--app-primary-dark);
+  border: none;
+  background: var(--app-primary);
+  color: white;
   border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--app-primary) 30%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .chat-new-session-btn:hover {
-  background: var(--app-primary-soft);
+  filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(38, 122, 92, 0.12);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--app-primary) 40%, transparent);
 }
 
 /* =========================================
@@ -401,18 +405,16 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: color-mix(in srgb, var(--app-surface) 90%, var(--app-bg));
-  backdrop-filter: blur(8px);
+  background: var(--app-surface);
   border: 1px solid var(--app-line);
-  border-radius: 14px;
-  font-size: 13px;
+  border-radius: 20px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--app-ink);
   cursor: pointer;
   text-align: left;
   font-family: var(--font-sans);
   transition: all 0.2s ease;
-  box-shadow: 0 8px 20px rgba(36, 35, 31, 0.04);
 }
 
 .chat-suggestion-chip:hover {
@@ -420,7 +422,6 @@
   background: var(--app-primary-soft);
   color: var(--app-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(38, 122, 92, 0.13);
 }
 
 .chat-suggestion-chip .chip-icon {
@@ -429,8 +430,8 @@
 }
 
 .chat-suggestion-chip.small {
-  padding: 7px 12px;
-  font-size: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
   border-radius: 20px;
 }
 
@@ -442,7 +443,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 780px;
+  max-width: 720px;
   margin: 0 auto;
   width: 100%;
 }
@@ -482,24 +483,24 @@
 }
 
 .chat-bubble {
-  max-width: 74%;
-  padding: 12px 15px;
-  border-radius: 18px;
+  max-width: 80%;
+  padding: 14px 18px;
+  border-radius: 20px;
   position: relative;
 }
 
 .chat-bubble.assistant {
   background: var(--app-surface);
   border: 1px solid var(--app-line);
-  border-bottom-left-radius: 6px;
-  box-shadow: 0 8px 22px rgba(36, 35, 31, 0.05);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 4px 12px rgba(36, 35, 31, 0.05);
 }
 
 .chat-bubble.user {
   background: var(--app-primary-dark);
   color: white;
-  border-bottom-right-radius: 6px;
-  box-shadow: 0 8px 20px rgba(38, 122, 92, 0.18);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(38, 122, 92, 0.18);
 }
 
 .chat-bubble.error {
@@ -550,9 +551,11 @@
 .chat-typing {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 14px 18px;
+  padding: 0 18px;
   min-width: 60px;
+  height: 42px;
 }
 
 .chat-typing span {
@@ -644,6 +647,9 @@
   z-index: 10;
   padding: 14px 24px 22px;
   background: linear-gradient(180deg, rgba(250, 246, 236, 0) 0%, var(--app-bg) 34%);
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .chat-input-wrapper.centered-input {
@@ -656,8 +662,9 @@
 
 .chat-suggestions-row {
   display: flex;
+  justify-content: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
@@ -669,8 +676,10 @@
   border: 1px solid var(--app-line);
   border-radius: 24px;
   padding: 8px 12px 8px 16px;
-  box-shadow: 0 12px 28px rgba(36, 35, 31, 0.08);
+  box-shadow: 0 8px 20px rgba(36, 35, 31, 0.08);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .chat-input-bar:focus-within {
@@ -777,9 +786,10 @@
 
 .chat-disclaimer {
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--app-muted);
-  margin: 8px 0 0;
+  opacity: 0.8;
+  margin: 12px 0 0;
 }
 
 /* =========================================
