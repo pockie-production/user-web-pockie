@@ -1,5 +1,23 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Search, Plus, List, Grid, Ticket, Wallet, Clock, Info, X } from 'lucide-react';
+import { startTransition, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import {
+  Search,
+  Plus,
+  List,
+  Grid,
+  Ticket,
+  Wallet,
+  Clock,
+  Info,
+  X,
+  Gift,
+  ShoppingBag,
+  Coffee,
+  Car,
+  BriefcaseBusiness,
+  Sparkles,
+  BadgePercent,
+  CreditCard,
+} from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { api } from '../../lib/api';
 import mascot from '../../assets/mascot.png';
@@ -19,13 +37,15 @@ interface VoucherStats {
 interface VoucherItem {
   id: string;
   brand: string;
-  brandLogo: string | ReactNode;
+  brandLogoUrl: string;
   category: string;
   categoryColor: string;
   title: string;
   description: string;
   expiryDate: string;
   brandBg: string;
+  expiryTs: number;
+  searchIndex: string;
 }
 
 interface PromoItem {
@@ -33,10 +53,10 @@ interface PromoItem {
   brand: string;
   title: string;
   subtitle: string;
-  bannerUrl: string;
   ctaText: string;
   bgColor: string;
   btnColor: string;
+  icon: 'card' | 'ride' | 'voucher';
 }
 
 const MOCK_STATS: VoucherStats = {
@@ -49,57 +69,67 @@ const MOCK_VOUCHERS: VoucherItem[] = [
   {
     id: '1',
     brand: 'Shopee',
-    brandLogo: <img src={shopeeLogo} alt="Shopee" className="brand-logo-img" />,
+    brandLogoUrl: shopeeLogo,
     brandBg: '#ffffffff',
     category: 'Mua sắm',
     categoryColor: 'var(--color-mint-light)',
     title: 'Giảm 15% tối đa 100K',
     description: 'Đơn tối thiểu 250K',
     expiryDate: '25/05/2025',
+    expiryTs: 0,
+    searchIndex: '',
   },
   {
     id: '2',
     brand: 'Grab',
-    brandLogo: <img src={grabLogo} alt="Grab" className="brand-logo-img" />,
+    brandLogoUrl: grabLogo,
     brandBg: '#ffffff',
     category: 'Di chuyển',
     categoryColor: 'var(--color-mint-light)',
     title: 'Giảm 20% tối đa 30K',
     description: 'Cho mọi chuyến xe',
     expiryDate: '28/05/2025',
+    expiryTs: 0,
+    searchIndex: '',
   },
   {
     id: '3',
     brand: 'Highlands Coffee',
-    brandLogo: <img src={hcLogo} alt="Highlands Coffee" className="brand-logo-img" />,
+    brandLogoUrl: hcLogo,
     brandBg: '#ffffff',
     category: 'Ăn uống',
     categoryColor: 'var(--color-mint-light)',
     title: 'Giảm 15% tối đa 25K',
     description: 'Áp dụng tại Highlands Coffee',
     expiryDate: '05/06/2025',
+    expiryTs: 0,
+    searchIndex: '',
   },
   {
     id: '4',
     brand: 'Tiki',
-    brandLogo: <img src={tikiLogo} alt="Tiki" className="brand-logo-img" />,
+    brandLogoUrl: tikiLogo,
     brandBg: '#ffffff',
     category: 'Mua sắm',
     categoryColor: 'var(--color-mint-light)',
     title: 'Giảm 50K cho đơn từ 500K',
     description: 'Áp dụng cho sản phẩm Tiki Trading',
     expiryDate: '15/06/2025',
+    expiryTs: 0,
+    searchIndex: '',
   },
   {
     id: '5',
     brand: 'Momo',
-    brandLogo: <img src={momoLogo} alt="Momo" className="brand-logo-img" />,
+    brandLogoUrl: momoLogo,
     brandBg: '#ffffff',
     category: 'Dịch vụ',
     categoryColor: 'var(--color-mint-light)',
     title: 'Giảm 10K khi nạp điện thoại',
     description: 'Cho đơn từ 50K',
     expiryDate: '20/06/2025',
+    expiryTs: 0,
+    searchIndex: '',
   }
 ];
 
@@ -109,62 +139,130 @@ const MOCK_PROMOS: PromoItem[] = [
     brand: 'Techcombank Inspire',
     title: 'Hoàn tiền đến 1,5%',
     subtitle: 'khi chi tiêu qua thẻ',
-    bannerUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Credit%20card/3D/credit_card_3d.png',
     ctaText: 'Tìm hiểu ngay',
     bgColor: 'var(--color-mint-light)',
-    btnColor: 'var(--color-mint)'
+    btnColor: 'var(--color-mint)',
+    icon: 'card',
   },
   {
     id: 'p2',
     brand: 'Ưu đãi độc quyền cho bạn',
     title: 'Giảm đến 50%',
     subtitle: 'khi đặt xe Grab',
-    bannerUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Automobile/3D/automobile_3d.png',
     ctaText: 'Nhận ưu đãi',
     bgColor: 'var(--color-mint-light)',
-    btnColor: 'var(--color-mint)'
+    btnColor: 'var(--color-mint)',
+    icon: 'ride',
   },
   {
     id: 'p3',
     brand: 'Shopee Voucher',
     title: 'Siêu ưu đãi mỗi ngày',
     subtitle: 'Săn voucher cực hời chỉ có trên Shopee',
-    bannerUrl: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20cart/3D/shopping_cart_3d.png',
     ctaText: 'Săn ngay',
     bgColor: 'var(--color-mint-light)',
-    btnColor: 'var(--color-mint)'
+    btnColor: 'var(--color-mint)',
+    icon: 'voucher',
   }
 ];
 
-const EMOJIS = {
-  gift: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Wrapped%20gift/3D/wrapped_gift_3d.png',
-  book: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Open%20book/3D/open_book_3d.png',
-  wallet: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Wallet/3D/wallet_3d.png',
-  alarm: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Alarm%20clock/3D/alarm_clock_3d.png',
-  all: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Wrapped%20gift/3D/wrapped_gift_3d.png', // Fallback
-  shopping: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shopping%20bags/3D/shopping_bags_3d.png',
-  food: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Hamburger/3D/hamburger_3d.png',
-  transport: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Motor%20scooter/3D/motor_scooter_3d.png',
-  service: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Briefcase/3D/briefcase_3d.png'
-};
+const EXPIRING_SOON_MS = new Date(2025, 4, 31).getTime();
+const INITIAL_VISIBLE_COUNT = 8;
 
 function parseVoucherDate(value: string) {
+  if (!value) {
+    return Number.POSITIVE_INFINITY;
+  }
   const [day, month, year] = value.split('/').map(Number);
-  return new Date(year, month - 1, day).getTime();
+  if (!day || !month || !year) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const timestamp = new Date(year, month - 1, day).getTime();
+  return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp;
+}
+
+function prepareVoucherItem(item: Partial<VoucherItem> & {
+  id?: string;
+  brand?: string;
+  category?: string;
+  title?: string;
+  description?: string;
+  expiryDate?: string;
+  brandBg?: string;
+  categoryColor?: string;
+  brandLogoUrl?: string;
+}) {
+  const expiryDate = item.expiryDate ?? '';
+  const prepared: VoucherItem = {
+    id: item.id ?? crypto.randomUUID(),
+    brand: item.brand ?? 'Đối tác',
+    brandLogoUrl: item.brandLogoUrl ?? momoLogo,
+    brandBg: item.brandBg ?? '#ffffff',
+    category: item.category ?? 'Khác',
+    categoryColor: item.categoryColor ?? 'var(--color-mint-light)',
+    title: item.title ?? 'Ưu đãi dành cho bạn',
+    description: item.description ?? 'Chi tiết ưu đãi đang được cập nhật',
+    expiryDate,
+    expiryTs: parseVoucherDate(expiryDate),
+    searchIndex: '',
+  };
+  prepared.searchIndex = `${prepared.brand} ${prepared.title} ${prepared.description} ${prepared.category}`.toLowerCase();
+  return prepared;
+}
+
+function sanitizeVouchers(rawVouchers: unknown) {
+  if (!Array.isArray(rawVouchers) || rawVouchers.length === 0) {
+    return MOCK_VOUCHERS.map(prepareVoucherItem);
+  }
+
+  return rawVouchers.map((item) => prepareVoucherItem(item as VoucherItem));
+}
+
+function sanitizePromos(rawPromos: unknown) {
+  return Array.isArray(rawPromos) && rawPromos.length > 0 ? rawPromos : MOCK_PROMOS;
+}
+
+function renderPromoIcon(icon: PromoItem['icon']) {
+  switch (icon) {
+    case 'card':
+      return <CreditCard size={36} />;
+    case 'ride':
+      return <Sparkles size={36} />;
+    case 'voucher':
+      return <BadgePercent size={36} />;
+    default:
+      return <Gift size={36} />;
+  }
+}
+
+function renderCategoryIcon(category: string) {
+  switch (category) {
+    case 'Mua sắm':
+      return <ShoppingBag size={18} />;
+    case 'Ăn uống':
+      return <Coffee size={18} />;
+    case 'Di chuyển':
+      return <Car size={18} />;
+    case 'Dịch vụ':
+      return <BriefcaseBusiness size={18} />;
+    default:
+      return <Gift size={18} />;
+  }
 }
 
 export default function Vouchers() {
   const [stats, setStats] = useState<VoucherStats>(MOCK_STATS);
-  const [vouchers, setVouchers] = useState<VoucherItem[]>(MOCK_VOUCHERS);
+  const [vouchers, setVouchers] = useState<VoucherItem[]>(() => MOCK_VOUCHERS.map(prepareVoucherItem));
   const [promos, setPromos] = useState<PromoItem[]>(MOCK_PROMOS);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tất cả');
   const [sortMode, setSortMode] = useState<'expiring' | 'brand'>('expiring');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedVoucher, setSelectedVoucher] = useState<VoucherItem | null>(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+  const deferredSearchTerm = useDeferredValue(searchTerm);
 
   useEffect(() => {
-    // Structure ready for future API integration
     async function fetchVouchersData() {
       try {
         const [statsRes, vouchersRes, promosRes] = await Promise.all([
@@ -177,10 +275,10 @@ export default function Vouchers() {
         setStats(rawStats && rawStats.totalCount !== undefined ? rawStats : MOCK_STATS);
 
         const rawVouchers = vouchersRes?.data?.data || vouchersRes?.data;
-        setVouchers(Array.isArray(rawVouchers) && rawVouchers.length > 0 ? rawVouchers : MOCK_VOUCHERS);
+        setVouchers(sanitizeVouchers(rawVouchers));
 
         const rawPromos = promosRes?.data?.data || promosRes?.data;
-        setPromos(Array.isArray(rawPromos) && rawPromos.length > 0 ? rawPromos : MOCK_PROMOS);
+        setPromos(sanitizePromos(rawPromos));
       } catch (error) {
         console.error("Failed to fetch vouchers", error);
       }
@@ -188,35 +286,62 @@ export default function Vouchers() {
     fetchVouchersData();
   }, []);
 
-  const filters = [
-    { name: 'Tất cả', count: vouchers.length },
-    { name: 'Sắp hết hạn', count: vouchers.filter((voucher) => parseVoucherDate(voucher.expiryDate) <= parseVoucherDate('31/05/2025')).length },
-    { name: 'Mua sắm', count: vouchers.filter((voucher) => voucher.category === 'Mua sắm').length },
-    { name: 'Ăn uống', count: vouchers.filter((voucher) => voucher.category === 'Ăn uống').length },
-    { name: 'Di chuyển', count: vouchers.filter((voucher) => voucher.category === 'Di chuyển').length },
-    { name: 'Dịch vụ', count: vouchers.filter((voucher) => voucher.category === 'Dịch vụ').length },
-  ];
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+  }, [activeFilter, deferredSearchTerm, sortMode]);
 
-  const normalizedQuery = searchTerm.trim().toLowerCase();
-  const filteredVouchers = vouchers
-    .filter((voucher) => {
-      if (activeFilter === 'Tất cả') return true;
-      if (activeFilter === 'Sắp hết hạn') {
-        return parseVoucherDate(voucher.expiryDate) <= parseVoucherDate('31/05/2025');
+  const filters = useMemo(() => {
+    const categoryCount = new Map<string, number>();
+    let expiringSoon = 0;
+
+    vouchers.forEach((voucher) => {
+      categoryCount.set(voucher.category, (categoryCount.get(voucher.category) ?? 0) + 1);
+      if (voucher.expiryTs <= EXPIRING_SOON_MS) {
+        expiringSoon += 1;
       }
-      return voucher.category === activeFilter;
-    })
-    .filter((voucher) => {
-      if (!normalizedQuery) return true;
-      const haystack = `${voucher.brand} ${voucher.title} ${voucher.description} ${voucher.category}`.toLowerCase();
-      return haystack.includes(normalizedQuery);
-    })
-    .sort((a, b) => {
+    });
+
+    return [
+      { name: 'Tất cả', count: vouchers.length },
+      { name: 'Sắp hết hạn', count: expiringSoon },
+      { name: 'Mua sắm', count: categoryCount.get('Mua sắm') ?? 0 },
+      { name: 'Ăn uống', count: categoryCount.get('Ăn uống') ?? 0 },
+      { name: 'Di chuyển', count: categoryCount.get('Di chuyển') ?? 0 },
+      { name: 'Dịch vụ', count: categoryCount.get('Dịch vụ') ?? 0 },
+    ];
+  }, [vouchers]);
+
+  const normalizedQuery = deferredSearchTerm.trim().toLowerCase();
+  const filteredVouchers = useMemo(() => {
+    const next = vouchers.filter((voucher) => {
+      if (activeFilter === 'Sắp hết hạn' && voucher.expiryTs > EXPIRING_SOON_MS) {
+        return false;
+      }
+      if (activeFilter !== 'Tất cả' && activeFilter !== 'Sắp hết hạn' && voucher.category !== activeFilter) {
+        return false;
+      }
+      if (!normalizedQuery) {
+        return true;
+      }
+      return voucher.searchIndex.includes(normalizedQuery);
+    });
+
+    next.sort((a, b) => {
       if (sortMode === 'brand') {
         return a.brand.localeCompare(b.brand, 'vi');
       }
-      return parseVoucherDate(a.expiryDate) - parseVoucherDate(b.expiryDate);
+      return a.expiryTs - b.expiryTs;
     });
+
+    return next;
+  }, [activeFilter, normalizedQuery, sortMode, vouchers]);
+
+  const visibleVouchers = useMemo(
+    () => filteredVouchers.slice(0, visibleCount),
+    [filteredVouchers, visibleCount]
+  );
+
+  const hasMoreVouchers = visibleCount < filteredVouchers.length;
 
   return (
     <div className="dashboard-layout">
@@ -229,7 +354,9 @@ export default function Vouchers() {
             <div className="vouchers-title-area">
               <h1>
                 Voucher của tôi
-                <img src={EMOJIS.gift} alt="Gift" className="title-emoji" />
+                <span className="title-emoji" aria-hidden="true">
+                  <Gift size={22} />
+                </span>
               </h1>
               <p>Tiết kiệm thông minh - Chi tiêu thật vui</p>
             </div>
@@ -239,7 +366,12 @@ export default function Vouchers() {
                   type="text"
                   placeholder="Tìm voucher..."
                   value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    startTransition(() => {
+                      setSearchTerm(nextValue);
+                    });
+                  }}
                 />
                 <Search size={16} className="search-icon" />
               </div>
@@ -308,7 +440,11 @@ export default function Vouchers() {
                   <select 
                     className="filter-dropdown" 
                     value={activeFilter} 
-                    onChange={(e) => setActiveFilter(e.target.value)}
+                    onChange={(event) => {
+                      startTransition(() => {
+                        setActiveFilter(event.target.value);
+                      });
+                    }}
                   >
                     {filters.map(f => (
                       <option key={f.name} value={f.name}>
@@ -319,7 +455,11 @@ export default function Vouchers() {
                   <select
                     className="sort-dropdown"
                     value={sortMode}
-                    onChange={(event) => setSortMode(event.target.value as 'expiring' | 'brand')}
+                    onChange={(event) => {
+                      startTransition(() => {
+                        setSortMode(event.target.value as 'expiring' | 'brand');
+                      });
+                    }}
                   >
                     <option value="expiring">Sắp hết hạn</option>
                     <option value="brand">Theo thương hiệu</option>
@@ -328,7 +468,11 @@ export default function Vouchers() {
                     <button
                       type="button"
                       className={`view-toggle ${viewMode === 'grid' ? 'active' : ''}`}
-                      onClick={() => setViewMode('grid')}
+                      onClick={() => {
+                        startTransition(() => {
+                          setViewMode('grid');
+                        });
+                      }}
                       aria-label="Hiển thị dạng lưới"
                     >
                       <Grid size={16} />
@@ -336,7 +480,11 @@ export default function Vouchers() {
                     <button
                       type="button"
                       className={`view-toggle ${viewMode === 'list' ? 'active' : ''}`}
-                      onClick={() => setViewMode('list')}
+                      onClick={() => {
+                        startTransition(() => {
+                          setViewMode('list');
+                        });
+                      }}
                       aria-label="Hiển thị dạng danh sách"
                     >
                       <List size={16} />
@@ -346,13 +494,16 @@ export default function Vouchers() {
               </div>
 
               <div className={`vouchers-list ${viewMode}-view`}>
-                {filteredVouchers.map(voucher => (
+                {visibleVouchers.map(voucher => (
                   <div key={voucher.id} className="voucher-card" onClick={() => setSelectedVoucher(voucher)}>
                     <div className="voucher-brand-col" style={{ backgroundColor: voucher.brandBg }}>
-                      {voucher.brandLogo}
+                      <img src={voucher.brandLogoUrl} alt={voucher.brand} className="brand-logo-img" loading="lazy" />
                     </div>
                     <div className="voucher-content-col">
                       <div className="voucher-category" style={{ backgroundColor: voucher.categoryColor }}>
+                        <span className="voucher-category-icon" aria-hidden="true">
+                          {renderCategoryIcon(voucher.category)}
+                        </span>
                         {voucher.category}
                       </div>
                       <h4 className="voucher-title">{voucher.title}</h4>
@@ -371,6 +522,16 @@ export default function Vouchers() {
                   </div>
                 )}
               </div>
+
+              {hasMoreVouchers && (
+                <button
+                  type="button"
+                  className="btn-load-more"
+                  onClick={() => setVisibleCount((current) => current + INITIAL_VISIBLE_COUNT)}
+                >
+                  Xem thêm voucher
+                </button>
+              )}
 
               <div className="voucher-footer-note">
                 <Info size={14} /> Voucher có thể có điều kiện áp dụng và số lượng giới hạn.
@@ -395,7 +556,9 @@ export default function Vouchers() {
                         {promo.ctaText}
                       </button>
                     </div>
-                    <img src={promo.bannerUrl} alt={promo.brand} className="promo-image" />
+                    <div className="promo-image" aria-hidden="true">
+                      {renderPromoIcon(promo.icon)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -415,7 +578,7 @@ export default function Vouchers() {
             
             <div className="modal-header">
               <div className="modal-brand-logo" style={{ backgroundColor: selectedVoucher.brandBg }}>
-                {selectedVoucher.brandLogo}
+                <img src={selectedVoucher.brandLogoUrl} alt={selectedVoucher.brand} className="brand-logo-img" loading="lazy" />
               </div>
               <div className="modal-header-info">
                 <h3>{selectedVoucher.brand}</h3>
