@@ -1,0 +1,103 @@
+.mobile-bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: min(100% - 24px, 520px);
+  padding: 9px 10px;
+  border: 1px solid var(--app-line);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--app-surface) 94%, var(--app-bg));
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgba(36, 35, 31, 0.12);
+  z-index: 120;
+}
+
+.mobile-bottom-nav__item {
+  min-width: 0;
+  flex: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 54px;
+  padding: 7px 4px;
+  border-radius: 16px;
+  color: var(--app-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.mobile-bottom-nav__item:hover {
+  color: var(--app-ink);
+}
+
+.mobile-bottom-nav__item.is-active {
+  color: var(--app-primary-dark);
+  background: var(--app-primary-soft);
+}
+
+.mobile-bottom-nav__item.is-active svg {
+  transform: translateY(-1px);
+}
+
+.mobile-ai-shortcut {
+  position: fixed;
+  right: 18px;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 82px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: var(--app-ink);
+  color: var(--app-surface);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 16px 34px rgba(36, 35, 31, 0.22);
+  z-index: 121;
+}
+
+.mobile-ai-shortcut:hover {
+  color: var(--app-surface);
+  text-decoration: none;
+}
+
+.mobile-ai-shortcut.is-active {
+  background: var(--app-primary-dark);
+}
+
+@media (max-width: 900px) {
+  .mobile-bottom-nav,
+  .mobile-ai-shortcut {
+    display: flex;
+  }
+}
+
+@media (max-width: 560px) {
+  .mobile-bottom-nav {
+    width: calc(100% - 18px);
+  }
+
+  .mobile-bottom-nav__item {
+    font-size: 10px;
+  }
+
+  .mobile-ai-shortcut {
+    right: 14px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}

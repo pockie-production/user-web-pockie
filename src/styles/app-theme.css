@@ -1,0 +1,229 @@
+/* Cross-page visual language. Imported after page CSS so tokens win the cascade. */
+.dashboard-main,
+.wallet-page,
+.goals-page,
+.reports-page,
+.settings-page,
+.login-page {
+  background: var(--app-bg);
+  color: var(--app-ink);
+}
+
+.dashboard-card,
+.wallet-summary-card,
+.wallet-allocation-card,
+.report-card,
+.metric-card,
+.progress-card,
+.mission-card,
+.reward-card,
+.settings-shell,
+.settings-panel,
+.settings-summary,
+.settings-feature-item,
+.date-selector,
+.icon-btn,
+.header-icon-btn,
+.stat-pill,
+.date-picker-btn,
+.export-btn,
+.wallet-action-btn,
+.report-filter-select,
+.btn-outline,
+.settings-back,
+.settings-secondary-btn {
+  border-color: var(--app-line);
+}
+
+.dashboard-card,
+.wallet-summary-card,
+.wallet-allocation-card,
+.report-card,
+.metric-card,
+.progress-card,
+.mission-card,
+.reward-card,
+.settings-shell,
+.settings-panel,
+.settings-summary {
+  box-shadow: var(--app-shadow);
+}
+
+.text-mint,
+.link-view-all,
+.wallet-icon,
+.mood-label,
+.insight-badge,
+.metric-diff.up,
+.section-action,
+.settings-eyebrow,
+.settings-feature-icon,
+.settings-status-icon {
+  color: var(--app-primary-dark) !important;
+}
+
+.bg-mint,
+.wallet-progress-fill,
+.cat-progress-fill,
+.settings-xp-fill {
+  background: var(--app-primary) !important;
+}
+
+.bg-mint-light,
+.settings-feature-badge.is-enabled {
+  background: var(--app-primary-soft) !important;
+  color: var(--app-primary-dark);
+}
+
+.btn-add-wallet,
+.settings-primary-btn,
+.ekyc-banner-btn,
+.banner-btn,
+.btn-popup-confirm {
+  background: var(--app-primary-dark);
+  border-color: var(--app-primary-dark);
+  color: var(--app-surface);
+}
+
+.metric-diff.down,
+.transaction-amount.expense,
+.settings-alert-error,
+.ekyc-error {
+  color: var(--app-danger) !important;
+}
+
+.metric-card.mint,
+.metric-card.blue,
+.metric-card.yellow {
+  border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-line));
+}
+
+.metric-card.danger {
+  border-color: color-mix(in srgb, var(--app-danger) 24%, var(--app-line));
+}
+
+.metric-card.mint::before,
+.metric-card.blue::before,
+.metric-card.yellow::before {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--app-primary-soft) 76%, transparent) 0%, transparent 100%);
+}
+
+.metric-card.danger::before {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--app-danger-soft) 76%, transparent) 0%, transparent 100%);
+}
+
+.metric-card.mint .metric-icon-wrap,
+.metric-card.blue .metric-icon-wrap {
+  background: var(--app-primary-soft);
+  color: var(--app-primary-dark);
+}
+
+.metric-card.yellow .metric-icon-wrap {
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.metric-card.danger .metric-icon-wrap {
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+}
+
+.wallet-summary-card {
+  background:
+    linear-gradient(135deg, var(--app-primary-soft) 0%, var(--app-surface) 72%),
+    var(--app-surface);
+}
+
+.wallet-card.mb-bank,
+.wallet-card.zalopay {
+  background: linear-gradient(135deg, var(--app-primary-dark) 0%, var(--app-primary) 100%);
+}
+
+.wallet-card.momo {
+  background: linear-gradient(135deg, var(--app-ink) 0%, var(--app-primary-dark) 100%);
+}
+
+.wallet-card.cash {
+  background: linear-gradient(135deg, var(--app-accent) 0%, #b86f20 100%);
+}
+
+.mission-card.mint,
+.mission-card.blue {
+  background: var(--app-primary-soft);
+  border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-line));
+}
+
+.mission-card.yellow,
+.reward-card.yellow,
+.reward-card.mint {
+  background: var(--app-accent-soft);
+  border-color: color-mix(in srgb, var(--app-accent) 22%, var(--app-line));
+}
+
+.mission-card.mint .m-card-icon,
+.mission-card.blue .m-card-icon,
+.p-stat-icon.mint {
+  background: var(--app-surface);
+  color: var(--app-primary-dark);
+}
+
+.mission-card.yellow .m-card-icon,
+.p-stat-icon.yellow,
+.banner-icon,
+.reward-icon-wrapper {
+  background: var(--app-surface);
+  color: var(--app-accent);
+}
+
+.mission-card.mint .m-card-progress-fill,
+.mission-card.blue .m-card-progress-fill {
+  background: var(--app-primary);
+}
+
+.mission-card.yellow .m-card-progress-fill {
+  background: var(--app-accent);
+}
+
+.mission-card.mint .m-card-reward,
+.mission-card.blue .m-card-reward,
+.mission-card.mint .m-card-btn,
+.mission-card.blue .m-card-btn {
+  color: var(--app-primary-dark);
+}
+
+.mission-card.yellow .m-card-reward,
+.mission-card.yellow .m-card-btn,
+.banner-text h4 {
+  color: var(--app-accent);
+}
+
+.mission-banner,
+.ekyc-banner-warning,
+.reward-xp-badge,
+.xp-badge {
+  background: var(--app-accent-soft);
+  border-color: color-mix(in srgb, var(--app-accent) 26%, var(--app-line));
+  color: var(--app-accent);
+}
+
+.ekyc-banner-pending,
+.settings-kyc-verified {
+  background: var(--app-primary-soft);
+  border-color: color-mix(in srgb, var(--app-primary) 26%, var(--app-line));
+  color: var(--app-primary-dark);
+}
+
+.m-card-progress-bar,
+.wallet-progress-bar,
+.cat-progress-bar,
+.settings-xp-track {
+  background: var(--app-line);
+}
+
+.spark-line {
+  stroke: var(--app-danger) !important;
+}
+
+.spark-dot {
+  fill: var(--app-danger) !important;
+}

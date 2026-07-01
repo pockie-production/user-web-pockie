@@ -155,13 +155,13 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
             <button className="header-icon-btn">
               <Bell size={20} />
               {/* Notification dot */}
-              <div style={{ position: 'absolute', top: 8, right: 10, width: 8, height: 8, background: '#EF4444', borderRadius: '50%', border: '2px solid white' }}></div>
+              <div style={{ position: 'absolute', top: 8, right: 10, width: 8, height: 8, background: 'var(--app-danger)', borderRadius: '50%', border: '2px solid white' }}></div>
             </button>
             <div className="header-avatar">
               {profile?.avatarUrl ? (
                 <img src={profile.avatarUrl} alt="Avatar" />
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#E5E7EB', fontWeight: 'bold' }}>
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--app-line)', fontWeight: 'bold' }}>
                   {profile?.displayName?.[0]?.toUpperCase() || 'U'}
                 </div>
               )}
@@ -184,8 +184,8 @@ export default function Goals({ isEmbedded = false }: { isEmbedded?: boolean }) 
                   <svg className="level-circle-svg" viewBox="0 0 100 100">
                     <defs>
                       <linearGradient id="yellow-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FCD34D" />
-                        <stop offset="100%" stopColor="#F59E0B" />
+                        <stop offset="0%" stopColor="var(--app-accent)" />
+                        <stop offset="100%" stopColor="var(--app-primary)" />
                       </linearGradient>
                     </defs>
                     <circle className="level-circle-bg" cx="50" cy="50" r="45" />

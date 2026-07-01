@@ -119,6 +119,7 @@
   /* --- Brand Colors --- */
   --color-mint:          #5CC89C;   /* Pockie Green – chữ logo, CTA chính */
   --color-mint-hover:    #4AB589;   /* Hover state của mint */
+  --color-mint-dark:     #2E8E68;
   --color-mint-light:    #E8F8F2;   /* Background nhẹ, input focus ring */
   --color-mint-border:   rgba(92, 200, 156, 0.4);
 
@@ -141,8 +142,26 @@
 
   /* --- Status --- */
   --color-error:         #E05555;
+  --color-danger:        #C95A4F;
   --color-error-bg:      #FFF5F5;
   --color-success:       var(--color-mint);
+
+  /* --- App Surface System --- */
+  --app-bg:              #FAF6EC;
+  --app-surface:         #FFFFFF;
+  --app-surface-soft:    #F5EFE3;
+  --app-surface-mint:    #EEF8F2;
+  --app-line:            #E3DAC8;
+  --app-ink:             #24231F;
+  --app-muted:           #716B60;
+  --app-primary:         #4FB88C;
+  --app-primary-dark:    #267A5C;
+  --app-primary-soft:    #EAF7F1;
+  --app-accent:          #D89032;
+  --app-accent-soft:     #FFF2D6;
+  --app-danger:          #C95A4F;
+  --app-danger-soft:     #FBE8E4;
+  --app-shadow:          0 12px 32px rgba(36, 35, 31, 0.08);
 
   /* --- Shadow --- */
   --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
