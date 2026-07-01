@@ -11,10 +11,13 @@ import AiChat from './pages/AiChat';
 import Wallet from './pages/Wallet';
 import Goals from './pages/Goals';
 import Reports from './pages/Reports';
+import Vouchers from './pages/Vouchers';
 import { api } from './lib/api';
 import { AUTH_STATE_CHANGED_EVENT } from './lib/authEvents';
 import { trackUserEvent } from './lib/analytics';
 import { GlobalPockie } from './components/GlobalPockie';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import GlobalLoading from './components/GlobalLoading';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { useIsMobileWeb } from './hooks/useIsMobileWeb';
 import './pages/Ekyc/Ekyc.css';
@@ -147,111 +150,121 @@ function App() {
   }, []);
 
   if (isBootstrapping) {
-    return null;
+    return <GlobalLoading />;
   }
 
   return (
-    <BrowserRouter>
-      <RouteTracker isAuthenticated={isAuthenticated} />
-      <MobileChrome isAuthenticated={isAuthenticated} isMobile={isMobile} />
-      <Routes>
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
-        <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ekyc"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <EkycFlow />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/insights"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Insights" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/transactions"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Giao dịch" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/wallet"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Wallet />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/goals"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Goals />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/mission"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Mission" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Reports />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ai-chat"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AiChat />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/categories"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <ComingSoon title="Danh mục chi tiêu" />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
-      </Routes>
-      {isAuthenticated && !isMobile && <GlobalPockie />}
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <RouteTracker isAuthenticated={isAuthenticated} />
+        <MobileChrome isAuthenticated={isAuthenticated} isMobile={isMobile} />
+        <Routes>
+          <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+          <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+          <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+          <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ekyc"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <EkycFlow />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insights"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <ComingSoon title="Insights" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <ComingSoon title="Giao dịch" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Wallet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Goals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mission"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <ComingSoon title="Mission" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-chat"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <AiChat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <ComingSoon title="Danh mục chi tiêu" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vouchers"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Vouchers />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+        </Routes>
+        {isAuthenticated && !isMobile && <GlobalPockie />}
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

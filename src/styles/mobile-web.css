@@ -1206,4 +1206,83 @@
     padding: 10px 14px 12px;
     background: linear-gradient(180deg, rgba(250, 246, 236, 0) 0%, var(--app-bg) 36%);
   }
+
+  body.mobile-web-mode .vouchers-page {
+    padding: 18px 16px 0;
+    gap: 18px;
+  }
+
+  body.mobile-web-mode .vouchers-header,
+  body.mobile-web-mode .vouchers-actions,
+  body.mobile-web-mode .list-header,
+  body.mobile-web-mode .list-controls,
+  body.mobile-web-mode .promos-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  body.mobile-web-mode .search-box input,
+  body.mobile-web-mode .btn-add-voucher,
+  body.mobile-web-mode .filter-dropdown,
+  body.mobile-web-mode .sort-dropdown {
+    width: 100%;
+  }
+
+  body.mobile-web-mode .vouchers-summary-grid,
+  body.mobile-web-mode .vouchers-main-layout,
+  body.mobile-web-mode .vouchers-list.grid-view {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.mobile-web-mode .summary-card,
+  body.mobile-web-mode .summary-promo,
+  body.mobile-web-mode .vouchers-list-section,
+  body.mobile-web-mode .promo-card,
+  body.mobile-web-mode .voucher-modal-content {
+    border-radius: 18px;
+  }
+
+  body.mobile-web-mode .promo-card {
+    padding: 18px;
+  }
+
+  body.mobile-web-mode .promo-content {
+    max-width: 100%;
+    padding-right: 84px;
+  }
+
+  body.mobile-web-mode .promo-image {
+    width: 82px;
+    height: 82px;
+    right: 12px;
+  }
+
+  body.mobile-web-mode .voucher-card,
+  body.mobile-web-mode .vouchers-list.grid-view .voucher-card {
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  body.mobile-web-mode .voucher-brand-col,
+  body.mobile-web-mode .vouchers-list.grid-view .voucher-brand-col {
+    width: 100%;
+    min-height: 108px;
+  }
+
+  body.mobile-web-mode .voucher-content-col,
+  body.mobile-web-mode .vouchers-list.grid-view .voucher-content-col {
+    border-right: none;
+    border-top: 1px dashed var(--app-line);
+  }
+
+  body.mobile-web-mode .voucher-content-col::before,
+  body.mobile-web-mode .voucher-content-col::after {
+    display: none;
+  }
+
+  body.mobile-web-mode .voucher-modal-overlay {
+    padding: 18px 12px;
+  }
 }
