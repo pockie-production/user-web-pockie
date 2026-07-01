@@ -1,6 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Plus, Sparkles, TrendingUp, Target, PiggyBank, Mic, Camera, ChevronRight } from 'lucide-react';
+import {
+  ArrowLeft,
+  Send,
+  Plus,
+  Sparkles,
+  TrendingUp,
+  Target,
+  PiggyBank,
+  Mic,
+  Camera,
+  ChevronRight,
+  MessageSquarePlus,
+} from 'lucide-react';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
 import { api } from '../../lib/api';
@@ -10,11 +22,38 @@ import Reports from '../Reports';
 import Settings from '../Settings';
 import './AiChat.css';
 
+type WorkspaceType = 'none' | 'wallet' | 'goals' | 'reports' | 'settings';
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+}
+
+interface SessionSummary {
+  id: string;
+  title: string;
+  preview: string;
+  workspace?: WorkspaceType;
+  updatedAt: string;
+  createdAt: string;
+}
+
+interface SessionMessagesResponse {
+  session: {
+    id: string;
+    title: string;
+    workspace?: WorkspaceType;
+    createdAt: string;
+    updatedAt: string;
+  };
+  messages: Array<{
+    id: string;
+    role: 'user' | 'assistant' | 'system' | 'tool';
+    content: string;
+    createdAt: string;
+  }>;
 }
 
 const SUGGESTED_PROMPTS = [
@@ -58,14 +97,14 @@ const MockReportView = ({ data }: { data: ReportData }) => (
           Xem gợi ý <ChevronRight size={14} />
         </button>
       </div>
-      
+
       <div style={{ background: 'var(--app-surface)', padding: '12px', borderRadius: '12px', boxShadow: 'var(--app-shadow)', border: '1px solid var(--app-line)', textAlign: 'center', minWidth: '110px' }}>
-         <div style={{ color: 'var(--app-danger)', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: 0 }}>{data.mood || 'NEUTRAL'}</div>
-         <svg width="80" height="30" viewBox="0 0 80 30" style={{ overflow: 'visible' }}>
-           <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="var(--app-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-           <circle cx="75" cy="2" r="3" fill="var(--app-danger)" />
-         </svg>
-         <div style={{ fontSize: '9px', color: 'var(--app-muted)', marginTop: '8px' }}>xu hướng tháng này</div>
+        <div style={{ color: 'var(--app-danger)', fontWeight: 800, fontSize: '14px', marginBottom: '8px', letterSpacing: 0 }}>{data.mood || 'NEUTRAL'}</div>
+        <svg width="80" height="30" viewBox="0 0 80 30" style={{ overflow: 'visible' }}>
+          <path d="M5,25 L20,18 L35,22 L55,10 L75,2" fill="none" stroke="var(--app-danger)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="75" cy="2" r="3" fill="var(--app-danger)" />
+        </svg>
+        <div style={{ fontSize: '9px', color: 'var(--app-muted)', marginTop: '8px' }}>xu hướng tháng này</div>
       </div>
     </div>
 
@@ -100,13 +139,30 @@ const MockReportView = ({ data }: { data: ReportData }) => (
   </div>
 );
 
+function mapApiMessages(messages: SessionMessagesResponse['messages']): Message[] {
+  return messages
+    .filter((message): message is SessionMessagesResponse['messages'][number] & { role: 'user' | 'assistant' } =>
+      message.role === 'user' || message.role === 'assistant',
+    )
+    .map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      timestamp: new Date(message.createdAt),
+    }));
+}
+
 export default function AiChat() {
   const navigate = useNavigate();
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSessionsLoading, setIsSessionsLoading] = useState(true);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [workspaceType, setWorkspaceType] = useState<'none' | 'wallet' | 'goals' | 'reports' | 'settings'>('none');
+  const [workspaceType, setWorkspaceType] = useState<WorkspaceType>('none');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -115,20 +171,34 @@ export default function AiChat() {
       try {
         const res = await api.get('/api/v1/ai/report-view');
         setReportData(res.data);
-      } catch (err) {
+      } catch {
         setReportData(null);
       }
     }
+
+    async function loadSessions() {
+      try {
+        const res = await api.get<SessionSummary[]>('/api/v1/ai/sessions');
+        const nextSessions = Array.isArray(res.data) ? res.data : [];
+        setSessions(nextSessions);
+
+        if (nextSessions.length > 0) {
+          const firstSessionId = nextSessions[0].id;
+          setActiveSessionId(firstSessionId);
+          await loadSessionMessages(firstSessionId);
+        }
+      } finally {
+        setIsSessionsLoading(false);
+      }
+    }
+
     loadReport();
+    loadSessions();
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -137,47 +207,98 @@ export default function AiChat() {
     }
   }, [input]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
-    const userMsg: Message = {
-      id: Date.now().toString(),
+  async function loadSessionMessages(sessionId: string) {
+    setIsMessagesLoading(true);
+    try {
+      const res = await api.get<SessionMessagesResponse>(`/api/v1/ai/sessions/${sessionId}/messages`);
+      setMessages(mapApiMessages(res.data.messages));
+      setWorkspaceType((res.data.session.workspace as WorkspaceType) || 'none');
+      setActiveSessionId(sessionId);
+    } finally {
+      setIsMessagesLoading(false);
+    }
+  }
+
+  async function refreshSessions(preferredSessionId?: string) {
+    const res = await api.get<SessionSummary[]>('/api/v1/ai/sessions');
+    const nextSessions = Array.isArray(res.data) ? res.data : [];
+    setSessions(nextSessions);
+
+    if (preferredSessionId && nextSessions.some((session) => session.id === preferredSessionId)) {
+      setActiveSessionId(preferredSessionId);
+    }
+  }
+
+  async function createSession() {
+    const res = await api.post<{ id: string; title: string; createdAt: string; updatedAt: string }>('/api/v1/ai/sessions');
+    const createdSession: SessionSummary = {
+      id: res.data.id,
+      title: res.data.title,
+      preview: '',
+      workspace: 'none',
+      createdAt: res.data.createdAt,
+      updatedAt: res.data.updatedAt,
+    };
+
+    setSessions((prev) => [createdSession, ...prev.filter((session) => session.id !== createdSession.id)]);
+    setActiveSessionId(createdSession.id);
+    setMessages([]);
+    setWorkspaceType('none');
+    return createdSession.id;
+  }
+
+  async function sendMessage(text: string) {
+    const trimmedText = text.trim();
+    if (!trimmedText || isTyping) return;
+
+    let sessionId = activeSessionId;
+    if (!sessionId) {
+      sessionId = await createSession();
+    }
+
+    const optimisticUserMessage: Message = {
+      id: `local-user-${Date.now()}`,
       role: 'user',
-      content: text.trim(),
+      content: trimmedText,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMsg]);
+
+    setMessages((prev) => [...prev, optimisticUserMessage]);
     setInput('');
     setIsTyping(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
-
-    let content = 'Tôi chưa phân tích được yêu cầu này.';
-    let detectedWorkspace: 'none' | 'wallet' | 'goals' | 'reports' | 'settings' = 'none';
-
     try {
-      const res = await api.post('/api/v1/ai/chat', { message: text.trim() });
-      content = res.data.reply;
-      detectedWorkspace = res.data.workspace || 'none';
-    } catch (err) {
-      content = 'Pockie AI tạm thời chưa phản hồi được. Vui lòng thử lại sau.';
+      const res = await api.post(`/api/v1/ai/sessions/${sessionId}/messages`, { message: trimmedText });
+      const assistantPayload = res.data?.message;
+      const assistantMessage: Message = {
+        id: assistantPayload?.id || `local-assistant-${Date.now()}`,
+        role: 'assistant',
+        content: assistantPayload?.content || res.data?.reply || 'Pockie AI tạm thời chưa phản hồi được.',
+        timestamp: assistantPayload?.createdAt ? new Date(assistantPayload.createdAt) : new Date(),
+      };
+
+      setWorkspaceType((res.data?.workspace as WorkspaceType) || 'none');
+      setMessages((prev) => [...prev, assistantMessage]);
+      await refreshSessions(sessionId);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `local-assistant-error-${Date.now()}`,
+          role: 'assistant',
+          content: 'Pockie AI tạm thời chưa phản hồi được. Vui lòng thử lại sau.',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
     }
+  }
 
-    setWorkspaceType(detectedWorkspace);
-
-    const botMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, botMsg]);
-    setIsTyping(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(input);
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void sendMessage(input);
     }
   };
 
@@ -188,10 +309,10 @@ export default function AiChat() {
     <div className={`chat-input-wrapper ${isEmpty ? 'centered-input' : ''}`}>
       {!isEmpty && (
         <div className="chat-suggestions-row">
-          {SUGGESTED_PROMPTS.slice(0, 2).map((p, i) => (
-            <button key={i} className="chat-suggestion-chip small" onClick={() => sendMessage(p.text)}>
-              <p.icon size={13} className="chip-icon" />
-              {p.text}
+          {SUGGESTED_PROMPTS.slice(0, 2).map((prompt, index) => (
+            <button key={index} className="chat-suggestion-chip small" onClick={() => void sendMessage(prompt.text)}>
+              <prompt.icon size={13} className="chip-icon" />
+              {prompt.text}
             </button>
           ))}
         </div>
@@ -205,7 +326,7 @@ export default function AiChat() {
           className="chat-input"
           placeholder="Hỏi Pockie..."
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
         />
@@ -218,8 +339,8 @@ export default function AiChat() {
           </button>
           <button
             className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim()}
+            onClick={() => void sendMessage(input)}
+            disabled={!input.trim() || isTyping}
             aria-label="Gửi"
           >
             <Send size={16} />
@@ -232,7 +353,6 @@ export default function AiChat() {
 
   return (
     <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''}`}>
-      {/* Chat Panel (Bên trái) */}
       <div className="agent-chat-panel">
         <header className="chat-header">
           <button className="chat-back-btn" onClick={() => navigate('/dashboard')}>
@@ -248,8 +368,32 @@ export default function AiChat() {
               </div>
             </div>
           </div>
+          <button className="chat-new-session-btn" onClick={() => void createSession()} aria-label="Tạo cuộc trò chuyện mới">
+            <MessageSquarePlus size={16} />
+            Cuộc trò chuyện mới
+          </button>
           <div className="chat-header-badge">BETA</div>
         </header>
+
+        <div className="chat-session-strip">
+          {isSessionsLoading ? (
+            <div className="chat-session-empty">Đang tải lịch sử chat...</div>
+          ) : sessions.length === 0 ? (
+            <div className="chat-session-empty">Chưa có phiên chat nào, hãy bắt đầu câu hỏi đầu tiên.</div>
+          ) : (
+            sessions.map((session) => (
+              <button
+                key={session.id}
+                type="button"
+                className={`chat-session-chip ${activeSessionId === session.id ? 'active' : ''}`}
+                onClick={() => void loadSessionMessages(session.id)}
+              >
+                <span className="chat-session-chip-title">{session.title}</span>
+                <span className="chat-session-chip-preview">{session.preview || 'Cuộc trò chuyện mới'}</span>
+              </button>
+            ))
+          )}
+        </div>
 
         <main className="chat-messages-area">
           {isEmpty ? (
@@ -259,44 +403,44 @@ export default function AiChat() {
               <PockieSprite size={120} variant="shy" className="chat-welcome-sprite" />
 
               <h1 className="chat-welcome-title">Xin chào! Tôi có thể<br />giúp gì cho bạn?</h1>
-              
+
               {renderInputBar()}
               <div className="chat-suggestions">
-                {SUGGESTED_PROMPTS.map((p, i) => (
+                {SUGGESTED_PROMPTS.map((prompt, index) => (
                   <button
-                    key={i}
+                    key={index}
                     className="chat-suggestion-chip"
-                    onClick={() => sendMessage(p.text)}
+                    onClick={() => void sendMessage(prompt.text)}
                   >
-                    <p.icon size={16} className="chip-icon" />
-                    {p.text}
+                    <prompt.icon size={16} className="chip-icon" />
+                    {prompt.text}
                   </button>
                 ))}
               </div>
             </div>
           ) : (
             <div className="chat-messages-list">
-              {messages.map(msg => (
-                <div key={msg.id} className={`chat-message-row ${msg.role}`}>
-                  {msg.role === 'assistant' && (
+              {messages.map((message) => (
+                <div key={message.id} className={`chat-message-row ${message.role}`}>
+                  {message.role === 'assistant' && (
                     <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
                   )}
-                  <div className={`chat-bubble ${msg.role}`}>
+                  <div className={`chat-bubble ${message.role}`}>
                     <div
                       className="chat-bubble-text"
                       dangerouslySetInnerHTML={{
-                        __html: msg.content
+                        __html: message.content
                           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                           .replace(/\n/g, '<br/>'),
                       }}
                     />
                     <span className="chat-bubble-time">
-                      {msg.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                      {message.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 </div>
               ))}
-              {isTyping && (
+              {(isTyping || isMessagesLoading) && (
                 <div className="chat-message-row assistant">
                   <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
                   <div className="chat-bubble assistant chat-typing">
@@ -311,7 +455,6 @@ export default function AiChat() {
         {!isEmpty && renderInputBar()}
       </div>
 
-      {/* Workspace Panel (Bên phải) */}
       {hasWorkspace && (
         <div className="agent-workspace-panel">
           <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>

@@ -177,6 +177,101 @@
   padding: 4px 9px;
 }
 
+.chat-new-session-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 20%, var(--app-line));
+  background: var(--app-surface);
+  color: var(--app-primary-dark);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.chat-new-session-btn:hover {
+  background: var(--app-primary-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(38, 122, 92, 0.12);
+}
+
+.chat-session-strip {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 14px 24px 10px;
+  border-bottom: 1px solid var(--app-line);
+  background: color-mix(in srgb, var(--app-bg) 92%, white);
+}
+
+.chat-session-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chat-session-strip::-webkit-scrollbar-thumb {
+  background: var(--app-line);
+  border-radius: 999px;
+}
+
+.chat-session-chip {
+  min-width: 200px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--app-line);
+  background: var(--app-surface);
+  box-shadow: 0 8px 20px rgba(36, 35, 31, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.chat-session-chip:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--app-primary) 40%, var(--app-line));
+}
+
+.chat-session-chip.active {
+  background: var(--app-primary-soft);
+  border-color: color-mix(in srgb, var(--app-primary) 42%, var(--app-line));
+  box-shadow: 0 10px 24px rgba(38, 122, 92, 0.12);
+}
+
+.chat-session-chip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.chat-session-chip-preview {
+  font-size: 11px;
+  color: var(--app-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.chat-session-empty {
+  font-size: 12px;
+  color: var(--app-muted);
+  padding: 6px 0 4px;
+}
+
 /* =========================================
    Messages Area
    ========================================= */
