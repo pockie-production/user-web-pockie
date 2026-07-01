@@ -11,6 +11,7 @@
   padding: 32px 48px;
   box-sizing: border-box;
   margin: 0 auto;
+  box-shadow: none;
 }
 
 .settings-header {
@@ -361,6 +362,7 @@
 }
 
 @media (max-width: 900px) {
+
   .settings-grid,
   .settings-summary {
     grid-template-columns: 1fr;

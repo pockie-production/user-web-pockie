@@ -911,14 +911,18 @@
   body.mobile-web-mode .progress-card,
   body.mobile-web-mode .mission-card,
   body.mobile-web-mode .reward-card,
-  body.mobile-web-mode .settings-shell,
-  body.mobile-web-mode .settings-panel,
-  body.mobile-web-mode .settings-summary,
-  body.mobile-web-mode .settings-feature-item,
   body.mobile-web-mode .notifications-popup {
     background: var(--app-surface);
     border: 1px solid var(--app-line);
     box-shadow: var(--app-shadow);
+  }
+
+  body.mobile-web-mode .settings-shell,
+  body.mobile-web-mode .settings-panel,
+  body.mobile-web-mode .settings-summary,
+  body.mobile-web-mode .settings-feature-item {
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
   }
 
   body.mobile-web-mode .date-selector,
@@ -993,7 +997,6 @@
 
   body.mobile-web-mode .ekyc-banner-warning,
   body.mobile-web-mode .mission-banner,
-  body.mobile-web-mode .reward-xp-badge,
   body.mobile-web-mode .xp-badge,
   body.mobile-web-mode .stat-pill.streak,
   body.mobile-web-mode .stat-pill.gems {
@@ -1012,8 +1015,7 @@
 
   body.mobile-web-mode .ekyc-banner-icon,
   body.mobile-web-mode .banner-icon,
-  body.mobile-web-mode .mood-trend-icon,
-  body.mobile-web-mode .reward-icon-wrapper {
+  body.mobile-web-mode .mood-trend-icon {
     background: var(--app-accent-soft);
     color: var(--app-accent);
   }

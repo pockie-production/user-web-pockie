@@ -5,7 +5,7 @@
 .reports-page,
 .settings-page,
 .login-page {
-  background: var(--app-bg);
+
   color: var(--app-ink);
 }
 
@@ -42,10 +42,7 @@
 .metric-card,
 .progress-card,
 .mission-card,
-.reward-card,
-.settings-shell,
-.settings-panel,
-.settings-summary {
+.reward-card {
   box-shadow: var(--app-shadow);
 }
 
@@ -169,8 +166,7 @@
 
 .mission-card.yellow .m-card-icon,
 .p-stat-icon.yellow,
-.banner-icon,
-.reward-icon-wrapper {
+.banner-icon {
   background: var(--app-surface);
   color: var(--app-accent);
 }
@@ -199,7 +195,6 @@
 
 .mission-banner,
 .ekyc-banner-warning,
-.reward-xp-badge,
 .xp-badge {
   background: var(--app-accent-soft);
   border-color: color-mix(in srgb, var(--app-accent) 26%, var(--app-line));
