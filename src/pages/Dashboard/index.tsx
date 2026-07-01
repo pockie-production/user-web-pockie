@@ -610,9 +610,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div 
-            className="dashboard-card card-wallet col-span-7" 
-            onClick={() => navigate('/wallet')} 
+          <div
+            className="dashboard-card card-wallet col-span-7"
+            onClick={() => navigate('/wallet')}
             style={{ cursor: 'pointer' }}
           >
             <div className="wallet-header">

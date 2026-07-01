@@ -205,8 +205,10 @@
    ========================================= */
 .dashboard-main {
   flex: 1;
-  padding: 32px 48px; /* Tăng nhẹ padding để nội dung thở tốt hơn khi mở rộng */
-  max-width: 1500px; /* Tăng max-width lên 1500px để giảm lề 2 bên */
+  padding: 32px 48px;
+  /* Tăng nhẹ padding để nội dung thở tốt hơn khi mở rộng */
+  max-width: 1500px;
+  /* Tăng max-width lên 1500px để giảm lề 2 bên */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -363,7 +365,8 @@
   left: 0;
   top: 0;
   transition: transform 1s ease-out;
-  touch-action: none; /* Prevent scroll while dragging on touch */
+  touch-action: none;
+  /* Prevent scroll while dragging on touch */
 }
 
 .fab-ai-chat:active,
@@ -385,7 +388,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible; /* Cho phép con ma tự do */
+  overflow: visible;
+  /* Cho phép con ma tự do */
   border: none;
   box-shadow: none;
   transition: transform 0.2s ease;
@@ -397,13 +401,15 @@
 
 .fab-bubble {
   position: absolute;
-  top: -20px; /* Điều chỉnh lại vì container đã to lên 140px */
+  top: -20px;
+  /* Điều chỉnh lại vì container đã to lên 140px */
   right: 0px;
   background: var(--color-white);
   color: var(--color-text-primary);
   padding: 8px 14px;
   border-radius: 16px;
-  border-bottom-right-radius: 4px; /* Hình dáng bong bóng thoại */
+  border-bottom-right-radius: 4px;
+  /* Hình dáng bong bóng thoại */
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -413,7 +419,8 @@
   transform: translateY(10px) scale(0.9);
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: -1; /* Nằm dưới con ma một chút xíu để không che mất chóp đầu nếu dính */
+  z-index: -1;
+  /* Nằm dưới con ma một chút xíu để không che mất chóp đầu nếu dính */
 }
 
 .fab-bubble.visible {
@@ -770,7 +777,7 @@
   background: #fff;
   padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   text-align: center;
   min-width: 110px;
   display: flex;
@@ -1350,6 +1357,7 @@
   height: 100%;
   border-radius: 3px;
 }
+
 /* =========================================
    eKYC Banner
    ========================================= */
@@ -1482,7 +1490,7 @@
   justify-content: center;
   color: var(--color-mint);
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .notif-content h4 {
@@ -1505,4 +1513,3 @@
   margin-top: 6px;
   display: block;
 }
-
