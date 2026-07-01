@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -8,11 +8,15 @@ import {
   TrendingUp,
   Target,
   PiggyBank,
-  Mic,
-  Camera,
   ChevronRight,
   MessageSquarePlus,
+  Menu,
+  X,
+  Image as ImageIcon,
+  RotateCcw
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
 import { api } from '../../lib/api';
@@ -29,6 +33,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  isError?: boolean;
 }
 
 interface SessionSummary {
@@ -163,8 +168,11 @@ export default function AiChat() {
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>('none');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadReport() {
@@ -244,6 +252,9 @@ export default function AiChat() {
     setActiveSessionId(createdSession.id);
     setMessages([]);
     setWorkspaceType('none');
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    }
     return createdSession.id;
   }
 
@@ -288,6 +299,7 @@ export default function AiChat() {
           role: 'assistant',
           content: 'Pockie AI tạm thời chưa phản hồi được. Vui lòng thử lại sau.',
           timestamp: new Date(),
+          isError: true,
         },
       ]);
     } finally {
@@ -299,6 +311,22 @@ export default function AiChat() {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       void sendMessage(input);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const msg = `[Đã tải lên hóa đơn: ${file.name}] Phân tích hóa đơn này giúp tôi.`;
+      void sendMessage(msg);
+    }
+  };
+
+  const handleRetry = () => {
+    // Find last user message
+    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMessage) {
+      void sendMessage(lastUserMessage.content);
     }
   };
 
@@ -331,11 +359,16 @@ export default function AiChat() {
           rows={1}
         />
         <div className="chat-input-actions">
-          <button className="chat-action-btn" aria-label="Giọng nói">
-            <Mic size={18} />
-          </button>
-          <button className="chat-action-btn" aria-label="Quét hóa đơn">
-            <Camera size={18} />
+          {/* File Upload Hidden Input */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+            style={{ display: 'none' }} 
+            accept="image/*,.pdf"
+          />
+          <button className="chat-action-btn" aria-label="Tải lên ảnh" onClick={() => fileInputRef.current?.click()}>
+            <ImageIcon size={18} />
           </button>
           <button
             className={`chat-send-btn ${input.trim() ? 'active' : ''}`}
@@ -353,8 +386,52 @@ export default function AiChat() {
 
   return (
     <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''}`}>
+      
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && <div className="chat-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
+      
+      {/* Sidebar History */}
+      <aside className={`chat-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <button className="chat-new-session-btn" onClick={() => void createSession()} aria-label="Tạo cuộc trò chuyện mới">
+            <MessageSquarePlus size={16} />
+            Phiên chat mới
+          </button>
+          <button className="sidebar-close-btn mobile-only" onClick={() => setIsSidebarOpen(false)}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="sidebar-sessions">
+          {isSessionsLoading ? (
+            <div className="chat-session-empty">Đang tải lịch sử chat...</div>
+          ) : sessions.length === 0 ? (
+            <div className="chat-session-empty">Chưa có phiên chat nào, hãy bắt đầu câu hỏi đầu tiên.</div>
+          ) : (
+            sessions.map((session) => (
+              <button
+                key={session.id}
+                type="button"
+                className={`chat-session-chip ${activeSessionId === session.id ? 'active' : ''}`}
+                onClick={() => {
+                  void loadSessionMessages(session.id);
+                  if (window.innerWidth <= 768) {
+                    setIsSidebarOpen(false);
+                  }
+                }}
+              >
+                <span className="chat-session-chip-title">{session.title}</span>
+                <span className="chat-session-chip-preview">{session.preview || 'Cuộc trò chuyện mới'}</span>
+              </button>
+            ))
+          )}
+        </div>
+      </aside>
+
       <div className="agent-chat-panel">
         <header className="chat-header">
+          <button className="chat-menu-btn" onClick={() => setIsSidebarOpen(true)}>
+            <Menu size={20} />
+          </button>
           <button className="chat-back-btn" onClick={() => navigate('/dashboard')}>
             <ArrowLeft size={20} />
           </button>
@@ -368,32 +445,8 @@ export default function AiChat() {
               </div>
             </div>
           </div>
-          <button className="chat-new-session-btn" onClick={() => void createSession()} aria-label="Tạo cuộc trò chuyện mới">
-            <MessageSquarePlus size={16} />
-            Cuộc trò chuyện mới
-          </button>
           <div className="chat-header-badge">BETA</div>
         </header>
-
-        <div className="chat-session-strip">
-          {isSessionsLoading ? (
-            <div className="chat-session-empty">Đang tải lịch sử chat...</div>
-          ) : sessions.length === 0 ? (
-            <div className="chat-session-empty">Chưa có phiên chat nào, hãy bắt đầu câu hỏi đầu tiên.</div>
-          ) : (
-            sessions.map((session) => (
-              <button
-                key={session.id}
-                type="button"
-                className={`chat-session-chip ${activeSessionId === session.id ? 'active' : ''}`}
-                onClick={() => void loadSessionMessages(session.id)}
-              >
-                <span className="chat-session-chip-title">{session.title}</span>
-                <span className="chat-session-chip-preview">{session.preview || 'Cuộc trò chuyện mới'}</span>
-              </button>
-            ))
-          )}
-        </div>
 
         <main className="chat-messages-area">
           {isEmpty ? (
@@ -425,15 +478,21 @@ export default function AiChat() {
                   {message.role === 'assistant' && (
                     <img src={mascot} alt="Pockie" className="chat-bubble-avatar" />
                   )}
-                  <div className={`chat-bubble ${message.role}`}>
-                    <div
-                      className="chat-bubble-text"
-                      dangerouslySetInnerHTML={{
-                        __html: message.content
-                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\n/g, '<br/>'),
-                      }}
-                    />
+                  <div className={`chat-bubble ${message.role} ${message.isError ? 'error' : ''}`}>
+                    <div className="chat-bubble-text markdown-body">
+                      {message.role === 'assistant' ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {message.content}
+                        </ReactMarkdown>
+                      ) : (
+                        message.content
+                      )}
+                    </div>
+                    {message.isError && (
+                      <button className="chat-retry-btn" onClick={handleRetry}>
+                        <RotateCcw size={12} /> Thử lại
+                      </button>
+                    )}
                     <span className="chat-bubble-time">
                       {message.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -457,7 +516,12 @@ export default function AiChat() {
 
       {hasWorkspace && (
         <div className="agent-workspace-panel">
-          <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%' }}>
+          <div className="workspace-mobile-header mobile-only">
+            <button className="workspace-close-btn" onClick={() => setWorkspaceType('none')}>
+              <X size={20} /> Đóng không gian làm việc
+            </button>
+          </div>
+          <div key={workspaceType} className="workspace-fade-in" style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
             {workspaceType === 'reports' && reportData && <MockReportView data={reportData} />}
             {workspaceType === 'wallet' && <Wallet isEmbedded={true} />}
             {workspaceType === 'goals' && <Goals isEmbedded={true} />}
