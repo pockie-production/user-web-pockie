@@ -1,4 +1,4 @@
-import { Home, MessageSquare, PieChart, Settings, Target, Wallet } from 'lucide-react';
+import { Gift, Home, MessageSquare, PieChart, Settings, Target, Wallet } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import './MobileBottomNav.css';
 
@@ -6,6 +6,7 @@ const items = [
   { label: 'Home', to: '/dashboard', icon: Home, end: true },
   { label: 'Wallet', to: '/wallet', icon: Wallet },
   { label: 'Goals', to: '/goals', icon: Target },
+  { label: 'Voucher', to: '/vouchers', icon: Gift },
   { label: 'Reports', to: '/reports', icon: PieChart },
   { label: 'Me', to: '/settings', icon: Settings },
 ];

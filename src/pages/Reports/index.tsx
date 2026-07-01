@@ -62,6 +62,25 @@ type TransactionApiItem = {
   icon?: string | null;
 };
 
+const FALLBACK_OVERVIEW: ReportOverview = {
+  income: '0 ₫',
+  incomeDiff: 0,
+  expense: '0 ₫',
+  expenseDiff: 0,
+  balance: '0 ₫',
+  balanceDiff: 0,
+  savingsRate: 0,
+  savingsDiff: 0,
+};
+
+const FALLBACK_TRENDS: TrendDataPoint[] = [
+  { date: 'T2', income: 0, expense: 0 },
+  { date: 'T3', income: 0, expense: 0 },
+  { date: 'T4', income: 0, expense: 0 },
+  { date: 'T5', income: 0, expense: 0 },
+  { date: 'T6', income: 0, expense: 0 },
+];
+
 const CATEGORY_COLORS = [
   'var(--app-primary)',
   'var(--app-accent)',
@@ -137,18 +156,21 @@ export default function Reports({ isEmbedded = false }: { isEmbedded?: boolean }
         ]);
         // Safe fallbacks to prevent empty rendering when API returns {}
         const rawOv = ovRes?.data?.data || ovRes?.data;
-        setOverview(rawOv && rawOv.income ? rawOv : MOCK_OVERVIEW);
+        setOverview(rawOv && rawOv.income ? rawOv : FALLBACK_OVERVIEW);
         
         const rawTr = trRes?.data?.data || trRes?.data;
-        setTrends(Array.isArray(rawTr) && rawTr.length > 0 ? rawTr : MOCK_TRENDS);
+        setTrends(Array.isArray(rawTr) && rawTr.length > 0 ? rawTr : FALLBACK_TRENDS);
         
         const rawCat = catRes?.data?.data || catRes?.data;
-        setCategories(Array.isArray(rawCat) && rawCat.length > 0 ? rawCat : MOCK_CATEGORIES);
+        setCategories(normalizeCategories(rawCat));
         
         const rawTxn = txnRes?.data?.data || txnRes?.data;
-        setTransactions(Array.isArray(rawTxn) && rawTxn.length > 0 ? rawTxn : MOCK_TRANSACTIONS);
+        setTransactions(normalizeTransactions(rawTxn));
       } catch (err) {
-        // Mocks are already initial state
+        setOverview(FALLBACK_OVERVIEW);
+        setTrends(FALLBACK_TRENDS);
+        setCategories([]);
+        setTransactions([]);
       }
     }
     fetchReportData();

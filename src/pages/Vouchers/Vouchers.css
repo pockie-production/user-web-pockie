@@ -261,15 +261,21 @@
 }
 
 .sort-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   padding: 6px 12px;
   background-color: #F9FAFB;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  border: 1px solid transparent;
+  color: var(--color-text-primary);
+  outline: none;
+  appearance: auto;
+}
+
+.sort-dropdown:focus {
+  border-color: var(--color-mint);
+  background-color: white;
 }
 
 .view-toggles {
@@ -300,6 +306,12 @@
   gap: 16px;
 }
 
+.vouchers-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .voucher-card {
   display: flex;
   border: 1px solid var(--color-border);
@@ -308,6 +320,16 @@
   min-height: 120px;
   position: relative;
   cursor: pointer;
+}
+
+.vouchers-list.grid-view .voucher-card {
+  min-height: 260px;
+  flex-direction: column;
+}
+
+.vouchers-list.grid-view .voucher-brand-col {
+  width: 100%;
+  min-height: 112px;
 }
 
 .voucher-hover-overlay {
@@ -370,6 +392,11 @@
   position: relative;
 }
 
+.vouchers-list.grid-view .voucher-content-col {
+  border-right: none;
+  border-top: 1px dashed var(--color-border);
+}
+
 /* The dotted cutouts on the sides */
 .voucher-content-col::before,
 .voucher-content-col::after {
@@ -396,6 +423,11 @@
   border-top-color: transparent;
   border-left-color: transparent;
   transform: rotate(45deg);
+}
+
+.vouchers-list.grid-view .voucher-content-col::before,
+.vouchers-list.grid-view .voucher-content-col::after {
+  display: none;
 }
 
 .voucher-category {
@@ -430,6 +462,26 @@
   margin-top: 24px;
   color: var(--color-text-muted);
   font-size: 13px;
+}
+
+.voucher-empty-state {
+  padding: 28px 20px;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+  background: var(--color-cream);
+}
+
+.voucher-empty-state h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.voucher-empty-state p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 /* Promos Section */
@@ -659,4 +711,16 @@
   background-color: var(--color-mint-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px var(--color-mint-border);
+}
+
+@media (max-width: 1100px) {
+  .vouchers-summary-grid,
+  .vouchers-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .vouchers-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Search, Plus, List, Grid, ChevronDown, Ticket, Wallet, Clock, Info, X } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Search, Plus, List, Grid, Ticket, Wallet, Clock, Info, X } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { api } from '../../lib/api';
 import mascot from '../../assets/mascot.png';
@@ -19,7 +19,7 @@ interface VoucherStats {
 interface VoucherItem {
   id: string;
   brand: string;
-  brandLogo: string | React.ReactNode;
+  brandLogo: string | ReactNode;
   category: string;
   categoryColor: string;
   title: string;
@@ -148,11 +148,19 @@ const EMOJIS = {
   service: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Briefcase/3D/briefcase_3d.png'
 };
 
+function parseVoucherDate(value: string) {
+  const [day, month, year] = value.split('/').map(Number);
+  return new Date(year, month - 1, day).getTime();
+}
+
 export default function Vouchers() {
   const [stats, setStats] = useState<VoucherStats>(MOCK_STATS);
   const [vouchers, setVouchers] = useState<VoucherItem[]>(MOCK_VOUCHERS);
   const [promos, setPromos] = useState<PromoItem[]>(MOCK_PROMOS);
+  const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tất cả');
+  const [sortMode, setSortMode] = useState<'expiring' | 'brand'>('expiring');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedVoucher, setSelectedVoucher] = useState<VoucherItem | null>(null);
 
   useEffect(() => {
@@ -181,13 +189,34 @@ export default function Vouchers() {
   }, []);
 
   const filters = [
-    { name: 'Tất cả', count: 12 },
-    { name: 'Sắp hết hạn', count: 3 },
-    { name: 'Mua sắm', count: 4 },
-    { name: 'Ăn uống', count: 5 },
-    { name: 'Di chuyển', count: 2 },
-    { name: 'Dịch vụ', count: 1 },
+    { name: 'Tất cả', count: vouchers.length },
+    { name: 'Sắp hết hạn', count: vouchers.filter((voucher) => parseVoucherDate(voucher.expiryDate) <= parseVoucherDate('31/05/2025')).length },
+    { name: 'Mua sắm', count: vouchers.filter((voucher) => voucher.category === 'Mua sắm').length },
+    { name: 'Ăn uống', count: vouchers.filter((voucher) => voucher.category === 'Ăn uống').length },
+    { name: 'Di chuyển', count: vouchers.filter((voucher) => voucher.category === 'Di chuyển').length },
+    { name: 'Dịch vụ', count: vouchers.filter((voucher) => voucher.category === 'Dịch vụ').length },
   ];
+
+  const normalizedQuery = searchTerm.trim().toLowerCase();
+  const filteredVouchers = vouchers
+    .filter((voucher) => {
+      if (activeFilter === 'Tất cả') return true;
+      if (activeFilter === 'Sắp hết hạn') {
+        return parseVoucherDate(voucher.expiryDate) <= parseVoucherDate('31/05/2025');
+      }
+      return voucher.category === activeFilter;
+    })
+    .filter((voucher) => {
+      if (!normalizedQuery) return true;
+      const haystack = `${voucher.brand} ${voucher.title} ${voucher.description} ${voucher.category}`.toLowerCase();
+      return haystack.includes(normalizedQuery);
+    })
+    .sort((a, b) => {
+      if (sortMode === 'brand') {
+        return a.brand.localeCompare(b.brand, 'vi');
+      }
+      return parseVoucherDate(a.expiryDate) - parseVoucherDate(b.expiryDate);
+    });
 
   return (
     <div className="dashboard-layout">
@@ -206,10 +235,15 @@ export default function Vouchers() {
             </div>
             <div className="vouchers-actions">
               <div className="search-box">
-                <input type="text" placeholder="Tìm voucher..." />
+                <input
+                  type="text"
+                  placeholder="Tìm voucher..."
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
                 <Search size={16} className="search-icon" />
               </div>
-              <button className="btn-add-voucher">
+              <button type="button" className="btn-add-voucher">
                 <Plus size={16} /> Nhập mã voucher
               </button>
             </div>
@@ -282,18 +316,37 @@ export default function Vouchers() {
                       </option>
                     ))}
                   </select>
-                  <div className="sort-dropdown">
-                    Mới nhất <ChevronDown size={14} />
-                  </div>
+                  <select
+                    className="sort-dropdown"
+                    value={sortMode}
+                    onChange={(event) => setSortMode(event.target.value as 'expiring' | 'brand')}
+                  >
+                    <option value="expiring">Sắp hết hạn</option>
+                    <option value="brand">Theo thương hiệu</option>
+                  </select>
                   <div className="view-toggles">
-                    <button className="view-toggle"><Grid size={16} /></button>
-                    <button className="view-toggle active"><List size={16} /></button>
+                    <button
+                      type="button"
+                      className={`view-toggle ${viewMode === 'grid' ? 'active' : ''}`}
+                      onClick={() => setViewMode('grid')}
+                      aria-label="Hiển thị dạng lưới"
+                    >
+                      <Grid size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-toggle ${viewMode === 'list' ? 'active' : ''}`}
+                      onClick={() => setViewMode('list')}
+                      aria-label="Hiển thị dạng danh sách"
+                    >
+                      <List size={16} />
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="vouchers-list">
-                {vouchers.map(voucher => (
+              <div className={`vouchers-list ${viewMode}-view`}>
+                {filteredVouchers.map(voucher => (
                   <div key={voucher.id} className="voucher-card" onClick={() => setSelectedVoucher(voucher)}>
                     <div className="voucher-brand-col" style={{ backgroundColor: voucher.brandBg }}>
                       {voucher.brandLogo}
@@ -311,6 +364,12 @@ export default function Vouchers() {
                     </div>
                   </div>
                 ))}
+                {filteredVouchers.length === 0 && (
+                  <div className="voucher-empty-state">
+                    <h4>Không tìm thấy voucher phù hợp</h4>
+                    <p>Thử đổi bộ lọc hoặc từ khóa tìm kiếm để xem thêm ưu đãi.</p>
+                  </div>
+                )}
               </div>
 
               <div className="voucher-footer-note">
@@ -332,7 +391,7 @@ export default function Vouchers() {
                       <span className="promo-brand">{promo.brand}</span>
                       <h4 className="promo-title">{promo.title}</h4>
                       <p className="promo-subtitle">{promo.subtitle}</p>
-                      <button className="btn-promo-cta" style={{ backgroundColor: promo.btnColor }}>
+                      <button type="button" className="btn-promo-cta" style={{ backgroundColor: promo.btnColor }}>
                         {promo.ctaText}
                       </button>
                     </div>
@@ -350,7 +409,7 @@ export default function Vouchers() {
       {selectedVoucher && (
         <div className="voucher-modal-overlay" onClick={() => setSelectedVoucher(null)}>
           <div className="voucher-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="btn-close-modal" onClick={() => setSelectedVoucher(null)}>
+            <button type="button" className="btn-close-modal" onClick={() => setSelectedVoucher(null)}>
               <X size={20} />
             </button>
             
@@ -383,7 +442,7 @@ export default function Vouchers() {
             </div>
             
             <div className="modal-footer">
-              <button className="btn-use-voucher-modal">Sử dụng ngay</button>
+              <button type="button" className="btn-use-voucher-modal">Sử dụng ngay</button>
             </div>
           </div>
         </div>
