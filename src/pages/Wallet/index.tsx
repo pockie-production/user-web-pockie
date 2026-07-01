@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { AddTransactionModal, SmartScanModal, AddWalletModal } from './WalletModals';
+import { CameraScanner } from './CameraScanner';
 import './Wallet.css';
 
 
@@ -60,6 +61,7 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
   // Modal states
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
   const [isSmartScanOpen, setIsSmartScanOpen] = useState(false);
+  const [isCameraScannerOpen, setIsCameraScannerOpen] = useState(false);
   const [isAddWalletOpen, setIsAddWalletOpen] = useState(false);
 
   React.useEffect(() => {
@@ -405,7 +407,15 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
       <Sidebar />
       {content}
       <AddTransactionModal isOpen={isAddTxOpen} onClose={() => setIsAddTxOpen(false)} />
-      <SmartScanModal isOpen={isSmartScanOpen} onClose={() => setIsSmartScanOpen(false)} />
+      <SmartScanModal 
+        isOpen={isSmartScanOpen} 
+        onClose={() => setIsSmartScanOpen(false)} 
+        onOpenCamera={() => {
+          setIsSmartScanOpen(false);
+          setIsCameraScannerOpen(true);
+        }}
+      />
+      <CameraScanner isOpen={isCameraScannerOpen} onClose={() => setIsCameraScannerOpen(false)} />
       <AddWalletModal isOpen={isAddWalletOpen} onClose={() => setIsAddWalletOpen(false)} />
     </div>
   );

@@ -51,7 +51,11 @@ export function AddTransactionModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-export function SmartScanModal({ isOpen, onClose }: ModalProps) {
+interface SmartScanModalProps extends ModalProps {
+  onOpenCamera?: () => void;
+}
+
+export function SmartScanModal({ isOpen, onClose, onOpenCamera }: SmartScanModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -73,7 +77,11 @@ export function SmartScanModal({ isOpen, onClose }: ModalProps) {
         
         <div style={{ textAlign: 'center', margin: '16px 0', color: 'var(--color-text-muted)' }}>hoặc</div>
         
-        <button className="wallet-btn-primary" style={{ background: 'var(--color-white)', color: 'var(--color-mint)', border: '1px solid var(--color-mint)' }}>
+        <button 
+          className="wallet-btn-primary" 
+          style={{ background: 'var(--color-white)', color: 'var(--color-mint)', border: '1px solid var(--color-mint)' }}
+          onClick={onOpenCamera}
+        >
           <Camera size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} />
           Mở camera quét trực tiếp
         </button>
