@@ -401,11 +401,8 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
       </main>
   );
 
-  if (isEmbedded) return content;
-  return (
-    <div className="dashboard-layout">
-      <Sidebar />
-      {content}
+  const modals = (
+    <>
       <AddTransactionModal isOpen={isAddTxOpen} onClose={() => setIsAddTxOpen(false)} />
       <SmartScanModal 
         isOpen={isSmartScanOpen} 
@@ -417,6 +414,23 @@ export default function Wallet({ isEmbedded = false }: { isEmbedded?: boolean })
       />
       <CameraScanner isOpen={isCameraScannerOpen} onClose={() => setIsCameraScannerOpen(false)} />
       <AddWalletModal isOpen={isAddWalletOpen} onClose={() => setIsAddWalletOpen(false)} />
+    </>
+  );
+
+  if (isEmbedded) {
+    return (
+      <>
+        {content}
+        {modals}
+      </>
+    );
+  }
+
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      {content}
+      {modals}
     </div>
   );
 }

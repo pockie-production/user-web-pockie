@@ -250,7 +250,7 @@ function renderCategoryIcon(category: string) {
   }
 }
 
-export default function Vouchers() {
+export default function Vouchers({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const [stats, setStats] = useState<VoucherStats>(MOCK_STATS);
   const [vouchers, setVouchers] = useState<VoucherItem[]>(() => MOCK_VOUCHERS.map(prepareVoucherItem));
   const [promos, setPromos] = useState<PromoItem[]>(MOCK_PROMOS);
@@ -344,8 +344,8 @@ export default function Vouchers() {
   const hasMoreVouchers = visibleCount < filteredVouchers.length;
 
   return (
-    <div className="dashboard-layout">
-      <Sidebar />
+    <div className={`dashboard-layout ${isEmbedded ? 'vouchers-embedded-layout' : ''}`}>
+      {!isEmbedded && <Sidebar />}
       <main className="dashboard-main vouchers-main" style={{ padding: 0 }}>
         <div className="vouchers-page">
 

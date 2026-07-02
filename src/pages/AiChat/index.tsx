@@ -22,10 +22,38 @@ import Wallet from '../Wallet';
 import Goals from '../Goals';
 import Reports from '../Reports';
 import Settings from '../Settings';
+import Vouchers from '../Vouchers';
 import { AssistantMessageContent, type ChatMessageMetadata } from './AssistantMessageContent';
 import './AiChat.css';
 
-type WorkspaceType = 'none' | 'wallet' | 'goals' | 'reports' | 'settings';
+type WorkspaceType = 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'vouchers';
+type ActiveWorkspaceType = Exclude<WorkspaceType, 'none'>;
+
+interface CopilotAction {
+  workspace: ActiveWorkspaceType;
+  target: string;
+  selector: string;
+  label: string;
+  status: string;
+  click?: boolean;
+  requiresConfirmation?: boolean;
+}
+
+interface CopilotCursorState {
+  visible: boolean;
+  x: number;
+  y: number;
+  label: string;
+  clicking: boolean;
+}
+
+interface CopilotHighlightState {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+}
 
 interface Message {
   id: string;
@@ -68,6 +96,128 @@ const SUGGESTED_PROMPTS = [
   { icon: PiggyBank, text: 'Tôi nên cắt giảm chi tiêu ở đâu?' },
   { icon: Sparkles, text: 'Gợi ý mục tiêu tài chính cho tôi' },
 ];
+
+const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
+  wallet: {
+    workspace: 'wallet',
+    target: 'wallet_overview',
+    selector: '.wallet-page',
+    label: 'Ví của bạn',
+    status: 'Pockie đang mở Ví để xem tài sản và dòng tiền.',
+  },
+  goals: {
+    workspace: 'goals',
+    target: 'goals_overview',
+    selector: '.goals-page',
+    label: 'Mục tiêu',
+    status: 'Pockie đang mở khu vực mục tiêu và nhiệm vụ.',
+  },
+  reports: {
+    workspace: 'reports',
+    target: 'reports_overview',
+    selector: '.reports-page, .workspace-fade-in',
+    label: 'Báo cáo',
+    status: 'Pockie đang mở báo cáo để soi dòng tiền.',
+  },
+  settings: {
+    workspace: 'settings',
+    target: 'settings_profile',
+    selector: '.settings-form, .settings-page',
+    label: 'Thông tin cá nhân',
+    status: 'Pockie đang mở cài đặt tài khoản.',
+  },
+  vouchers: {
+    workspace: 'vouchers',
+    target: 'vouchers_overview',
+    selector: '.vouchers-page',
+    label: 'Voucher',
+    status: 'Pockie đang mở kho voucher và ưu đãi.',
+  },
+};
+
+const TARGET_ACTIONS: Record<string, CopilotAction> = {
+  smart_scan: {
+    workspace: 'wallet',
+    target: 'smart_scan',
+    selector: '.btn-scan',
+    label: 'Smart Scan',
+    status: 'Pockie đang mở Smart Scan để quét hóa đơn.',
+    click: true,
+  },
+  scan_receipt: {
+    workspace: 'wallet',
+    target: 'smart_scan',
+    selector: '.btn-scan',
+    label: 'Smart Scan',
+    status: 'Pockie đang mở Smart Scan để quét hóa đơn.',
+    click: true,
+  },
+  add_transaction: {
+    workspace: 'wallet',
+    target: 'add_transaction',
+    selector: '.btn-add-tx',
+    label: 'Thêm giao dịch',
+    status: 'Pockie đã tìm nút thêm giao dịch. Bước ghi dữ liệu cần bạn xác nhận.',
+    click: true,
+    requiresConfirmation: true,
+  },
+  add_wallet: {
+    workspace: 'wallet',
+    target: 'add_wallet',
+    selector: '.btn-add-wallet',
+    label: 'Thêm ví',
+    status: 'Pockie đã tìm nút thêm ví. Bước tạo ví cần bạn xác nhận.',
+    click: true,
+    requiresConfirmation: true,
+  },
+  missions: {
+    workspace: 'goals',
+    target: 'missions',
+    selector: '.missions-grid, .banner-btn',
+    label: 'Nhiệm vụ hôm nay',
+    status: 'Pockie đang mở danh sách nhiệm vụ hôm nay.',
+  },
+  all_missions: {
+    workspace: 'goals',
+    target: 'all_missions',
+    selector: '.banner-btn',
+    label: 'Xem tất cả nhiệm vụ',
+    status: 'Pockie đang mở toàn bộ nhiệm vụ.',
+    click: true,
+  },
+  report_categories: {
+    workspace: 'reports',
+    target: 'report_categories',
+    selector: '.progress-list, .donut-chart-wrapper, .reports-page',
+    label: 'Danh mục chi tiêu',
+    status: 'Pockie đang trỏ vào phần danh mục chi tiêu.',
+  },
+  voucher_search: {
+    workspace: 'vouchers',
+    target: 'voucher_search',
+    selector: '.search-box input',
+    label: 'Tìm voucher',
+    status: 'Pockie đang mở ô tìm kiếm voucher.',
+  },
+  voucher_detail: {
+    workspace: 'vouchers',
+    target: 'voucher_detail',
+    selector: '.voucher-card',
+    label: 'Chi tiết voucher',
+    status: 'Pockie đang mở voucher đầu tiên để xem chi tiết.',
+    click: true,
+  },
+  profile_settings: {
+    workspace: 'settings',
+    target: 'profile_settings',
+    selector: '.settings-form',
+    label: 'Hồ sơ cá nhân',
+    status: 'Pockie đang trỏ vào form thông tin cá nhân.',
+  },
+};
+
+const COPILOT_DIRECTIVE_PATTERN =
+  /\[\[(?:pockie|copilot|ui):[^\]]+\]\]|\[CMD:[^\]]+\]|\[POCKIE_ACTION[^\]]+\]/gi;
 
 interface CategoryExpense {
   name: string;
@@ -159,6 +309,137 @@ function mapApiMessages(messages: SessionMessagesResponse['messages']): Message[
     }));
 }
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function normalizeForIntent(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function stripCopilotDirectives(content: string) {
+  return content.replace(COPILOT_DIRECTIVE_PATTERN, '').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function getWorkspaceAction(value: unknown): CopilotAction | null {
+  if (typeof value !== 'string') return null;
+  const key = normalizeForIntent(value).replace(/[^a-z0-9_-]/g, '') as ActiveWorkspaceType;
+  return key in WORKSPACE_ACTIONS ? WORKSPACE_ACTIONS[key] : null;
+}
+
+function getTargetAction(value: unknown): CopilotAction | null {
+  if (typeof value !== 'string') return null;
+
+  const normalized = normalizeForIntent(value)
+    .replace(/^(open|show|go_to|goto|click|highlight|switch|view)[_\s:-]+/, '')
+    .replace(/[^a-z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+
+  if (normalized in TARGET_ACTIONS) {
+    return TARGET_ACTIONS[normalized];
+  }
+
+  return getWorkspaceAction(normalized);
+}
+
+function getCopilotActionFromMetadata(metadata?: ChatMessageMetadata | null) {
+  if (!metadata) return null;
+
+  const rawAction =
+    metadata.copilotAction ??
+    metadata.uiAction ??
+    metadata.action ??
+    metadata.workspaceAction;
+
+  if (typeof rawAction === 'string') {
+    return getTargetAction(rawAction);
+  }
+
+  if (isPlainRecord(rawAction)) {
+    return (
+      getTargetAction(rawAction.target) ??
+      getTargetAction(rawAction.name) ??
+      getWorkspaceAction(rawAction.workspace) ??
+      null
+    );
+  }
+
+  return getWorkspaceAction(metadata.workspace);
+}
+
+function getCopilotActionFromDirectives(content: string) {
+  const cmdMatch = content.match(/\[CMD:([A-Z_]+):([a-z0-9_-]+)\]/i);
+  if (cmdMatch) {
+    const [, command, target] = cmdMatch;
+    if (/WORKSPACE|PAGE/i.test(command)) {
+      return getWorkspaceAction(target) ?? getTargetAction(target);
+    }
+    return getTargetAction(target);
+  }
+
+  const attributeMatch = content.match(/\[POCKIE_ACTION([^\]]+)\]/i);
+  if (attributeMatch) {
+    const attrs = attributeMatch[1];
+    const target = attrs.match(/target=["']?([a-z0-9_-]+)["']?/i)?.[1];
+    const workspace = attrs.match(/workspace=["']?([a-z0-9_-]+)["']?/i)?.[1];
+    return getTargetAction(target) ?? getWorkspaceAction(workspace);
+  }
+
+  const compactMatch = content.match(/\[\[(?:pockie|copilot|ui):([a-z0-9_:-]+)\]\]/i);
+  if (compactMatch) {
+    const parts = compactMatch[1].split(':').filter(Boolean);
+    return getTargetAction(parts.at(-1)) ?? getWorkspaceAction(parts.at(-1));
+  }
+
+  return null;
+}
+
+function inferCopilotActionFromText(text: string) {
+  const normalized = normalizeForIntent(text);
+
+  if (/(smart\s*scan|scan|quet|hoa don|bien lai|receipt|camera)/.test(normalized)) {
+    return TARGET_ACTIONS.smart_scan;
+  }
+
+  if (/(them|nhap|ghi).{0,18}(giao dich|khoan chi|khoan thu)/.test(normalized)) {
+    return TARGET_ACTIONS.add_transaction;
+  }
+
+  if (/(them|lien ket|tao).{0,18}(vi|tai khoan|ngan hang)/.test(normalized)) {
+    return TARGET_ACTIONS.add_wallet;
+  }
+
+  if (/(voucher|uu dai|ma giam|khuyen mai|coupon)/.test(normalized)) {
+    return normalized.includes('tim') ? TARGET_ACTIONS.voucher_search : WORKSPACE_ACTIONS.vouchers;
+  }
+
+  if (/(tat ca nhiem vu|danh sach nhiem vu|all missions)/.test(normalized)) {
+    return TARGET_ACTIONS.all_missions;
+  }
+
+  if (/(nhiem vu|mission|xp|streak|phan thuong|muc tieu|tiet kiem)/.test(normalized)) {
+    return WORKSPACE_ACTIONS.goals;
+  }
+
+  if (/(danh muc|bao cao|thong ke|phan tich|bao bieu|report|chi tieu thang|dong tien thang)/.test(normalized)) {
+    return normalized.includes('danh muc') ? TARGET_ACTIONS.report_categories : WORKSPACE_ACTIONS.reports;
+  }
+
+  if (/(cai dat|ho so|profile|thong tin ca nhan|ekyc|kyc|gioi tinh)/.test(normalized)) {
+    return TARGET_ACTIONS.profile_settings;
+  }
+
+  if (/(vi|so du|tai san|dong tien|thu nhap|chi tieu|tien trong)/.test(normalized)) {
+    return WORKSPACE_ACTIONS.wallet;
+  }
+
+  return null;
+}
+
 export default function AiChat() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -171,10 +452,22 @@ export default function AiChat() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>('none');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCopilotMode, setIsCopilotMode] = useState(false);
+  const [copilotStatus, setCopilotStatus] = useState('Pockie đang chờ lệnh để thao tác giao diện.');
+  const [cursorState, setCursorState] = useState<CopilotCursorState>({
+    visible: false,
+    x: 72,
+    y: 72,
+    label: '',
+    clicking: false,
+  });
+  const [highlightState, setHighlightState] = useState<CopilotHighlightState | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const copilotTimeoutsRef = useRef<number[]>([]);
+  const lastCopilotActionRef = useRef<string | null>(null);
 
   useEffect(() => {
     async function loadReport() {
@@ -217,12 +510,116 @@ export default function AiChat() {
     }
   }, [input]);
 
+  useEffect(() => {
+    return () => {
+      copilotTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      copilotTimeoutsRef.current = [];
+    };
+  }, []);
+
+  function delay(ms: number) {
+    return new Promise<void>((resolve) => {
+      const timeoutId = window.setTimeout(() => {
+        copilotTimeoutsRef.current = copilotTimeoutsRef.current.filter((id) => id !== timeoutId);
+        resolve();
+      }, ms);
+      copilotTimeoutsRef.current.push(timeoutId);
+    });
+  }
+
+  async function waitForElement(selector: string) {
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (element) return element;
+      await delay(90);
+    }
+    return null;
+  }
+
+  async function moveCursorToElement(selector: string, label: string, click = false) {
+    const element = await waitForElement(selector);
+    if (!element) {
+      setCopilotStatus('Pockie chưa tìm thấy đúng vùng giao diện, tui sẽ dừng để tránh bấm nhầm.');
+      setHighlightState(null);
+      return false;
+    }
+
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    await delay(280);
+
+    const rect = element.getBoundingClientRect();
+    const x = Math.round(rect.left + rect.width / 2);
+    const y = Math.round(rect.top + Math.min(rect.height / 2, 120));
+    setCursorState({ visible: true, x, y, label, clicking: false });
+    setHighlightState({
+      x: Math.max(8, Math.round(rect.left - 8)),
+      y: Math.max(8, Math.round(rect.top - 8)),
+      width: Math.round(rect.width + 16),
+      height: Math.round(rect.height + 16),
+      label,
+    });
+
+    await delay(420);
+
+    if (click) {
+      setCursorState((prev) => ({ ...prev, clicking: true }));
+      await delay(170);
+      element.click();
+      setCursorState((prev) => ({ ...prev, clicking: false }));
+      await delay(280);
+    }
+
+    return true;
+  }
+
+  async function runCopilotAction(action: CopilotAction | null) {
+    if (!action) return;
+
+    const signature = `${action.workspace}:${action.target}`;
+    if (lastCopilotActionRef.current === signature) return;
+
+    lastCopilotActionRef.current = signature;
+    setIsCopilotMode(true);
+    setIsSidebarOpen(false);
+    setCopilotStatus(action.status);
+    setWorkspaceType(action.workspace);
+    setCursorState((prev) => ({ ...prev, visible: true, label: action.label }));
+    setHighlightState(null);
+
+    await delay(360);
+
+    const workspaceAction = WORKSPACE_ACTIONS[action.workspace];
+    await moveCursorToElement(workspaceAction.selector, workspaceAction.label);
+
+    if (action.selector !== workspaceAction.selector) {
+      await moveCursorToElement(action.selector, action.label, action.click && !action.requiresConfirmation);
+    }
+
+    if (action.requiresConfirmation) {
+      setCopilotStatus(`${action.status} Bồ xem lại rồi tự bấm xác nhận giúp tui nha.`);
+      void delay(2500).then(() => {
+        if (lastCopilotActionRef.current === signature) {
+          lastCopilotActionRef.current = null;
+        }
+      });
+      return;
+    }
+
+    setCopilotStatus(`Xong bước "${action.label}". Bồ muốn tui xử lý tiếp phần nào nữa?`);
+    void delay(2500).then(() => {
+      if (lastCopilotActionRef.current === signature) {
+        lastCopilotActionRef.current = null;
+      }
+    });
+  }
+
   async function loadSessionMessages(sessionId: string) {
     setIsMessagesLoading(true);
     try {
       const res = await api.get<SessionMessagesResponse>(`/api/v1/ai/sessions/${sessionId}/messages`);
       setMessages(mapApiMessages(res.data.messages));
-      setWorkspaceType((res.data.session.workspace as WorkspaceType) || 'none');
+      const sessionWorkspaceAction = getWorkspaceAction(res.data.session.workspace);
+      setWorkspaceType(sessionWorkspaceAction?.workspace || 'none');
       setActiveSessionId(sessionId);
     } finally {
       setIsMessagesLoading(false);
@@ -254,6 +651,9 @@ export default function AiChat() {
     setActiveSessionId(createdSession.id);
     setMessages([]);
     setWorkspaceType('none');
+    setIsCopilotMode(false);
+    setHighlightState(null);
+    lastCopilotActionRef.current = null;
     if (window.innerWidth <= 768) {
       setIsSidebarOpen(false);
     }
@@ -279,6 +679,7 @@ export default function AiChat() {
     setMessages((prev) => [...prev, optimisticUserMessage]);
     setInput('');
     setIsTyping(true);
+    void runCopilotAction(inferCopilotActionFromText(trimmedText));
 
     try {
       const res = await api.post(`/api/v1/ai/sessions/${sessionId}/messages`, { message: trimmedText });
@@ -291,8 +692,17 @@ export default function AiChat() {
         timestamp: assistantPayload?.createdAt ? new Date(assistantPayload.createdAt) : new Date(),
       };
 
-      setWorkspaceType((res.data?.workspace as WorkspaceType) || 'none');
+      const responseWorkspaceAction = getWorkspaceAction(res.data?.workspace);
+      const responseAction =
+        getCopilotActionFromMetadata(assistantMessage.metadata) ??
+        getCopilotActionFromDirectives(assistantMessage.content) ??
+        responseWorkspaceAction;
+
+      if (responseWorkspaceAction && !responseAction) {
+        setWorkspaceType(responseWorkspaceAction.workspace);
+      }
       setMessages((prev) => [...prev, assistantMessage]);
+      void runCopilotAction(responseAction);
       await refreshSessions(sessionId);
     } catch {
       setMessages((prev) => [
@@ -388,7 +798,7 @@ export default function AiChat() {
   );
 
   return (
-    <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''}`}>
+    <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''} ${isCopilotMode ? 'copilot-mode' : ''}`}>
       
       {/* Sidebar Overlay for Mobile */}
       {isSidebarOpen && <div className="chat-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
@@ -451,6 +861,26 @@ export default function AiChat() {
           <div className="chat-header-badge">BETA</div>
         </header>
 
+        {isCopilotMode && (
+          <div className="copilot-status-bar">
+            <div className="copilot-status-copy">
+              <Sparkles size={15} />
+              <span>{copilotStatus}</span>
+            </div>
+            <button
+              type="button"
+              className="copilot-stop-btn"
+              onClick={() => {
+                setIsCopilotMode(false);
+                setHighlightState(null);
+                setCursorState((prev) => ({ ...prev, visible: false, clicking: false }));
+              }}
+            >
+              Dừng
+            </button>
+          </div>
+        )}
+
         <main className="chat-messages-area">
           {isEmpty ? (
             <div className="chat-welcome">
@@ -485,7 +915,7 @@ export default function AiChat() {
                     <div className="chat-bubble-text markdown-body">
                       {message.role === 'assistant' ? (
                         <AssistantMessageContent
-                          content={message.content}
+                          content={stripCopilotDirectives(message.content)}
                           metadata={message.metadata}
                           onQuickReply={(nextMessage) => void sendMessage(nextMessage)}
                         />
@@ -532,7 +962,31 @@ export default function AiChat() {
             {workspaceType === 'goals' && <Goals isEmbedded={true} />}
             {workspaceType === 'reports' && !reportData && <Reports isEmbedded={true} />}
             {workspaceType === 'settings' && <Settings isEmbedded={true} />}
+            {workspaceType === 'vouchers' && <Vouchers isEmbedded={true} />}
           </div>
+        </div>
+      )}
+
+      {highlightState && (
+        <div
+          className="copilot-highlight-ring"
+          style={{
+            transform: `translate3d(${highlightState.x}px, ${highlightState.y}px, 0)`,
+            width: highlightState.width,
+            height: highlightState.height,
+          }}
+        >
+          <span>{highlightState.label}</span>
+        </div>
+      )}
+
+      {cursorState.visible && (
+        <div
+          className={`copilot-ghost-cursor ${cursorState.clicking ? 'is-clicking' : ''}`}
+          style={{ transform: `translate3d(${cursorState.x}px, ${cursorState.y}px, 0)` }}
+        >
+          <div className="copilot-cursor-shape" />
+          {cursorState.label && <span className="copilot-cursor-label">{cursorState.label}</span>}
         </div>
       )}
     </div>
