@@ -13,7 +13,9 @@ import {
   Menu,
   X,
   Image as ImageIcon,
-  RotateCcw
+  RotateCcw,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
@@ -63,6 +65,8 @@ interface CopilotHighlightState {
   height: number;
   label: string;
 }
+
+type CopilotPhase = 'idle' | 'thinking' | 'observing' | 'acting' | 'waiting_user';
 
 interface Message {
   id: string;
@@ -512,46 +516,13 @@ function getCopilotActionFromDirectives(content: string) {
   return null;
 }
 
-function inferCopilotActionFromText(text: string) {
-  const normalized = normalizeForIntent(text);
+function getSessionMonogram(title: string) {
+  const normalized = title.trim();
+  if (!normalized) return 'P';
 
-  if (/(smart\s*scan|scan|quet|hoa don|bien lai|receipt|camera)/.test(normalized)) {
-    return TARGET_ACTIONS.smart_scan;
-  }
-
-  if (/(them|nhap|ghi).{0,18}(giao dich|khoan chi|khoan thu)/.test(normalized)) {
-    return TARGET_ACTIONS.add_transaction;
-  }
-
-  if (/(them|lien ket|tao).{0,18}(vi|tai khoan|ngan hang)/.test(normalized)) {
-    return TARGET_ACTIONS.add_wallet;
-  }
-
-  if (/(voucher|uu dai|ma giam|khuyen mai|coupon)/.test(normalized)) {
-    return normalized.includes('tim') ? TARGET_ACTIONS.voucher_search : WORKSPACE_ACTIONS.vouchers;
-  }
-
-  if (/(tat ca nhiem vu|danh sach nhiem vu|all missions)/.test(normalized)) {
-    return TARGET_ACTIONS.all_missions;
-  }
-
-  if (/(nhiem vu|mission|xp|streak|phan thuong|muc tieu|tiet kiem)/.test(normalized)) {
-    return WORKSPACE_ACTIONS.goals;
-  }
-
-  if (/(danh muc|bao cao|thong ke|phan tich|bao bieu|report|chi tieu thang|dong tien thang)/.test(normalized)) {
-    return normalized.includes('danh muc') ? TARGET_ACTIONS.report_categories : WORKSPACE_ACTIONS.reports;
-  }
-
-  if (/(cai dat|ho so|profile|thong tin ca nhan|ekyc|kyc|gioi tinh)/.test(normalized)) {
-    return TARGET_ACTIONS.profile_settings;
-  }
-
-  if (/(vi|so du|tai san|dong tien|thu nhap|chi tieu|tien trong)/.test(normalized)) {
-    return WORKSPACE_ACTIONS.wallet;
-  }
-
-  return null;
+  const parts = normalized.split(/\s+/).filter(Boolean);
+  const monogram = parts.slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('');
+  return monogram || normalized.slice(0, 1).toUpperCase();
 }
 
 export default function AiChat() {
@@ -566,7 +537,12 @@ export default function AiChat() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>('none');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
+  );
   const [isCopilotMode, setIsCopilotMode] = useState(false);
+  const [copilotPhase, setCopilotPhase] = useState<CopilotPhase>('idle');
   const [copilotStatus, setCopilotStatus] = useState('Pockie đang chờ lệnh để thao tác giao diện.');
   const [cursorState, setCursorState] = useState<CopilotCursorState>({
     visible: false,
@@ -583,6 +559,8 @@ export default function AiChat() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const copilotTimeoutsRef = useRef<number[]>([]);
   const lastCopilotRunRef = useRef<string | null>(null);
+  const isEmpty = messages.length === 0;
+  const hasWorkspace = !isEmpty && workspaceType !== 'none';
 
   useEffect(() => {
     async function loadReport() {
@@ -632,6 +610,33 @@ export default function AiChat() {
     };
   }, []);
 
+  useEffect(() => {
+    const onResize = () => {
+      const nextIsMobile = window.innerWidth <= 768;
+      setIsMobileViewport(nextIsMobile);
+
+      if (!nextIsMobile) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileViewport) return;
+
+    if (hasWorkspace) {
+      setIsDesktopSidebarCollapsed(true);
+      return;
+    }
+
+    if (messages.length === 0 && sessions.length <= 1) {
+      setIsDesktopSidebarCollapsed(false);
+    }
+  }, [hasWorkspace, isMobileViewport, messages.length, sessions.length]);
+
   function delay(ms: number) {
     return new Promise<void>((resolve) => {
       const timeoutId = window.setTimeout(() => {
@@ -656,6 +661,7 @@ export default function AiChat() {
     if (!element) {
       setCopilotStatus('Pockie chưa tìm thấy đúng vùng giao diện, tui sẽ dừng để tránh bấm nhầm.');
       setHighlightState(null);
+      setCopilotPhase('idle');
       return false;
     }
 
@@ -677,11 +683,14 @@ export default function AiChat() {
     await delay(420);
 
     if (click) {
+      setCopilotPhase('acting');
       setCursorState((prev) => ({ ...prev, clicking: true }));
       await delay(170);
       element.click();
       setCursorState((prev) => ({ ...prev, clicking: false }));
       await delay(280);
+    } else {
+      setCopilotPhase('observing');
     }
 
     return true;
@@ -689,7 +698,12 @@ export default function AiChat() {
 
   async function executeCopilotStep(step: CopilotAction, index: number, total: number) {
     setIsCopilotMode(true);
-    setIsSidebarOpen(false);
+    setCopilotPhase('observing');
+    if (isMobileViewport) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsDesktopSidebarCollapsed(true);
+    }
     setCopilotProgress({ current: index + 1, total });
     setCopilotStatus(step.status);
     setWorkspaceType(step.workspace);
@@ -707,10 +721,16 @@ export default function AiChat() {
       const element = await waitForElement(step.selector);
       if (!element) {
         setCopilotStatus(`Pockie chưa thấy "${step.label}" xuất hiện, nên tạm dừng để tránh đi sai bước.`);
+        setCopilotPhase('idle');
         return false;
       }
 
       return moveCursorToElement(step.selector, step.label, false);
+    }
+
+    if (step.type === 'click' || step.click) {
+      setCopilotStatus(`Tui đã xác định được "${step.label}", đang chuẩn bị thao tác thật nè.`);
+      await delay(260);
     }
 
     return moveCursorToElement(
@@ -729,6 +749,10 @@ export default function AiChat() {
 
     if (lastCopilotRunRef.current === signature) return;
     lastCopilotRunRef.current = signature;
+    setIsCopilotMode(true);
+    setCopilotPhase('thinking');
+    setCopilotStatus('Pockie đang đối chiếu yêu cầu với màn hình trước khi thao tác.');
+    await delay(280);
 
     for (let index = 0; index < plan.steps.length; index += 1) {
       const step = plan.steps[index];
@@ -739,12 +763,14 @@ export default function AiChat() {
           if (lastCopilotRunRef.current === signature) {
             lastCopilotRunRef.current = null;
           }
+          setCopilotPhase('idle');
           setCopilotProgress(null);
         });
         return;
       }
 
       if (step.requiresConfirmation) {
+        setCopilotPhase('waiting_user');
         setCopilotStatus(`${step.status} Bồ xem lại rồi tự bấm xác nhận giúp tui nha.`);
         void delay(2500).then(() => {
           if (lastCopilotRunRef.current === signature) {
@@ -756,6 +782,7 @@ export default function AiChat() {
       }
     }
 
+    setCopilotPhase('idle');
     setCopilotStatus(plan.completionMessage || 'Pockie đã chạy xong toàn bộ các bước.');
     void delay(2500).then(() => {
       if (lastCopilotRunRef.current === signature) {
@@ -804,10 +831,11 @@ export default function AiChat() {
     setMessages([]);
     setWorkspaceType('none');
     setIsCopilotMode(false);
+    setCopilotPhase('idle');
     setCopilotProgress(null);
     setHighlightState(null);
     lastCopilotRunRef.current = null;
-    if (window.innerWidth <= 768) {
+    if (isMobileViewport) {
       setIsSidebarOpen(false);
     }
     return createdSession.id;
@@ -832,7 +860,12 @@ export default function AiChat() {
     setMessages((prev) => [...prev, optimisticUserMessage]);
     setInput('');
     setIsTyping(true);
-    void runCopilotPlan(buildPlanFromSingleAction(inferCopilotActionFromText(trimmedText)));
+    setIsCopilotMode(true);
+    setCopilotPhase('thinking');
+    setCopilotStatus('Pockie đang đọc yêu cầu và soi ngữ cảnh thật trước đã.');
+    setCopilotProgress(null);
+    setHighlightState(null);
+    setCursorState((prev) => ({ ...prev, visible: false, clicking: false, label: '' }));
 
     try {
       const res = await api.post(`/api/v1/ai/sessions/${sessionId}/messages`, { message: trimmedText });
@@ -855,9 +888,17 @@ export default function AiChat() {
         setWorkspaceType(responseWorkspaceAction.workspace);
       }
       setMessages((prev) => [...prev, assistantMessage]);
-      void runCopilotPlan(responsePlan);
+      if (responsePlan) {
+        void runCopilotPlan(responsePlan);
+      } else {
+        setIsCopilotMode(false);
+        setCopilotPhase('idle');
+        setCopilotStatus('Pockie đang chờ lệnh để thao tác giao diện.');
+      }
       await refreshSessions(sessionId);
     } catch {
+      setIsCopilotMode(false);
+      setCopilotPhase('idle');
       setMessages((prev) => [
         ...prev,
         {
@@ -896,8 +937,26 @@ export default function AiChat() {
     }
   };
 
-  const isEmpty = messages.length === 0;
-  const hasWorkspace = !isEmpty && workspaceType !== 'none';
+  const isSidebarVisible = isMobileViewport ? isSidebarOpen : !isDesktopSidebarCollapsed;
+  const copilotPhaseLabel =
+    copilotPhase === 'thinking'
+      ? 'Đang hiểu việc'
+      : copilotPhase === 'observing'
+        ? 'Đang quan sát'
+        : copilotPhase === 'acting'
+          ? 'Đang thao tác'
+          : copilotPhase === 'waiting_user'
+            ? 'Đợi bồ xác nhận'
+            : 'Sẵn sàng';
+
+  function toggleSidebar() {
+    if (isMobileViewport) {
+      setIsSidebarOpen((prev) => !prev);
+      return;
+    }
+
+    setIsDesktopSidebarCollapsed((prev) => !prev);
+  }
 
   const renderInputBar = () => (
     <div className={`chat-input-wrapper ${isEmpty ? 'centered-input' : ''}`}>
@@ -951,20 +1010,24 @@ export default function AiChat() {
   );
 
   return (
-    <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''} ${isCopilotMode ? 'copilot-mode' : ''}`}>
+    <div className={`chat-layout ${hasWorkspace ? 'split-view' : ''} ${isCopilotMode ? 'copilot-mode' : ''} ${!isMobileViewport && isDesktopSidebarCollapsed ? 'desktop-sidebar-collapsed' : ''}`}>
       
       {/* Sidebar Overlay for Mobile */}
-      {isSidebarOpen && <div className="chat-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
+      {isMobileViewport && isSidebarOpen && <div className="chat-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
       
       {/* Sidebar History */}
-      <aside className={`chat-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+      <aside className={`chat-sidebar ${isSidebarVisible ? 'open' : ''} ${!isMobileViewport && isDesktopSidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <button className="chat-new-session-btn" onClick={() => void createSession()} aria-label="Tạo cuộc trò chuyện mới">
             <MessageSquarePlus size={16} />
-            Phiên chat mới
+            <span>Phiên chat mới</span>
           </button>
-          <button className="sidebar-close-btn mobile-only" onClick={() => setIsSidebarOpen(false)}>
-            <X size={20} />
+          <button
+            className="sidebar-close-btn"
+            onClick={toggleSidebar}
+            aria-label={isSidebarVisible ? 'Thu gọn lịch sử chat' : 'Mở lịch sử chat'}
+          >
+            {isMobileViewport ? <X size={20} /> : isSidebarVisible ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
         </div>
         <div className="sidebar-sessions">
@@ -980,11 +1043,14 @@ export default function AiChat() {
                 className={`chat-session-chip ${activeSessionId === session.id ? 'active' : ''}`}
                 onClick={() => {
                   void loadSessionMessages(session.id);
-                  if (window.innerWidth <= 768) {
+                  if (isMobileViewport) {
                     setIsSidebarOpen(false);
+                  } else if (hasWorkspace) {
+                    setIsDesktopSidebarCollapsed(true);
                   }
                 }}
               >
+                <span className="chat-session-chip-monogram">{getSessionMonogram(session.title)}</span>
                 <span className="chat-session-chip-title">{session.title}</span>
                 <span className="chat-session-chip-preview">{session.preview || 'Cuộc trò chuyện mới'}</span>
               </button>
@@ -995,7 +1061,7 @@ export default function AiChat() {
 
       <div className="agent-chat-panel">
         <header className="chat-header">
-          <button className="chat-menu-btn" onClick={() => setIsSidebarOpen(true)}>
+          <button className="chat-menu-btn" onClick={toggleSidebar}>
             <Menu size={20} />
           </button>
           <button className="chat-back-btn" onClick={() => navigate('/dashboard')}>
@@ -1018,6 +1084,7 @@ export default function AiChat() {
           <div className="copilot-status-bar">
             <div className="copilot-status-copy">
               <Sparkles size={15} />
+              <strong className="copilot-phase-pill">{copilotPhaseLabel}</strong>
               <span>
                 {copilotProgress ? `Bước ${copilotProgress.current}/${copilotProgress.total}: ` : ''}
                 {copilotStatus}
@@ -1028,6 +1095,7 @@ export default function AiChat() {
               className="copilot-stop-btn"
               onClick={() => {
                 setIsCopilotMode(false);
+                setCopilotPhase('idle');
                 setCopilotProgress(null);
                 setHighlightState(null);
                 lastCopilotRunRef.current = null;
