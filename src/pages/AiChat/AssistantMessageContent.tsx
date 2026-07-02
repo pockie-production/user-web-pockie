@@ -4,6 +4,14 @@ import remarkGfm from 'remark-gfm';
 
 export interface ChatMessageMetadata {
   provider?: string;
+  dataContext?: Record<string, unknown>;
+  uiPlan?: {
+    planId?: string;
+    intent?: string;
+    totalSteps?: number;
+    completionMessage?: string;
+    steps?: Array<Record<string, unknown>>;
+  };
   render?: {
     format?: string;
     html?: string;
@@ -39,6 +47,17 @@ interface AssistantMessageContentProps {
   content: string;
   metadata?: ChatMessageMetadata | null;
   onQuickReply: (message: string) => void;
+}
+
+interface InsightItem {
+  label: string;
+  value: string;
+}
+
+interface PlanStepSummary {
+  id: string;
+  label: string;
+  status: string;
 }
 
 const ALLOWED_HTML_TAGS = [
@@ -217,6 +236,93 @@ function hasRichCardContent(card: SmartbotCardData) {
   );
 }
 
+function normalizeInsightValue(value: unknown) {
+  if (value == null) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed ? trimmed : null;
+  }
+  if (typeof value === 'number') {
+    return value.toLocaleString('vi-VN');
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'Có' : 'Không';
+  }
+  return null;
+}
+
+function buildInsightItems(metadata?: ChatMessageMetadata | null): InsightItem[] {
+  const context = metadata?.dataContext;
+  if (!isRecord(context)) return [];
+
+  const items: InsightItem[] = [];
+
+  const pushIfPresent = (label: string, value: unknown) => {
+    const normalized = normalizeInsightValue(value);
+    if (normalized) {
+      items.push({ label, value: normalized });
+    }
+  };
+
+  pushIfPresent('Số dư tổng', context.balance);
+  pushIfPresent('Chi tiêu tháng', context.expense);
+  pushIfPresent('Ngân sách còn lại', context.remainingBudget);
+  pushIfPresent('Số ví đang hoạt động', context.accountsCount);
+  pushIfPresent('Số giao dịch gần đây', context.transactionCount);
+  pushIfPresent('Mức dùng ngân sách', typeof context.spentPercent === 'number' ? `${context.spentPercent}%` : null);
+  pushIfPresent('Tháng đang soi', context.month);
+
+  if (Array.isArray(context.topCategories) && context.topCategories.length > 0) {
+    const topCategories = context.topCategories
+      .slice(0, 3)
+      .map((item) => {
+        if (!isRecord(item)) return null;
+        const categoryName = normalizeInsightValue(item.categoryName);
+        const percent = normalizeInsightValue(
+          typeof item.percent === 'number' ? `${item.percent}%` : item.percent,
+        );
+        return categoryName && percent ? `${categoryName} ${percent}` : categoryName;
+      })
+      .filter((item): item is string => Boolean(item))
+      .join(', ');
+
+    pushIfPresent('Nhóm chi nổi bật', topCategories);
+  }
+
+  if (isRecord(context.primaryWallet)) {
+    const walletName = normalizeInsightValue(context.primaryWallet.name);
+    const walletBalance = normalizeInsightValue(context.primaryWallet.balance);
+    if (walletName && walletBalance) {
+      items.push({
+        label: 'Ví nổi bật',
+        value: `${walletName} · ${walletBalance}`,
+      });
+    }
+  }
+
+  return items;
+}
+
+function buildPlanSteps(metadata?: ChatMessageMetadata | null): PlanStepSummary[] {
+  const steps = metadata?.uiPlan?.steps;
+  if (!Array.isArray(steps)) return [];
+
+  return steps
+    .map((step, index) => {
+      if (!isRecord(step)) return null;
+      const label = normalizeInsightValue(step.label);
+      const status = normalizeInsightValue(step.status);
+      if (!label || !status) return null;
+
+      return {
+        id: typeof step.id === 'string' ? step.id : `step-${index}`,
+        label,
+        status,
+      };
+    })
+    .filter((step): step is PlanStepSummary => Boolean(step));
+}
+
 export function AssistantMessageContent({
   content,
   metadata,
@@ -224,6 +330,8 @@ export function AssistantMessageContent({
 }: AssistantMessageContentProps) {
   const htmlSource = getCandidateHtml(metadata, content);
   const sanitizedHtml = htmlSource ? pruneEmptyHtml(sanitizeRichHtml(htmlSource)) : '';
+  const insightItems = sanitizedHtml ? [] : buildInsightItems(metadata);
+  const planSteps = sanitizedHtml ? [] : buildPlanSteps(metadata);
   const richCards = sanitizedHtml
     ? []
     : normalizeCardData(metadata).filter(
@@ -310,6 +418,44 @@ export function AssistantMessageContent({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!sanitizedHtml && (insightItems.length > 0 || planSteps.length > 0) && (
+        <div className="pockie-evidence-stack">
+          {insightItems.length > 0 && (
+            <section className="pockie-evidence-card">
+              <div className="pockie-evidence-title">Pockie đang thấy dữ liệu thật</div>
+              <div className="pockie-evidence-grid">
+                {insightItems.map((item) => (
+                  <div key={item.label} className="pockie-evidence-item">
+                    <div className="pockie-evidence-label">{item.label}</div>
+                    <div className="pockie-evidence-value">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {planSteps.length > 0 && (
+            <section className="pockie-evidence-card">
+              <div className="pockie-evidence-title">
+                Kế hoạch thao tác
+                {typeof metadata?.uiPlan?.totalSteps === 'number' ? ` · ${metadata.uiPlan.totalSteps} bước` : ''}
+              </div>
+              <div className="pockie-plan-list">
+                {planSteps.map((step, index) => (
+                  <div key={step.id} className="pockie-plan-step">
+                    <div className="pockie-plan-index">{index + 1}</div>
+                    <div className="pockie-plan-copy">
+                      <div className="pockie-plan-label">{step.label}</div>
+                      <div className="pockie-plan-status">{step.status}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>
