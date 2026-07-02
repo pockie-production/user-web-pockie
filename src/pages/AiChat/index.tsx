@@ -30,6 +30,7 @@ type WorkspaceType = 'none' | 'wallet' | 'goals' | 'reports' | 'settings' | 'vou
 type ActiveWorkspaceType = Exclude<WorkspaceType, 'none'>;
 
 interface CopilotAction {
+  type?: 'open_workspace' | 'highlight' | 'click' | 'wait_for';
   workspace: ActiveWorkspaceType;
   target: string;
   selector: string;
@@ -37,6 +38,14 @@ interface CopilotAction {
   status: string;
   click?: boolean;
   requiresConfirmation?: boolean;
+}
+
+interface CopilotPlan {
+  planId?: string;
+  intent?: string;
+  totalSteps?: number;
+  completionMessage?: string;
+  steps: CopilotAction[];
 }
 
 interface CopilotCursorState {
@@ -99,6 +108,7 @@ const SUGGESTED_PROMPTS = [
 
 const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
   wallet: {
+    type: 'open_workspace',
     workspace: 'wallet',
     target: 'wallet_overview',
     selector: '.wallet-page',
@@ -106,6 +116,7 @@ const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
     status: 'Pockie đang mở Ví để xem tài sản và dòng tiền.',
   },
   goals: {
+    type: 'open_workspace',
     workspace: 'goals',
     target: 'goals_overview',
     selector: '.goals-page',
@@ -113,6 +124,7 @@ const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
     status: 'Pockie đang mở khu vực mục tiêu và nhiệm vụ.',
   },
   reports: {
+    type: 'open_workspace',
     workspace: 'reports',
     target: 'reports_overview',
     selector: '.reports-page, .workspace-fade-in',
@@ -120,6 +132,7 @@ const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
     status: 'Pockie đang mở báo cáo để soi dòng tiền.',
   },
   settings: {
+    type: 'open_workspace',
     workspace: 'settings',
     target: 'settings_profile',
     selector: '.settings-form, .settings-page',
@@ -127,6 +140,7 @@ const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
     status: 'Pockie đang mở cài đặt tài khoản.',
   },
   vouchers: {
+    type: 'open_workspace',
     workspace: 'vouchers',
     target: 'vouchers_overview',
     selector: '.vouchers-page',
@@ -137,6 +151,7 @@ const WORKSPACE_ACTIONS: Record<ActiveWorkspaceType, CopilotAction> = {
 
 const TARGET_ACTIONS: Record<string, CopilotAction> = {
   smart_scan: {
+    type: 'click',
     workspace: 'wallet',
     target: 'smart_scan',
     selector: '.btn-scan',
@@ -145,6 +160,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     click: true,
   },
   scan_receipt: {
+    type: 'click',
     workspace: 'wallet',
     target: 'smart_scan',
     selector: '.btn-scan',
@@ -153,6 +169,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     click: true,
   },
   add_transaction: {
+    type: 'click',
     workspace: 'wallet',
     target: 'add_transaction',
     selector: '.btn-add-tx',
@@ -162,6 +179,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     requiresConfirmation: true,
   },
   add_wallet: {
+    type: 'click',
     workspace: 'wallet',
     target: 'add_wallet',
     selector: '.btn-add-wallet',
@@ -171,6 +189,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     requiresConfirmation: true,
   },
   missions: {
+    type: 'highlight',
     workspace: 'goals',
     target: 'missions',
     selector: '.missions-grid, .banner-btn',
@@ -178,6 +197,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     status: 'Pockie đang mở danh sách nhiệm vụ hôm nay.',
   },
   all_missions: {
+    type: 'click',
     workspace: 'goals',
     target: 'all_missions',
     selector: '.banner-btn',
@@ -186,6 +206,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     click: true,
   },
   report_categories: {
+    type: 'highlight',
     workspace: 'reports',
     target: 'report_categories',
     selector: '.progress-list, .donut-chart-wrapper, .reports-page',
@@ -193,6 +214,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     status: 'Pockie đang trỏ vào phần danh mục chi tiêu.',
   },
   voucher_search: {
+    type: 'highlight',
     workspace: 'vouchers',
     target: 'voucher_search',
     selector: '.search-box input',
@@ -200,6 +222,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     status: 'Pockie đang mở ô tìm kiếm voucher.',
   },
   voucher_detail: {
+    type: 'click',
     workspace: 'vouchers',
     target: 'voucher_detail',
     selector: '.voucher-card',
@@ -208,6 +231,7 @@ const TARGET_ACTIONS: Record<string, CopilotAction> = {
     click: true,
   },
   profile_settings: {
+    type: 'highlight',
     workspace: 'settings',
     target: 'profile_settings',
     selector: '.settings-form',
@@ -371,6 +395,96 @@ function getCopilotActionFromMetadata(metadata?: ChatMessageMetadata | null) {
   return getWorkspaceAction(metadata.workspace);
 }
 
+function normalizeCopilotStep(raw: unknown): CopilotAction | null {
+  if (typeof raw === 'string') {
+    return getTargetAction(raw);
+  }
+
+  if (!isPlainRecord(raw)) {
+    return null;
+  }
+
+  const fallback =
+    getTargetAction(raw.target) ??
+    getTargetAction(raw.name) ??
+    getWorkspaceAction(raw.workspace) ??
+    null;
+
+  const workspace = getWorkspaceAction(raw.workspace)?.workspace ?? fallback?.workspace;
+  if (!workspace) {
+    return fallback;
+  }
+
+  const inferredType =
+    raw.type === 'open_workspace' ||
+    raw.type === 'highlight' ||
+    raw.type === 'click' ||
+    raw.type === 'wait_for'
+      ? raw.type
+      : fallback?.type;
+
+  return {
+    type: inferredType,
+    workspace,
+    target: typeof raw.target === 'string' ? raw.target : fallback?.target || 'custom',
+    selector: typeof raw.selector === 'string' ? raw.selector : fallback?.selector || '',
+    label: typeof raw.label === 'string' ? raw.label : fallback?.label || 'Pockie Copilot',
+    status: typeof raw.status === 'string' ? raw.status : fallback?.status || 'Pockie đang xử lý thao tác.',
+    click: typeof raw.click === 'boolean' ? raw.click : fallback?.click,
+    requiresConfirmation:
+      typeof raw.requiresConfirmation === 'boolean'
+        ? raw.requiresConfirmation
+        : fallback?.requiresConfirmation,
+  };
+}
+
+function buildPlanFromSingleAction(action: CopilotAction | null): CopilotPlan | null {
+  if (!action) return null;
+  return {
+    steps: [action],
+    totalSteps: 1,
+    completionMessage: `Xong bước "${action.label}".`,
+  };
+}
+
+function getCopilotPlanFromMetadata(metadata?: ChatMessageMetadata | null) {
+  if (!metadata) {
+    return null;
+  }
+
+  const rawPlan = metadata.uiPlan ?? metadata.plan;
+  if (isPlainRecord(rawPlan) && Array.isArray(rawPlan.steps)) {
+    const steps = rawPlan.steps
+      .map((step) => normalizeCopilotStep(step))
+      .filter((step): step is CopilotAction => Boolean(step));
+
+    if (steps.length > 0) {
+      return {
+        planId: typeof rawPlan.planId === 'string' ? rawPlan.planId : undefined,
+        intent: typeof rawPlan.intent === 'string' ? rawPlan.intent : undefined,
+        totalSteps: typeof rawPlan.totalSteps === 'number' ? rawPlan.totalSteps : steps.length,
+        completionMessage:
+          typeof rawPlan.completionMessage === 'string' ? rawPlan.completionMessage : undefined,
+        steps,
+      };
+    }
+  }
+
+  if (Array.isArray(metadata.actions)) {
+    const steps = metadata.actions
+      .map((step) => normalizeCopilotStep(step))
+      .filter((step): step is CopilotAction => Boolean(step));
+    if (steps.length > 0) {
+      return {
+        totalSteps: steps.length,
+        steps,
+      };
+    }
+  }
+
+  return buildPlanFromSingleAction(getCopilotActionFromMetadata(metadata));
+}
+
 function getCopilotActionFromDirectives(content: string) {
   const cmdMatch = content.match(/\[CMD:([A-Z_]+):([a-z0-9_-]+)\]/i);
   if (cmdMatch) {
@@ -462,12 +576,13 @@ export default function AiChat() {
     clicking: false,
   });
   const [highlightState, setHighlightState] = useState<CopilotHighlightState | null>(null);
+  const [copilotProgress, setCopilotProgress] = useState<{ current: number; total: number } | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const copilotTimeoutsRef = useRef<number[]>([]);
-  const lastCopilotActionRef = useRef<string | null>(null);
+  const lastCopilotRunRef = useRef<string | null>(null);
 
   useEffect(() => {
     async function loadReport() {
@@ -572,44 +687,81 @@ export default function AiChat() {
     return true;
   }
 
-  async function runCopilotAction(action: CopilotAction | null) {
-    if (!action) return;
-
-    const signature = `${action.workspace}:${action.target}`;
-    if (lastCopilotActionRef.current === signature) return;
-
-    lastCopilotActionRef.current = signature;
+  async function executeCopilotStep(step: CopilotAction, index: number, total: number) {
     setIsCopilotMode(true);
     setIsSidebarOpen(false);
-    setCopilotStatus(action.status);
-    setWorkspaceType(action.workspace);
-    setCursorState((prev) => ({ ...prev, visible: true, label: action.label }));
+    setCopilotProgress({ current: index + 1, total });
+    setCopilotStatus(step.status);
+    setWorkspaceType(step.workspace);
+    setCursorState((prev) => ({ ...prev, visible: true, label: step.label }));
     setHighlightState(null);
 
     await delay(360);
 
-    const workspaceAction = WORKSPACE_ACTIONS[action.workspace];
-    await moveCursorToElement(workspaceAction.selector, workspaceAction.label);
-
-    if (action.selector !== workspaceAction.selector) {
-      await moveCursorToElement(action.selector, action.label, action.click && !action.requiresConfirmation);
+    if (step.type === 'open_workspace') {
+      const workspaceAction = WORKSPACE_ACTIONS[step.workspace];
+      return moveCursorToElement(workspaceAction.selector, workspaceAction.label);
     }
 
-    if (action.requiresConfirmation) {
-      setCopilotStatus(`${action.status} Bồ xem lại rồi tự bấm xác nhận giúp tui nha.`);
-      void delay(2500).then(() => {
-        if (lastCopilotActionRef.current === signature) {
-          lastCopilotActionRef.current = null;
-        }
-      });
-      return;
-    }
-
-    setCopilotStatus(`Xong bước "${action.label}". Bồ muốn tui xử lý tiếp phần nào nữa?`);
-    void delay(2500).then(() => {
-      if (lastCopilotActionRef.current === signature) {
-        lastCopilotActionRef.current = null;
+    if (step.type === 'wait_for') {
+      const element = await waitForElement(step.selector);
+      if (!element) {
+        setCopilotStatus(`Pockie chưa thấy "${step.label}" xuất hiện, nên tạm dừng để tránh đi sai bước.`);
+        return false;
       }
+
+      return moveCursorToElement(step.selector, step.label, false);
+    }
+
+    return moveCursorToElement(
+      step.selector,
+      step.label,
+      (step.type === 'click' || step.click) && !step.requiresConfirmation,
+    );
+  }
+
+  async function runCopilotPlan(plan: CopilotPlan | null) {
+    if (!plan || plan.steps.length === 0) return;
+
+    const signature =
+      plan.planId ||
+      plan.steps.map((step) => `${step.workspace}:${step.target}:${step.type || 'step'}`).join('|');
+
+    if (lastCopilotRunRef.current === signature) return;
+    lastCopilotRunRef.current = signature;
+
+    for (let index = 0; index < plan.steps.length; index += 1) {
+      const step = plan.steps[index];
+      const succeeded = await executeCopilotStep(step, index, plan.steps.length);
+
+      if (!succeeded) {
+        void delay(2500).then(() => {
+          if (lastCopilotRunRef.current === signature) {
+            lastCopilotRunRef.current = null;
+          }
+          setCopilotProgress(null);
+        });
+        return;
+      }
+
+      if (step.requiresConfirmation) {
+        setCopilotStatus(`${step.status} Bồ xem lại rồi tự bấm xác nhận giúp tui nha.`);
+        void delay(2500).then(() => {
+          if (lastCopilotRunRef.current === signature) {
+            lastCopilotRunRef.current = null;
+          }
+          setCopilotProgress(null);
+        });
+        return;
+      }
+    }
+
+    setCopilotStatus(plan.completionMessage || 'Pockie đã chạy xong toàn bộ các bước.');
+    void delay(2500).then(() => {
+      if (lastCopilotRunRef.current === signature) {
+        lastCopilotRunRef.current = null;
+      }
+      setCopilotProgress(null);
     });
   }
 
@@ -652,8 +804,9 @@ export default function AiChat() {
     setMessages([]);
     setWorkspaceType('none');
     setIsCopilotMode(false);
+    setCopilotProgress(null);
     setHighlightState(null);
-    lastCopilotActionRef.current = null;
+    lastCopilotRunRef.current = null;
     if (window.innerWidth <= 768) {
       setIsSidebarOpen(false);
     }
@@ -679,7 +832,7 @@ export default function AiChat() {
     setMessages((prev) => [...prev, optimisticUserMessage]);
     setInput('');
     setIsTyping(true);
-    void runCopilotAction(inferCopilotActionFromText(trimmedText));
+    void runCopilotPlan(buildPlanFromSingleAction(inferCopilotActionFromText(trimmedText)));
 
     try {
       const res = await api.post(`/api/v1/ai/sessions/${sessionId}/messages`, { message: trimmedText });
@@ -693,16 +846,16 @@ export default function AiChat() {
       };
 
       const responseWorkspaceAction = getWorkspaceAction(res.data?.workspace);
-      const responseAction =
-        getCopilotActionFromMetadata(assistantMessage.metadata) ??
-        getCopilotActionFromDirectives(assistantMessage.content) ??
-        responseWorkspaceAction;
+      const responsePlan =
+        getCopilotPlanFromMetadata(assistantMessage.metadata) ??
+        buildPlanFromSingleAction(getCopilotActionFromDirectives(assistantMessage.content)) ??
+        buildPlanFromSingleAction(responseWorkspaceAction);
 
-      if (responseWorkspaceAction && !responseAction) {
+      if (responseWorkspaceAction && !responsePlan) {
         setWorkspaceType(responseWorkspaceAction.workspace);
       }
       setMessages((prev) => [...prev, assistantMessage]);
-      void runCopilotAction(responseAction);
+      void runCopilotPlan(responsePlan);
       await refreshSessions(sessionId);
     } catch {
       setMessages((prev) => [
@@ -865,14 +1018,19 @@ export default function AiChat() {
           <div className="copilot-status-bar">
             <div className="copilot-status-copy">
               <Sparkles size={15} />
-              <span>{copilotStatus}</span>
+              <span>
+                {copilotProgress ? `Bước ${copilotProgress.current}/${copilotProgress.total}: ` : ''}
+                {copilotStatus}
+              </span>
             </div>
             <button
               type="button"
               className="copilot-stop-btn"
               onClick={() => {
                 setIsCopilotMode(false);
+                setCopilotProgress(null);
                 setHighlightState(null);
+                lastCopilotRunRef.current = null;
                 setCursorState((prev) => ({ ...prev, visible: false, clicking: false }));
               }}
             >
