@@ -127,6 +127,52 @@ function sanitizeRichHtml(html: string) {
   }).trim();
 }
 
+function pruneEmptyHtml(html: string) {
+  if (!html || typeof window === 'undefined') {
+    return html;
+  }
+
+  const template = window.document.createElement('template');
+  template.innerHTML = html;
+
+  const mediaTags = new Set(['AUDIO', 'IMG', 'TABLE', 'VIDEO']);
+  const structuralTags = new Set(['BR', 'HR']);
+
+  const pruneNode = (node: Element) => {
+    Array.from(node.children).forEach((child) => pruneNode(child));
+
+    const tagName = node.tagName.toUpperCase();
+    const text = node.textContent?.replace(/\s+/g, ' ').trim() || '';
+    const hasMedia = mediaTags.has(tagName);
+    const hasStructure = structuralTags.has(tagName);
+    const hasMeaningfulChildren = Array.from(node.children).some((child) => {
+      const childElement = child as Element;
+      const childText = childElement.textContent?.replace(/\s+/g, ' ').trim() || '';
+      return Boolean(
+        childText ||
+          mediaTags.has(childElement.tagName.toUpperCase()) ||
+          structuralTags.has(childElement.tagName.toUpperCase()),
+      );
+    });
+
+    if (!text && !hasMedia && !hasStructure && !hasMeaningfulChildren) {
+      node.remove();
+    }
+  };
+
+  Array.from(template.content.children).forEach((child) => pruneNode(child as Element));
+
+  const normalizedHtml = template.innerHTML.trim();
+  const plainText = template.content.textContent?.replace(/\s+/g, ' ').trim() || '';
+  const hasRenderableMedia = template.content.querySelector('img, audio, table, video');
+
+  if (!plainText && !hasRenderableMedia) {
+    return '';
+  }
+
+  return normalizedHtml;
+}
+
 function normalizeCardData(metadata?: ChatMessageMetadata | null) {
   if (!metadata || !('cardData' in metadata) || !Array.isArray(metadata.cardData)) {
     return [];
@@ -177,7 +223,7 @@ export function AssistantMessageContent({
   onQuickReply,
 }: AssistantMessageContentProps) {
   const htmlSource = getCandidateHtml(metadata, content);
-  const sanitizedHtml = htmlSource ? sanitizeRichHtml(htmlSource) : '';
+  const sanitizedHtml = htmlSource ? pruneEmptyHtml(sanitizeRichHtml(htmlSource)) : '';
   const richCards = sanitizedHtml
     ? []
     : normalizeCardData(metadata).filter(
@@ -202,19 +248,34 @@ export function AssistantMessageContent({
       {richCards.length > 0 && (
         <div className="smartbot-card-list">
           {richCards.map((card, index) => {
-            const buttonActions = Array.isArray(card.buttons) ? card.buttons : [];
+            const buttonActions = Array.isArray(card.buttons)
+              ? card.buttons.filter((button) => (button.title?.trim() || button.payload?.trim()))
+              : [];
             const imageUrl = typeof card.image_url === 'string' && card.image_url.trim()
               ? card.image_url
               : typeof card.thumbnail === 'string' && card.thumbnail.trim()
                 ? card.thumbnail
                 : null;
+            const cardText = typeof card.text === 'string' ? card.text.trim() : '';
+            const shouldRenderText = cardText && cardText !== content.trim() && !isLikelyHtmlSnippet(cardText);
+
+            if (
+              !card.title?.trim() &&
+              !card.subtitle?.trim() &&
+              !shouldRenderText &&
+              !imageUrl &&
+              !card.audio_url &&
+              buttonActions.length === 0
+            ) {
+              return null;
+            }
 
             return (
               <div key={`${card.type || 'card'}-${index}`} className="smartbot-card">
                 {card.title && <div className="smartbot-card-title">{card.title}</div>}
                 {card.subtitle && <div className="smartbot-card-subtitle">{card.subtitle}</div>}
-                {card.text && card.text.trim() !== content.trim() && (
-                  <div className="smartbot-card-text">{card.text}</div>
+                {shouldRenderText && (
+                  <div className="smartbot-card-text">{cardText}</div>
                 )}
                 {imageUrl && (
                   <img
