@@ -15,8 +15,6 @@ import {
   Image as ImageIcon,
   RotateCcw
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import mascot from '../../assets/mascot.png';
 import { PockieSprite } from '../../components/PockieSprite';
 import { api } from '../../lib/api';
@@ -24,6 +22,7 @@ import Wallet from '../Wallet';
 import Goals from '../Goals';
 import Reports from '../Reports';
 import Settings from '../Settings';
+import { AssistantMessageContent, type ChatMessageMetadata } from './AssistantMessageContent';
 import './AiChat.css';
 
 type WorkspaceType = 'none' | 'wallet' | 'goals' | 'reports' | 'settings';
@@ -33,6 +32,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  metadata?: ChatMessageMetadata;
   isError?: boolean;
 }
 
@@ -57,6 +57,7 @@ interface SessionMessagesResponse {
     id: string;
     role: 'user' | 'assistant' | 'system' | 'tool';
     content: string;
+    metadata?: ChatMessageMetadata;
     createdAt: string;
   }>;
 }
@@ -153,6 +154,7 @@ function mapApiMessages(messages: SessionMessagesResponse['messages']): Message[
       id: message.id,
       role: message.role,
       content: message.content,
+      metadata: message.metadata,
       timestamp: new Date(message.createdAt),
     }));
 }
@@ -285,6 +287,7 @@ export default function AiChat() {
         id: assistantPayload?.id || `local-assistant-${Date.now()}`,
         role: 'assistant',
         content: assistantPayload?.content || res.data?.reply || 'Pockie AI tạm thời chưa phản hồi được.',
+        metadata: assistantPayload?.metadata,
         timestamp: assistantPayload?.createdAt ? new Date(assistantPayload.createdAt) : new Date(),
       };
 
@@ -481,9 +484,11 @@ export default function AiChat() {
                   <div className={`chat-bubble ${message.role} ${message.isError ? 'error' : ''}`}>
                     <div className="chat-bubble-text markdown-body">
                       {message.role === 'assistant' ? (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.content}
-                        </ReactMarkdown>
+                        <AssistantMessageContent
+                          content={message.content}
+                          metadata={message.metadata}
+                          onQuickReply={(nextMessage) => void sendMessage(nextMessage)}
+                        />
                       ) : (
                         message.content
                       )}
